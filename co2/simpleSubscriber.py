@@ -1,12 +1,14 @@
 import paho.mqtt.client as PahoMQTT
 import time
 import json
+from ThinkSpeak.db import SensorsDB
 
 class MySubscriber:
-		def __init__(self, clientID):
+		def __init__(self, clientID, db):
 			self.clientID = clientID
 			# create an instance of paho.mqtt.client
-			self._paho_mqtt = PahoMQTT.Client(clientID, False) 
+			self._paho_mqtt = PahoMQTT.Client(clientID, False)
+			self.db = db
 
 			# register the callback
 			self._paho_mqtt.on_connect = self.myOnConnect
@@ -53,12 +55,24 @@ class MySubscriber:
 						}
 					}
 				]
+				self.insertData(json_body[0])
 				#self.client.write_points(json_body,time_precision='s')
 			except Exception as e:
 				print (e)
 
+		def insertData(self, data):
+			print("SONO IN INSERT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			print(data["time"], data["fields"]["value"])
+			sql ="INSERT INTO CO2 (TIMESTAMP, VALUE) values (%s,%s)"
+			self.db.cursor.execute(sql,[data["time"], data["fields"]["value"]])
+			self.db.mydb.commit()
+
+# mycursor.execute(sql)
+
 if __name__ == "__main__":
-	test = MySubscriber('co2_sensor')
+	db = SensorsDB()
+	db.start()
+	test = MySubscriber('co2_sensor', db)
 	test.start()
 	while (True):
 		pass
