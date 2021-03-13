@@ -12,7 +12,7 @@ class MySubscriber:
 			self._paho_mqtt.on_connect = self.myOnConnect
 			self._paho_mqtt.on_message = self.myOnMessageReceived
 			self.topic = 'pynini/temperature_humidity'
-			self.messageBroker = 'localhost'
+			self.messageBroker = 'localhost'  
 
 
 		def start (self):
@@ -43,7 +43,7 @@ class MySubscriber:
 				print(e)
 
 if __name__ == "__main__":
-	test = MySubscriber('VirtualBuilding')
+	test = MySubscriber('pynini')
 	test.start()
 	while(True):
 		pass
