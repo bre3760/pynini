@@ -12,9 +12,11 @@ class MyPublisher:
 		# register the callback
 		self._paho_mqtt.on_connect = self.myOnConnect
 		self.messageBroker = 'localhost'
+		
 
 	def start (self):
 		#manage connection to broker
+		#self._paho_mqtt.username_pw_set(password=pynini)
 		self._paho_mqtt.connect(self.messageBroker, 1883)
 		self._paho_mqtt.loop_start()
 

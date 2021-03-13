@@ -13,7 +13,6 @@ class MySubscriber:
 			self._paho_mqtt.on_message = self.myOnMessageReceived
 			self.topic = 'pynini/temperature_humidity'
 			self.messageBroker = 'localhost'
-			
 
 
 		def start (self):
@@ -25,7 +24,7 @@ class MySubscriber:
 
 		def stop (self):
 			self._paho_mqtt.unsubscribe(self.topic)
-			self._paho_mqtt.loop_stop()
+			self._paho_mqtt.lo op_stop()
 			self._paho_mqtt.disconnect()
 
 		def myOnConnect (self, paho_mqtt, userdata, flags, rc):
