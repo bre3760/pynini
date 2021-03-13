@@ -24,7 +24,7 @@ class MySubscriber:
 
 		def stop (self):
 			self._paho_mqtt.unsubscribe(self.topic)
-			self._paho_mqtt.lo op_stop()
+			self._paho_mqtt.loop_stop()
 			self._paho_mqtt.disconnect()
 
 		def myOnConnect (self, paho_mqtt, userdata, flags, rc):
