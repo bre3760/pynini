@@ -1,7 +1,7 @@
 import paho.mqtt.client as PahoMQTT
 import time
 import json
-from ThinkSpeak.db import SensorsDB
+from ThingSpeak.sensors_db import SensorsDB
 
 class MySubscriber:
 		def __init__(self, clientID, db):
