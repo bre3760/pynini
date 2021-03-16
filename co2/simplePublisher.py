@@ -52,7 +52,7 @@ if __name__ == "__main__":
 						"value":value}
 			test.myPublish('co2', json.dumps(payload))
 			print('ho pubblicato')
-			time.sleep(0.1)
+			time.sleep(10)
 
 	test.stop()
 

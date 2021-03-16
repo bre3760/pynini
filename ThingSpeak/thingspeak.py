@@ -25,24 +25,28 @@ for element in rows:
 print(values)
 print(dates)
 
-#params = urllib.parse.urlencode({'field1': values, 'created_at': dates,'api_key':key})
-#params = urllib.parse.urlencode({'field1': values,'api_key':key_co2})
-#headers = {"Content-type": "application/x-www-form-urlencoded","Accept":"text/plain"}
-URL = 'https://api.thingspeak.com/update?api_key='
-headers = '&field1={}&created_at={}'.format(*values,*dates)
-final_url = URL+key_co2+headers
-print(final_url)
-data = urllib.request.urlopen(final_url)
-print(data)
-#conn = http.client.HTTPConnection("api.thingspeak.com:80")
 
-#try:
-    #conn.request("GET", "/update", params, headers)
-    #response = conn.getresponse()
-    #print(response.status, response.reason)
-    #data = response.read()
-    #conn.close()
-#except:
-    #print("connection failed")
+#params = urllib.parse.urlencode({'field1': values, 'created_at': dates,'api_key':key})
+#headers = {"Content-type": "application/x-www-form-urlencoded","Accept":"text/plain"}
+# URL = 'https://api.thingspeak.com/update?api_key='
+# headers = '&field1={}&created_at={}'.format(*values,*dates)
+# final_url = URL+key_co2+headers
+# print(final_url)
+# data = urllib.request.urlopen(final_url)
+# print(data)
+conn = http.client.HTTPConnection("api.thingspeak.com:80")
+
+
+params = urllib.parse.urlencode({'field1': values,'api_key':key_co2})
+headers = {"Content-type": "application/x-www-form-urlencoded","Accept":"raw"}
+
+try:
+    conn.request("GET", "/update", params, headers)
+    response = conn.getresponse()
+    print(response.status, response.reason)
+    data = response.read()
+    conn.close()
+except:
+    print("connection failed")
 
 sys.exit()
