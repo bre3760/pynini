@@ -15,9 +15,6 @@ class MySubscriber:
 			self._paho_mqtt.on_message = self.myOnMessageReceived
 			self.topic = 'co2'
 			self.messageBroker = 'broker.emqx.io' #'localhost'
-			#self.client = InfluxDBClient('localhost', 8086, 'root', 'root', clientID)
-			#if {'name': clientID} not in self.client.get_list_database():
-					#self.client.create_database(clientID)
 
 
 		def start (self):
