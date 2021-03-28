@@ -6,7 +6,8 @@ import datetime
 import socket
 
 sys.path.insert(0, "../")
-
+HOST = "0.0.0.0"
+PORT = 9090
 class Catalog(object):
     exposed = True
 
@@ -14,17 +15,21 @@ class Catalog(object):
         pass
 
     def GET(self, *uri, **params):
-        with open('t2s_catalog.json', 'r') as f:
-            t2s_catalog = json.load(f)
-            f.close()
-        return json.dumps(t2s_catalog)
+        with open("catalog.json", 'r') as f:
+            catalog = json.load(f)
+            cc = catalog['Catalog']
+        if uri[0] == "broker":
+            return json.dumps(cc[0])
+        elif uri[0] == "threshold":
+            return json.dumps(cc[1])
+        elif uri[0] == "devices":
+            return json.dumps(cc[2])
 
     def POST(self, *uri, **params):
-        # to add a new device
         if len(uri) == 1 and uri[0] == 'addDevice':
             try:
-                with open('t2s_catalog.json', 'r+') as f:
-                    t2s_catalog = json.load(f)
+                with open('catalog.json', 'r+') as f:
+                    catalog = json.load(f)
                     new_device_info = json.loads(cherrypy.request.body.read())
                     try:
                         ip = new_device_info['ip']
@@ -38,26 +43,25 @@ class Catalog(object):
                     new_dev = {'ip': ip, 'port': port, 'name': name,
                                'last_seen': last_seen}
 
-                    for d in t2s_catalog['devices']:
+                    for d in catalog['Catalog'][2]['devices']:
                         if d['ip'] == ip:
-                            t2s_catalog['devices'].pop(t2s_catalog['devices'].index(d))
+                            catalog['Catalog'][2]['devices'].pop(catalog['Catalog'][2]['devices'].index(d))
 
-                    t2s_catalog['devices'].append(new_dev)
-                    t2s_catalog['last_updated'] = time.time()
-                    """ f.seek(0) """
-                    f.write(json.dumps(t2s_catalog, indent=4, sort_keys=True))
-                    """ f.truncate() """
+                    catalog['Catalog'][2]['devices'].append(new_dev)
+                    catalog['Catalog'][2]['last_updated'] = time.time()
+                    f.seek(0)
+                    f.write(json.dumps(catalog, indent=4, sort_keys=True))
+                    f.truncate()
                     f.close()
                     print(f'${new_dev["name"]} - added to the catalog')
                     return 'catalog file successfully written'
             except KeyError:
                 raise cherrypy.HTTPError(404, 'The catalog file was not found')
-        
-        # to remove a device
+
         if len(uri) == 1 and uri[0] == 'removeDevice':
             try:
-                with open('t2s_catalog.json', 'r+') as f:
-                    t2s_catalog = json.load(f)
+                with open('catalog.json', 'r+') as f:
+                    catalog = json.load(f)
                     new_device_info = json.loads(cherrypy.request.body.read())
                     try:
                         ip = new_device_info['ip']
@@ -66,49 +70,62 @@ class Catalog(object):
                         raise cherrypy.HTTPError(400, 'Bad request')
 
                     found = False
-                    for d in t2s_catalog['devices']:
+                    for d in catalog['Catalog'][2]['devices']:
                         if d['ip'] == ip:
-                            t2s_catalog['devices'].pop(t2s_catalog['devices'].index(d))
+                            catalog['Catalog'][2]['devices'].pop(catalog['Catalog'][2]['devices'].index(d))
                             found = True
 
                     if found is False:
                         f.close()
                         raise cherrypy.HTTPError(404, "Device not found")
 
-                    t2s_catalog['last_updated'] = time.time()
+                    catalog['Catalog'][2]['last_updated'] = time.time()
                     f.seek(0)
-                    f.write(json.dumps(t2s_catalog, indent=4, sort_keys=True))
+                    f.write(json.dumps(catalog, indent=4, sort_keys=True))
                     f.truncate()
                     f.close()
                     return 'catalog file successfully written'
             except KeyError:
                 raise cherrypy.HTTPError(404, 'The catalog file was not found')
 
-    def removeInactive(self):
-        removingDev = False
-        with open('t2s_catalog.json', 'r+') as f:
-            t2s_catalog = json.load(f)
-            for d in t2s_catalog['devices']:
-                if time.time() - d['last_seen'] > 10:
-                    t2s_catalog['devices'].pop(t2s_catalog['devices'].index(d))
-                    t2s_catalog['last_updated'] = time.time()
-                    removingDev = True
-            if removingDev:
-                f.seek(0)
-                f.write(json.dumps(t2s_catalog, indent=4, sort_keys=True))
-                f.truncate()
-                f.close()
-            else:
-                f.close()
+        if len(uri) == 1 and uri[0] == 'setThreshold':
+            try:
+                with open('catalog.json', 'r+') as f:
+                    catalog = json.load(f)
+                    new_threshold_info = json.loads(cherrypy.request.body.read())
+                    try:
+                        name = new_threshold_info['name']
+                        min_T_th = new_threshold_info['min_temperature_th']
+                        min_rh_th = new_threshold_info['min_humidity_th']
+                        max_T_th = new_threshold_info['max_temperature_th']
+                        max_co2_th = new_threshold_info['max_co2_th']
+                        max_rh_th = new_threshold_info['max_humidity_th']
+                    except KeyError:
+                        f.close()
+                        raise cherrypy.HTTPError(400, 'Bad request')
 
+                    new_th = {
+                        "name": name,
+                        "min_temperature_th": min_T_th, 
+                        "min_humidity_th": min_rh_th, 
+                        "max_temperature_th": max_T_th, 
+                        "max_humidity_th": max_rh_th, 
+                        "max_co2_th": max_co2_th
+                    }
 
-""" def get_ip_address():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        s.connect(("8.8.8.8", 80))
-        return s.getsockname()[0]
-    except:
-        return None """
+                    for d in catalog['Catalog'][1]['thresholds']:
+                        if d['name'] == name:
+                            catalog['Catalog'][1]['thresholds'].pop(catalog['Catalog'][1]['thresholds'].index(d))
+
+                    catalog['Catalog'][1]['thresholds'].append(new_th)
+                    f.seek(0)
+                    f.write(json.dumps(catalog, indent=4, sort_keys=True))
+                    f.truncate()
+                    f.close()
+                    print(f'${new_th["name"]} - added to the catalog')
+                    return 'catalog file successfully written'
+            except KeyError:
+                raise cherrypy.HTTPError(404, 'The catalog file was not found')
 
 
 if __name__ == '__main__':
@@ -120,24 +137,7 @@ if __name__ == '__main__':
                 'tools.sessions.on': True
             }
     }
-    cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': 8083})
     cherrypy.tree.mount(catalog, '/', conf)
+    cherrypy.server.socket_host = HOST
+    cherrypy.server.socket_port = PORT
     cherrypy.engine.start()
-
-"""     with open("../etc/globalVar.py", 'w') as f:
-        f.write(f"CATALOG_ADDRESS = 'http://{get_ip_address()}:8082'")
-
-    with open('t2s_catalog.json', 'r') as f:
-        my_catalog = json.load(f)
-        my_catalog['broker_host'] = str(get_ip_address())
-
-    with open('t2s_catalog.json', 'w') as f:
-        f.write(json.dumps(my_catalog, indent=4, sort_keys=True))
-
-    while True:
-        try:
-            catalog.removeInactive()
-            time.sleep(2)
-        except KeyboardInterrupt:
-            cherrypy.engine.exit()
-            break """
