@@ -1,8 +1,6 @@
 import sys
-import requests
-import datetime
 import http.client, urllib
-from ThingSpeak.sensors_db import SensorsDB
+from TelegramBot.sensors_db import SensorsDB
 
 db = SensorsDB()
 db.start()

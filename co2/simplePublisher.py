@@ -10,7 +10,7 @@ class MyPublisher:
 		self._paho_mqtt = PahoMQTT.Client(self.clientID, False) 
 		# register the callback
 		self._paho_mqtt.on_connect = self.myOnConnect
-		self.messageBroker = 'broker.emqx.io' #'localhost'
+		self.messageBroker = 'broker.emqx.io'
 
 	def start (self):
 		#manage connection to broker
@@ -29,25 +29,16 @@ class MyPublisher:
 		print ("Connected to %s with result code: %d (publisher)" % (self.messageBroker, rc))
 
 
-
 if __name__ == "__main__":
 	test = MyPublisher("MyPublisher")
 	test.start()
 	df=pd.read_csv('co2.csv',sep=',',decimal=',',index_col=0)
 	df.index=pd.to_datetime(df.index,unit='s')
-	#GATEWAY_NAME="VirtualBuilding"
 	for i in df.index:
 		for j in df.loc[i].items():
-			#nodeID=j[0]
 			value=j[1]
-			#if nodeID=='Power':
-				#measurement="Power"
-			#else:
-				#measurement="Temperature"
 			payload={
-						#"location":str(GATEWAY_NAME),
 						"measurement":'co2',
-						#"node":str(nodeID),
 						"time_stamp":str(i),
 						"value":value}
 			test.myPublish('co2', json.dumps(payload))

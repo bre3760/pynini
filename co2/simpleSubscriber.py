@@ -1,7 +1,6 @@
 import paho.mqtt.client as PahoMQTT
-import time
 import json
-from ThingSpeak.sensors_db import SensorsDB
+from TelegramBot.sensors_db import SensorsDB
 
 class MySubscriber:
 		def __init__(self, clientID, db):
@@ -40,16 +39,9 @@ class MySubscriber:
 				json_body = [
 					{
 					"measurement": data['measurement'],
-					#"tags":
-					#	{
-						#"node": data['node'],
-						#"location": data['location']
-					#	},
 					"time": data['time_stamp'],
-					"fields":
-						{
-						"value":data['value']
-						}
+					"value": data['value'],
+					"type": 'Standard'
 					}
 				]
 				self.insertData(json_body[0])
@@ -58,10 +50,10 @@ class MySubscriber:
 				print (e)
 
 		def insertData(self, data):
-			print("SONO IN INSERT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			print(data["time"], data["fields"]["value"])
-			sql ="INSERT INTO CO2 (TIMESTAMP, VALUE) values (%s,%s)"
-			self.db.cursor.execute(sql,[data["time"], data["fields"]["value"]])
+			print("SONO IN INSERT!")
+			print(data["time"], data["value"], data["type"])
+			sql ="INSERT INTO CO2 (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
+			self.db.cursor.execute(sql,[data["time"], data["value"], data["type"]])
 			self.db.mydb.commit()
 
 # mycursor.execute(sql)
