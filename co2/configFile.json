@@ -1,0 +1,10 @@
+{
+    "catalogIP":"192.168.43.91",
+    "sensorID":"co2",
+    "typology": "white",
+    "catalogPort":"8080",
+    "topic": "co2",
+    "messageBroker": "broker.emqx.io",
+    "max_threshold":"30",
+    "min_threshold":"15"
+}

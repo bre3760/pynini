@@ -1,6 +1,6 @@
 import sys
 import http.client, urllib
-from TelegramBot.sensors_db import SensorsDB
+from telegramBot.sensors_db import SensorsDB
 
 db = SensorsDB()
 db.start()

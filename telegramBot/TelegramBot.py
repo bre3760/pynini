@@ -1,9 +1,14 @@
 from telegram import (ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
-from TelegramBot.sensors_db import SensorsDB
+from telegramBot.sensors_db import SensorsDB
 import logging
+import json
+import requests
+import cherrypy
 import time
+import socket
 import numpy as np
+from catalog import *
 
 # https://iaassassari.files.wordpress.com/2012/07/panificazione.pdf
 
@@ -17,21 +22,39 @@ import numpy as np
 
 TYPOLOGY, PARAM, PARAM2, HOME, INFO, EXIT = range(6)
 
+
+class TelegramRest(object):
+    exposed = True
+
+    def __init__(self):
+        pass
+
+    def GET(self, *uri, **params):
+        if len(list(params.values())) != 4 or list(params.keys())[0] != "ipWhereIAm" \
+                or list(params.keys())[1] != "portWhereIAm" or list(params.keys())[2] != "ipGeneratePath":
+            raise cherrypy.HTTPError(400, "ERROR: error with the parameters")
+        else:
+            telegram_bot.ipWhereIAm = str(params['ipWhereIAm'])
+            telegram_bot.portWhereIAm = str(params['portWhereIAm'])
+
+        requests.put('http://' + str(telegram_bot.catalogIP) + ':' + str(telegram_bot.catalogPort), json=body)
+
+
 class TelegramBot(object):
     def __init__(self, db):
-        # file_content2 = json.load(open('confFileBot.json'))
-        # pathInfo = json.load(open('sub/roomInfo.json'))
-        # self.roomInfo = json.load(open('sub/roomDescriptions.json'))
-        #
-        # self.catalogAddress = file_content2.get('ipCatalog')
-        # self.catalogPort = file_content2.get('catalogPort')
-        # self.token = file_content2.get('token')
-        # self.portTelegram = int(file_content2.get('telegramPort'))
-        # s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        # s.connect(("localhost", 80))
-        # self.address = s.getsockname()[0]
-        self.token="1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
+
+        file = open("configFile.json", "r")
+        jsonString = file.read()
+        file.close()
+        data = json.loads(jsonString)
+        self.catalogIP = data.get("catalogIP")
+        self.catalogPort = data.get("catalogPort")
+        self.telegramPort = int(data.get("telegramPort"))
+        self.token = data.get("token")
         self.db = db
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("localhost", 80))
+        self.address = s.getsockname()[0]
 
     def start(self, update, context):
         # print(f'Welcome to @Pynini! You can select the info you want to retrieve:\n 1./photo\n 2./temperature\n 3./humidity')
@@ -366,6 +389,29 @@ if __name__=='__main__':
     db.start()
     # db.mydb.commit()
     # db.cursor.close()
-    # db.mydb.close()
-    bot = TelegramBot(db)
-    bot.main()
+    db.mydb.close()
+
+    telegram_bot = TelegramBot(db)
+    telegram_rest = TelegramRest()
+
+    conf = {
+        '/': {
+            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+        }
+    }
+
+    cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': telegram_bot.telegramPort})
+    cherrypy.tree.mount(telegram_rest, '/', conf)
+    cherrypy.engine.start()
+    body = {'whatPut': 1, 'IP': telegram_bot.catalogIP, 'port': telegram_bot.telegramPort, 'last_update': 0,
+            'whoIAm': 'telegramBot', 'category': 'server', 'field': ''}
+
+    while True:
+        try:
+            requests.put('http://' + str(telegram_bot.catalogIP) + ':' + str(telegram_bot.catalogPort),
+                         json=body)
+            telegram_bot.main()
+        except requests.exceptions.RequestException as e:
+            print(e)
+    cherrypy.engine.exit()
+

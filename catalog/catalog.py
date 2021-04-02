@@ -8,6 +8,7 @@ import socket
 sys.path.insert(0, "../")
 HOST = "0.0.0.0"
 PORT = 9090
+
 class Catalog(object):
     exposed = True
 
@@ -27,15 +28,20 @@ class Catalog(object):
 
     def POST(self, *uri, **params):
         if len(uri) == 1 and uri[0] == 'addDevice':
+            new_device_info = json.loads(cherrypy.request.body.read())
+            print("cherrypy.request.body.read()", new_device_info)
             try:
                 with open('catalog.json', 'r+') as f:
                     catalog = json.load(f)
-                    new_device_info = json.loads(cherrypy.request.body.read())
+                    #new_device_info = cherrypy.request.body.read()
+                    print("DENTRO", type(new_device_info))
                     try:
-                        ip = new_device_info['ip']
+                        ip = new_device_info["ip"]
+                        print("ip", ip)
                         port = new_device_info['port']
-                        name = new_device_info['name']
+                        name = new_device_info['name'] # temp, hum, co2
                         last_seen = new_device_info['last_seen']
+                        dev_name = new_device_info['dev_name']
                     except KeyError:
                         f.close()
                         raise cherrypy.HTTPError(400, 'Bad request')
@@ -43,12 +49,13 @@ class Catalog(object):
                     new_dev = {'ip': ip, 'port': port, 'name': name,
                                'last_seen': last_seen}
 
-                    for d in catalog['Catalog'][2]['devices']:
+                    print("lista di sensori",type(catalog['devices'][dev_name]))
+                    for d in catalog['devices'][dev_name]['sensors']:
                         if d['ip'] == ip:
-                            catalog['Catalog'][2]['devices'].pop(catalog['Catalog'][2]['devices'].index(d))
+                            catalog['devices'][dev_name]['sensors'].pop(catalog['devices'][dev_name]['sensors'].index(d))
 
-                    catalog['Catalog'][2]['devices'].append(new_dev)
-                    catalog['Catalog'][2]['last_updated'] = time.time()
+                    catalog['devices'][dev_name]['sensors'].append(new_dev)
+                    catalog['last_updated'] = time.time()
                     f.seek(0)
                     f.write(json.dumps(catalog, indent=4, sort_keys=True))
                     f.truncate()
@@ -70,16 +77,16 @@ class Catalog(object):
                         raise cherrypy.HTTPError(400, 'Bad request')
 
                     found = False
-                    for d in catalog['Catalog'][2]['devices']:
+                    for d in catalog['devices']:
                         if d['ip'] == ip:
-                            catalog['Catalog'][2]['devices'].pop(catalog['Catalog'][2]['devices'].index(d))
+                            catalog['devices'].pop(catalog['devices'].index(d))
                             found = True
 
                     if found is False:
                         f.close()
                         raise cherrypy.HTTPError(404, "Device not found")
 
-                    catalog['Catalog'][2]['last_updated'] = time.time()
+                    catalog['last_updated'] = time.time()
                     f.seek(0)
                     f.write(json.dumps(catalog, indent=4, sort_keys=True))
                     f.truncate()
@@ -113,11 +120,11 @@ class Catalog(object):
                         "max_co2_th": max_co2_th
                     }
 
-                    for d in catalog['Catalog'][1]['thresholds']:
+                    for d in catalog['thresholds']:
                         if d['name'] == name:
-                            catalog['Catalog'][1]['thresholds'].pop(catalog['Catalog'][1]['thresholds'].index(d))
+                            catalog['thresholds'].pop(catalog['thresholds'].index(d))
 
-                    catalog['Catalog'][1]['thresholds'].append(new_th)
+                    catalog['thresholds'].append(new_th)
                     f.seek(0)
                     f.write(json.dumps(catalog, indent=4, sort_keys=True))
                     f.truncate()
