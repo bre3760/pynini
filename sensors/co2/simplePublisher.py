@@ -32,7 +32,7 @@ class MyPublisher:
 if __name__ == "__main__":
 	test = MyPublisher("MyPublisher")
 	test.start()
-	df=pd.read_csv('co2.csv',sep=',',decimal=',',index_col=0)
+	df=pd.read_csv('co2.csv', sep=',', decimal=',', index_col=0)
 	df.index=pd.to_datetime(df.index,unit='s')
 	for i in df.index:
 		for j in df.loc[i].items():

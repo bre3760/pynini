@@ -1,8 +1,6 @@
 import json
-import time
 import requests
-from MyMQTT import *
-
+from controller.MyMQTT import *
 
 class CaseControl(object):
     def __init__(self, clientID, IP_broker, port_broker, IP_catalogue, port_catalogue):
@@ -89,7 +87,7 @@ class CaseControl(object):
     def getMinTemperatureThreshold(self):
 
         try:
-            threshold_URL = "http://" + self.IP_catalogue + ":" + self.port_catalogue + "/threshold"
+            threshold_URL = "http://" + self.IP_catalogue + ":" + self.port_catalogue + "/thresholds"
             r = requests.get(threshold_URL)
             print("Minimum temperature allowed by " + self.clientID)
 

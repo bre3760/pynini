@@ -1,5 +1,4 @@
-from mqtt_temperature.caseControl import CaseControl
-import time
+from controller.caseControl import CaseControl
 import requests
 import json
 
@@ -8,7 +7,7 @@ CATALOG_ADDRESS = "172.20.10.11"
 
 #catalog = requests.get(CATALOG_ADDRESS).json()
 #catalog_port = catalog["catalog_port"]
-with open('./catalog/catalog.json', 'r') as f:
+with open('../catalog/catalog.json', 'r') as f:
     config_dict = json.load(f)
     #local_topic = config_dict['network_name']
     catalog_port = config_dict["catalog_port"]
@@ -26,13 +25,12 @@ obj = json.loads(r.text)
 broker_IP = obj["broker"]
 broker_port = obj["port"]
 
-
 # Case Controller: init, start and subscription of measurment topics
 
 case_controller = CaseControl("Case controller", broker_IP, broker_port, CATALOG_ADDRESS, catalog_port)
 case_controller.run()
 
-# TODO: sarebbe carino se prendesse il nome delle topiche dal catalog
+# case_controller.myMqttClient.mySubscribe("button")
 case_controller.myMqttClient.mySubscribe("trigger/threshold")
 case_controller.myMqttClient.mySubscribe("measure/temperature")
 case_controller.myMqttClient.mySubscribe("measure/humidity")

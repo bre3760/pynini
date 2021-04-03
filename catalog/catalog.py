@@ -18,27 +18,30 @@ class Catalog(object):
     def GET(self, *uri, **params):
         with open("catalog.json", 'r') as f:
             catalog = json.load(f)
-            cc = catalog['Catalog']
-        if uri[0] == "broker":
-            return json.dumps(cc[0])
-        elif uri[0] == "threshold":
-            return json.dumps(cc[1])
+            #cc = catalog['Catalog']
+        if uri[0] == "broker_port":
+            return json.dumps(catalog["broker_port"])
+        if uri[0] == "catalog_port":
+            return json.dumps(catalog["catalog_port"])
+        if uri[0] == "category":
+            return json.dumps(catalog["category"])
+        elif uri[0] == "thresholds":
+            return json.dumps(catalog["thresholds"])
         elif uri[0] == "devices":
-            return json.dumps(cc[2])
+            return json.dumps(catalog["devices"])
 
     def POST(self, *uri, **params):
+        res = {}
         if len(uri) == 1 and uri[0] == 'addDevice':
             new_device_info = json.loads(cherrypy.request.body.read())
             print("cherrypy.request.body.read()", new_device_info)
             try:
                 with open('catalog.json', 'r+') as f:
                     catalog = json.load(f)
-                    #new_device_info = cherrypy.request.body.read()
-                    print("DENTRO", type(new_device_info))
                     try:
                         ip = new_device_info["ip"]
                         print("ip", ip)
-                        port = new_device_info['port']
+                        # port = new_device_info['port']
                         name = new_device_info['name'] # temp, hum, co2
                         last_seen = new_device_info['last_seen']
                         dev_name = new_device_info['dev_name']
@@ -46,10 +49,10 @@ class Catalog(object):
                         f.close()
                         raise cherrypy.HTTPError(400, 'Bad request')
 
-                    new_dev = {'ip': ip, 'port': port, 'name': name,
+                    new_dev = {'ip': ip, 'name': name,
                                'last_seen': last_seen}
 
-                    print("lista di sensori",type(catalog['devices'][dev_name]))
+                    # print("lista di sensori",type(catalog['devices'][dev_name]))
                     for d in catalog['devices'][dev_name]['sensors']:
                         if d['ip'] == ip:
                             catalog['devices'][dev_name]['sensors'].pop(catalog['devices'][dev_name]['sensors'].index(d))
@@ -61,7 +64,12 @@ class Catalog(object):
                     f.truncate()
                     f.close()
                     print(f'${new_dev["name"]} - added to the catalog')
-                    return 'catalog file successfully written'
+
+                    res["topic"] = catalog['topics'][name]
+                    res["broker_ip"] = catalog["broker_ip"]
+
+                    return json.dumps(res)
+
             except KeyError:
                 raise cherrypy.HTTPError(404, 'The catalog file was not found')
 

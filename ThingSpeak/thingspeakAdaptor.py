@@ -9,10 +9,6 @@ data = json.loads(jsonString)
 url = data["resourceCatalog"]["url"]
 channel = data["resourceCatalog"]["channel"]
 write_key = data["resourceCatalog"]["write_key"]
-broker_address = data["resourceCatalog"]["broker_address"]
-port1 = data["resourceCatalog"]["port1"]
-port2 = data["resourceCatalog"]["port2"]
-name = data["resourceCatalog"]["name"]
 
 
 class ThingSpeakConnector():

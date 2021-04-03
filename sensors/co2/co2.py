@@ -28,7 +28,7 @@ print(df.head())
 
 df.to_csv('co2.csv', index=False)
 
-df=pd.read_csv('co2.csv',sep=',',decimal=',',index_col=0)
+df=pd.read_csv('co2.csv', sep=',', decimal=',', index_col=0)
 #print(df.head())
 
 df.index=pd.to_datetime(df.index,unit='s')

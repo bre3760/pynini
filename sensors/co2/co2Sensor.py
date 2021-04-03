@@ -6,7 +6,7 @@ import pandas as pd
 from telegramBot.sensors_db import SensorsDB
 
 global CATALOG_ADDRESS
-CATALOG_ADDRESS = "172.20.10.11"
+CATALOG_ADDRESS = "http://localhost:9090" # "172.20.10.11"
 
 class co2Sensor:
 		def __init__(self, clientID, db):
@@ -18,23 +18,17 @@ class co2Sensor:
 			self._paho_mqtt.on_connect = self.myOnConnect
 			self._paho_mqtt.on_message = self.myOnMessageReceived
 
-			config_dict = json.load(open("configFile.json"))
-			self.catalogAddress = config_dict.get("ipCatalog")
-			self.catalogPort = int(config_dict.get("catalogPort"))
-			self.sensorID = config_dict.get("sensorID")
-			self.typology = config_dict.get("typology")
-			self.topic = config_dict.get("topic")
-			self.messageBroker = config_dict.get("messageBroker")
-			self.minTemp = int(config_dict.get("min_threshold"))
-			self.maxTemp = int(config_dict.get("max_threshold"))
+			#config_dict = json.load(open("configFile.json"))
+			self.topic = ""
+			self.sensorID = "co2"
+			#self.messageBroker = config_dict.get("messageBroker")
 			self.message = {
 				'measurement': self.sensorID,
-				'typology': self.typology,
 				'timestamp': '',
 				'value': '',
 			}
 			self.sensorIP = CATALOG_ADDRESS
-			self.sensorPort = self.catalogPort
+			#self.sensorPort = self.catalogPort
 
 			# s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 			# s.connect(("8.8.8.8", 80))
@@ -91,12 +85,15 @@ class co2Sensor:
 			"""
 			sensor_dict = {}
 			sensor_dict["ip"] = self.sensorIP
-			sensor_dict["port"] = self.sensorPort
+			#sensor_dict["port"] = self.sensorPort
 			sensor_dict["name"] = self.sensorID
 			sensor_dict["last_seen"] = time.time()
 			sensor_dict["dev_name"] = 'rpi'
 
 			r = requests.post("http://localhost:9090/addDevice", json=sensor_dict)
+			print("r",  json.loads(r.text)['topic'])
+			self.topic = json.loads(r.text)['topic']
+			self.messageBroker = json.loads(r.text)['broker_ip']
 
 			print("[{}] Device Registered on Catalog".format(
 				int(time.time()),
@@ -106,11 +103,16 @@ class co2Sensor:
 
 if __name__ == "__main__":
 
-	#catalogue = requests.get(CATALOG_ADDRESS).json()
+	# la prima volta il catalog deve essere letto come json per ricavare il suo indirizzo, no?
+	# catalog = requests.get(CATALOG_ADDRESS).json()
 	#broker_port = catalogue["port"]
-	#with open('../catalog/catalog.json', 'r') as f:
-	#	config_dict = json.load(f)
-	#	local_topic = config_dict['network_name'] + '/' + config_dict['room_name']
+
+	with open('../../catalog/catalog.json', 'r') as f:
+		catalog_dict = json.load(f)
+		#local_topic = catalog_dict['network_name'] + '/' + catalog_dict['room_name']
+		# ip = catalog_dict["ip_address"]
+		# port = catalog_dict["catalog_port"]
+		# print("catalog_dict", catalog_dict)
 
 	db = SensorsDB()
 	db.start()
@@ -125,7 +127,6 @@ if __name__ == "__main__":
 		for j in df.loc[i].items():
 			value = j[1]
 			sensor.message["measurement"] = sensor.sensorID
-			sensor.message["typology"] = sensor.typology
 			sensor.message["timestamp"]	= str(i)
 			sensor.message["value"]	= value
 			sensor.myPublish(sensor.topic, json.dumps(sensor.message))
