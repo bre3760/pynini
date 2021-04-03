@@ -30,31 +30,39 @@ class TelegramRest(object):
         pass
 
     def GET(self, *uri, **params):
-        if len(list(params.values())) != 4 or list(params.keys())[0] != "ipWhereIAm" \
-                or list(params.keys())[1] != "portWhereIAm" or list(params.keys())[2] != "ipGeneratePath":
-            raise cherrypy.HTTPError(400, "ERROR: error with the parameters")
-        else:
-            telegram_bot.ipWhereIAm = str(params['ipWhereIAm'])
-            telegram_bot.portWhereIAm = str(params['portWhereIAm'])
+        with open("catalog.json", 'r') as f:
+            catalog = json.load(f)
+            #cc = catalog['Catalog']
+        if uri[0] == "broker_port":
+            return json.dumps(catalog["broker_port"])
+        if uri[0] == "catalog_port":
+            return json.dumps(catalog["catalog_port"])
+        if uri[0] == "category":
+            return json.dumps(catalog["category"])
+        elif uri[0] == "thresholds":
+            return json.dumps(catalog["thresholds"])
+        elif uri[0] == "devices":
+            return json.dumps(catalog["devices"])
 
-        requests.put('http://' + str(telegram_bot.catalogIP) + ':' + str(telegram_bot.catalogPort), json=body)
-
+        # requests.put('http://' + str(telegram_bot.catalogIP) + ':' + str(telegram_bot.catalogPort), json=body)
 
 class TelegramBot(object):
     def __init__(self, db):
 
-        file = open("configFile.json", "r")
-        jsonString = file.read()
-        file.close()
-        data = json.loads(jsonString)
-        self.catalogIP = data.get("catalogIP")
-        self.catalogPort = data.get("catalogPort")
-        self.telegramPort = int(data.get("telegramPort"))
-        self.token = data.get("token")
-        self.db = db
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("localhost", 80))
-        self.address = s.getsockname()[0]
+        # file = open("configFile.json", "r")
+        # jsonString = file.read()
+        # file.close()
+        # data = json.loads(jsonString)
+        # self.catalogIP = data.get("catalogIP")
+        # self.catalogPort = data.get("catalogPort")
+        # self.telegramPort = int(data.get("telegramPort"))
+        # self.token = data.get("token")
+        # self.db = db
+        # s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        # s.connect(("localhost", 80))
+        # self.address = s.getsockname()[0]
+
+    # PRENDI DATI DAL CATALOG
 
     def start(self, update, context):
         # print(f'Welcome to @Pynini! You can select the info you want to retrieve:\n 1./photo\n 2./temperature\n 3./humidity')

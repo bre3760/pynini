@@ -18,25 +18,33 @@
                 {
                     "ip": "192.168.178.200",
                     "last_seen": 0,
-                    "name": "pluto",
+                    "name": "temperature",
                     "port": 8080
                 },
                 {
                     "ip": "172.20.10.11",
-                    "last_seen": 1617377520.7015858,
+                    "last_seen": 1617462677.4078486,
                     "name": "co2",
                     "port": 8080
-                },
-                {
-                    "ip": "http://localhost:9090",
-                    "last_seen": 1617439785.3167565,
-                    "name": "co2"
                 }
             ]
         }
     },
     "ip_address": "172.20.10.11",
-    "last_updated": 1617439787.3768914,
+    "last_updated": 1617462679.4666507,
+    "telegramBot": {
+        "telegramPort": "8086",
+        "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
+    },
+    "thingspeak": {
+        "broker_ip": "broker.emqx.io",
+        "channel": "1327196",
+        "name": "pynini",
+        "port1": "1883",
+        "port2": 60,
+        "url": "https://api.thingspeak.com/update.json",
+        "write_key": "7FP7K9V4HN68HHTV"
+    },
     "thresholds": {
         "glutenfree": {
             "max_co2_th": "10",
@@ -64,15 +72,8 @@
         }
     },
     "topics": {
-        "co2": "measure/CO2",
+        "co2": "measure/co2",
         "humidity": "measure/humidity",
         "temperature": "measure/temperature"
-    },
-    "thingspeak": {
-        "name" : "pynini",
-        "write_key": "7FP7K9V4HN68HHTV",
-        "url" : "https://api.thingspeak.com/update.json",
-		"channel" : "1327196",
-        "port1" : "1883"
     }
 }

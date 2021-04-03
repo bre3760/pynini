@@ -21,14 +21,23 @@ class Catalog(object):
             #cc = catalog['Catalog']
         if uri[0] == "broker_port":
             return json.dumps(catalog["broker_port"])
-        if uri[0] == "catalog_port":
+        elif uri[0] == "catalog_port":
             return json.dumps(catalog["catalog_port"])
-        if uri[0] == "category":
+        elif uri[0] == "category":
             return json.dumps(catalog["category"])
         elif uri[0] == "thresholds":
             return json.dumps(catalog["thresholds"])
         elif uri[0] == "devices":
             return json.dumps(catalog["devices"])
+        elif uri[0] == "activeDev":
+            return json.dumps(catalog["devices"]["rpi"]["sensors"])
+        elif uri[0] == "telegramBot":
+            return json.dumps(catalog["telegramBot"])
+        elif uri[0] == "thingspeak":
+            return json.dumps(catalog["thingspeak"])
+        elif uri[0] == "topics":
+            return json.dumps(catalog["topics"])
+
 
     def POST(self, *uri, **params):
         res = {}
@@ -39,9 +48,8 @@ class Catalog(object):
                 with open('catalog.json', 'r+') as f:
                     catalog = json.load(f)
                     try:
-                        ip = new_device_info["ip"]
-                        print("ip", ip)
-                        # port = new_device_info['port']
+                        ip = new_device_info['ip']
+                        port = new_device_info['port']
                         name = new_device_info['name'] # temp, hum, co2
                         last_seen = new_device_info['last_seen']
                         dev_name = new_device_info['dev_name']
@@ -49,7 +57,7 @@ class Catalog(object):
                         f.close()
                         raise cherrypy.HTTPError(400, 'Bad request')
 
-                    new_dev = {'ip': ip, 'name': name,
+                    new_dev = {'ip': ip, 'port': port, 'name': name,
                                'last_seen': last_seen}
 
                     # print("lista di sensori",type(catalog['devices'][dev_name]))
