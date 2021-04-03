@@ -1,12 +1,10 @@
 from telegram import (ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
 from telegramBot.sensors_db import SensorsDB
+import requests
 import logging
 import json
-import requests
-import cherrypy
 import time
-import socket
 import numpy as np
 from catalog import *
 
@@ -22,49 +20,18 @@ from catalog import *
 
 TYPOLOGY, PARAM, PARAM2, HOME, INFO, EXIT = range(6)
 
-
-class TelegramRest(object):
-    exposed = True
-
-    def __init__(self):
-        pass
-
-    def GET(self, *uri, **params):
-        with open("catalog.json", 'r') as f:
-            catalog = json.load(f)
-            #cc = catalog['Catalog']
-        if uri[0] == "broker_port":
-            return json.dumps(catalog["broker_port"])
-        if uri[0] == "catalog_port":
-            return json.dumps(catalog["catalog_port"])
-        if uri[0] == "category":
-            return json.dumps(catalog["category"])
-        elif uri[0] == "thresholds":
-            return json.dumps(catalog["thresholds"])
-        elif uri[0] == "devices":
-            return json.dumps(catalog["devices"])
-
-        # requests.put('http://' + str(telegram_bot.catalogIP) + ':' + str(telegram_bot.catalogPort), json=body)
-
 class TelegramBot(object):
-    def __init__(self, db):
+    def __init__(self, db, port, token):
+        self.telegramPort = port
+        self.token = token
+        self.db = db
 
-        # file = open("configFile.json", "r")
-        # jsonString = file.read()
-        # file.close()
-        # data = json.loads(jsonString)
-        # self.catalogIP = data.get("catalogIP")
-        # self.catalogPort = data.get("catalogPort")
-        # self.telegramPort = int(data.get("telegramPort"))
-        # self.token = data.get("token")
-        # self.db = db
-        # s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        # s.connect(("localhost", 80))
-        # self.address = s.getsockname()[0]
-
-    # PRENDI DATI DAL CATALOG
+        self.ip = "127.0.0.0"
+        self.id = "pippo"
 
     def start(self, update, context):
+
+        requests.post("http://localhost:9090/addBot", json={'ip': self.ip, 'name': self.id, 'last_seen': time.time()})
         # print(f'Welcome to @Pynini! You can select the info you want to retrieve:\n 1./photo\n 2./temperature\n 3./humidity')
         # update.message.reply_text(f'Welcome to @Pynini! You can select the info you want to retrieve:\n 1./photo\n 2./temperature\n 3./humidity')
 
@@ -147,7 +114,6 @@ class TelegramBot(object):
         keyboard = [[InlineKeyboardButton("Temperature", callback_data='temp'),
                      InlineKeyboardButton("Humidity", callback_data='hum'),
                      InlineKeyboardButton("CO2", callback_data='co2'),
-                     #InlineKeyboardButton("pH", callback_data='ph'),
                      InlineKeyboardButton("Back", callback_data='home')
                      ],
                     [InlineKeyboardButton("Exit", callback_data='exit')]]
@@ -292,15 +258,14 @@ class TelegramBot(object):
     #             return -1
 
         elif query.data == 'exit':
-            #body = {'whatPut': 3, 'chat_id': update.effective_chat.id}
-            #requests.put('http://' + str(self.catalogAddress) + ':' + str(self.catalogPort), json=body)
+            body = {'whatPut': 3, 'chat_id': update.effective_chat.id}
+            requests.put("http://localhost:9090", json=body)
 
             # self.exit(update, context)
             print(f'Goodbye! Come back to @Pynini soon')
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='Bye! Have a good day and come back to @Pynini soon.',
                                      reply_markup=ReplyKeyboardRemove())
-            # update.message.reply_text(f'Goodbye! Come back to @Pynini soon')
             return ConversationHandler.END
 
         #         else:
@@ -393,33 +358,13 @@ class TelegramBot(object):
 
 
 if __name__=='__main__':
-    db = SensorsDB()
+
+    dataDB = requests.get("http://localhost:9090/db")
+    db = SensorsDB(json.loads(dataDB.text))
     db.start()
-    # db.mydb.commit()
-    # db.cursor.close()
+    db.mydb.commit()
     db.mydb.close()
 
-    telegram_bot = TelegramBot(db)
-    telegram_rest = TelegramRest()
-
-    conf = {
-        '/': {
-            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-        }
-    }
-
-    cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': telegram_bot.telegramPort})
-    cherrypy.tree.mount(telegram_rest, '/', conf)
-    cherrypy.engine.start()
-    body = {'whatPut': 1, 'IP': telegram_bot.catalogIP, 'port': telegram_bot.telegramPort, 'last_update': 0,
-            'whoIAm': 'telegramBot', 'category': 'server', 'field': ''}
-
-    while True:
-        try:
-            requests.put('http://' + str(telegram_bot.catalogIP) + ':' + str(telegram_bot.catalogPort),
-                         json=body)
-            telegram_bot.main()
-        except requests.exceptions.RequestException as e:
-            print(e)
-    cherrypy.engine.exit()
-
+    data = requests.get("http://localhost:9090/telegramBot")
+    bot = TelegramBot(db, json.loads(data.text)["telegramPort"], json.loads(data.text)["token"])
+    bot.main()

@@ -14,6 +14,7 @@
             ]
         },
         "rpi": {
+            "bots": [],
             "sensors": [
                 {
                     "ip": "192.168.178.200",
@@ -23,7 +24,7 @@
                 },
                 {
                     "ip": "172.20.10.11",
-                    "last_seen": 1617462677.4078486,
+                    "last_seen": 1617467832.9563808,
                     "name": "co2",
                     "port": 8080
                 }
@@ -31,7 +32,7 @@
         }
     },
     "ip_address": "172.20.10.11",
-    "last_updated": 1617462679.4666507,
+    "last_updated": 1617467835.0218513,
     "telegramBot": {
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
@@ -44,6 +45,12 @@
         "port2": 60,
         "url": "https://api.thingspeak.com/update.json",
         "write_key": "7FP7K9V4HN68HHTV"
+    },
+    "db":  {
+        "host": "localhost",
+        "user": "root",
+        "password": "pynini",
+        "nameDB": "mydatabase"
     },
     "thresholds": {
         "glutenfree": {

@@ -92,12 +92,25 @@ class co2Sensor:
 		sensor_dict["last_seen"] = time.time()
 		sensor_dict["dev_name"] = 'rpi'
 
-		r = requests.post("http://localhost:9090/addDevice", json=sensor_dict)
+		r = requests.post("http://localhost:9090/addSensor", json=sensor_dict)
 
 		self.topic = json.loads(r.text)['topic']
 		self.messageBroker = json.loads(r.text)['broker_ip']
 
 		print("[{}] Device Registered on Catalog".format(
+			int(time.time()),
+		))
+
+	def removeDevice(self):
+
+		sensor_dict = {}
+		sensor_dict["ip"] = self.sensorIP
+		sensor_dict["port"] = self.sensorPort
+		sensor_dict["name"] = self.sensorID
+		sensor_dict["dev_name"] = 'rpi'
+
+		requests.post("http://localhost:9090/removeDevice", json=sensor_dict)
+		print("[{}] Device Removed from Catalog".format(
 			int(time.time()),
 		))
 
@@ -123,3 +136,4 @@ if __name__ == "__main__":
 			time.sleep(10)
 
 	sensor.stop()
+	sensor.removeDevice()

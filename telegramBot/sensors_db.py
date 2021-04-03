@@ -1,11 +1,13 @@
 from mysql.connector import connect, Error
+import json
+import requests
 
 class SensorsDB():
-    def __init__(self):
-        self.host = "localhost"
-        self.user = "root"
-        self.password = "pynini"
-        self.nameDB = "mydatabase"
+    def __init__(self, data):
+        self.host = data["host"]
+        self.user = data["user"]
+        self.password = data["password"]
+        self.nameDB = data["nameDB"]
         #self.cursor = {}
 
     def start(self):
@@ -56,6 +58,8 @@ class SensorsDB():
 
 
 if __name__ == "__main__":
-    mydb = SensorsDB()
+
+    data = requests.get("http://localhost:9090/db")
+    mydb = SensorsDB(json.loads(data.text))
     mydb.start()
     print(mydb.cursor)
