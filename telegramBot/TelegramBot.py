@@ -17,7 +17,6 @@ from catalog import *
 
 # Mi serve un db per salvare dati relativi a ciascun tipo di pane e per plottare i dati sulle vendite
 
-
 TYPOLOGY, PARAM, PARAM2, HOME, INFO, EXIT = range(6)
 
 class TelegramBot(object):
@@ -32,6 +31,7 @@ class TelegramBot(object):
     def start(self, update, context):
 
         requests.post("http://localhost:9090/addBot", json={'ip': self.ip, 'name': self.id, 'last_seen': time.time()})
+        print("Mi sono registrato al catalog")
         # print(f'Welcome to @Pynini! You can select the info you want to retrieve:\n 1./photo\n 2./temperature\n 3./humidity')
         # update.message.reply_text(f'Welcome to @Pynini! You can select the info you want to retrieve:\n 1./photo\n 2./temperature\n 3./humidity')
 
@@ -160,6 +160,9 @@ class TelegramBot(object):
                                          text='Bye! Have a good day and come back to @Pynini soon.',
                                          reply_markup=ReplyKeyboardRemove())
                 # update.message.reply_text(f'Goodbye! Come back to @Pynini soon')
+                requests.post("http://localhost:9090/removeBot",
+                              json={'ip': self.ip, 'name': self.id, 'last_seen': time.time()})
+                print("Mi sono eliminato dal catalog")
                 return ConversationHandler.END
 
 
@@ -258,8 +261,11 @@ class TelegramBot(object):
     #             return -1
 
         elif query.data == 'exit':
-            body = {'whatPut': 3, 'chat_id': update.effective_chat.id}
-            requests.put("http://localhost:9090", json=body)
+            # body = {'whatPut': 3, 'chat_id': update.effective_chat.id}
+            # requests.put("http://localhost:9090", json=body)
+            requests.post("http://localhost:9090/removeBot",
+                          json={'ip': self.ip, 'name': self.id, 'last_seen': time.time()})
+            print("Mi sono eliminato dal catalog")
 
             # self.exit(update, context)
             print(f'Goodbye! Come back to @Pynini soon')
@@ -313,6 +319,9 @@ class TelegramBot(object):
                                      text='Bye! Have a good day and come back to @Pynini soon.',
                                      reply_markup=ReplyKeyboardRemove())
             # update.message.reply_text(f'Goodbye! Come back to @Pynini soon')
+            requests.post("http://localhost:9090/removeBot",
+                          json={'ip': self.ip, 'name': self.id, 'last_seen': time.time()})
+            print("Mi sono eliminato dal catalog")
             return ConversationHandler.END
 
     def exit(self, update, context):
@@ -323,6 +332,9 @@ class TelegramBot(object):
                                  text='Bye! Have a good day and come back to @Pynini soon.',
                                  reply_markup=ReplyKeyboardRemove())
         # update.message.reply_text(f'Goodbye! Come back to @Pynini soon')
+        requests.post("http://localhost:9090/removeBot",
+                      json={'ip': self.ip, 'name': self.id, 'last_seen': time.time()})
+        print("Mi sono eliminato dal catalog")
         return ConversationHandler.END
 
     def main(self):

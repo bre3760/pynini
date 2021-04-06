@@ -83,7 +83,7 @@ class Catalog(object):
             except KeyError:
                 raise cherrypy.HTTPError(404, 'The catalog file was not found')
 
-            if len(uri) == 1 and uri[0] == 'addBot':
+        if len(uri) == 1 and uri[0] == 'addBot':
                 new_bot_info = json.loads(cherrypy.request.body.read())
                 print("cherrypy.request.body.read()", new_bot_info)
                 try:
@@ -98,55 +98,87 @@ class Catalog(object):
                             f.close()
                             raise cherrypy.HTTPError(400, 'Bad request')
 
-                        new_dev = {'ip': ip, 'name': name,
+                        new_bot = {'ip': ip, 'name': name,
                                    'last_seen': last_seen}
 
-                        # print("lista di sensori",type(catalog['devices'][dev_name]))
+                        # print("lista di bots",type(catalog['devices'][dev_name]))
                         for d in catalog['devices'][dev_name]['bots']:
                             if d['ip'] == ip:
                                 catalog['devices'][dev_name]['bots'].pop(catalog['devices'][dev_name]['bots'].index(d))
 
-                        catalog['devices'][dev_name]['bots'].append(new_dev)
+                        catalog['devices'][dev_name]['bots'].append(new_bot)
                         catalog['last_updated'] = time.time()
                         f.seek(0)
                         f.write(json.dumps(catalog, indent=4, sort_keys=True))
                         f.truncate()
                         f.close()
-                        print(f'${new_dev["name"]} - added to the catalog')
+                        print(f'${new_bot["name"]} - added to the catalog')
 
                 except KeyError:
                     raise cherrypy.HTTPError(404, 'The catalog file was not found')
 
+        if len(uri) == 1 and uri[0] == 'removeDevice':
+            new_device_info = json.loads(cherrypy.request.body.read())
+            print("cherrypy.request.body.read()", new_device_info)
+            try:
+                with open('catalog.json', 'r+') as f:
+                    catalog = json.load(f)
+                    try:
+                        ip = new_device_info['ip']
+                        dev_name = new_device_info['dev_name']
+                    except KeyError:
+                        f.close()
+                        raise cherrypy.HTTPError(400, 'Bad request')
 
-        # if len(uri) == 1 and uri[0] == 'removeDevice':
-        #     try:
-        #         with open('catalog.json', 'r+') as f:
-        #             catalog = json.load(f)
-        #             new_device_info = json.loads(cherrypy.request.body.read())
-        #             try:
-        #                 ip = new_device_info['ip']
-        #             except KeyError:
-        #                 f.close()
-        #                 raise cherrypy.HTTPError(400, 'Bad request')
-        #
-        #             found = False
-        #             for d in catalog['devices']:
-        #                 if d['ip'] == ip:
-        #                     catalog['devices'].pop(catalog['devices'].index(d))
-        #                     found = True
-        #
-        #             if found is False:
-        #                 f.close()
-        #                 raise cherrypy.HTTPError(404, "Device not found")
-        #
-        #             catalog['last_updated'] = time.time()
-        #             f.seek(0)
-        #             f.write(json.dumps(catalog, indent=4, sort_keys=True))
-        #             f.truncate()
-        #             f.close()
-        #             return 'catalog file successfully written'
-        #     except KeyError:
-        #         raise cherrypy.HTTPError(404, 'The catalog file was not found')
+                    found = False
+                    for d in catalog['devices'][dev_name]['sensors']:
+                        if d['ip'] == ip:
+                            catalog['devices'][dev_name]['sensors'].pop(catalog['devices'][dev_name]['sensors'].index(d))
+                            found = True
+
+                    if found is False:
+                        f.close()
+                        raise cherrypy.HTTPError(404, "Device not found")
+
+                    catalog['last_updated'] = time.time()
+                    f.seek(0)
+                    f.write(json.dumps(catalog, indent=4, sort_keys=True))
+                    f.truncate()
+                    f.close()
+                    return 'catalog file successfully written'
+            except KeyError:
+                raise cherrypy.HTTPError(404, 'The catalog file was not found')
+
+        if len(uri) == 1 and uri[0] == 'removeBot':
+            new_bot_info = json.loads(cherrypy.request.body.read())
+            try:
+                with open('catalog.json', 'r+') as f:
+                    catalog = json.load(f)
+                    try:
+                        ip = new_bot_info['ip']
+                        dev_name = 'rpi'
+                    except KeyError:
+                        f.close()
+                        raise cherrypy.HTTPError(400, 'Bad request')
+
+                    found = False
+                    for d in catalog['devices'][dev_name]['bots']:
+                        if d['ip'] == ip:
+                            catalog['devices'][dev_name]['bots'].pop(catalog['devices'][dev_name]['bots'].index(d))
+                            found = True
+
+                    if found is False:
+                        f.close()
+                        raise cherrypy.HTTPError(404, "Device not found")
+
+                    catalog['last_updated'] = time.time()
+                    f.seek(0)
+                    f.write(json.dumps(catalog, indent=4, sort_keys=True))
+                    f.truncate()
+                    f.close()
+                    return 'catalog file successfully written'
+            except KeyError:
+                raise cherrypy.HTTPError(404, 'The catalog file was not found')
 
         if len(uri) == 1 and uri[0] == 'setThreshold':
             try:
@@ -183,44 +215,6 @@ class Catalog(object):
                     f.truncate()
                     f.close()
                     print(f'${new_th["name"]} - added to the catalog')
-                    return 'catalog file successfully written'
-            except KeyError:
-                raise cherrypy.HTTPError(404, 'The catalog file was not found')
-
-
-
-    #def DELETE(self, *uri, **params):
-        if len(uri) == 1 and uri[0] == 'removeDevice':
-            new_device_info = json.loads(cherrypy.request.body.read())
-            print("cherrypy.request.body.read()", new_device_info)
-            try:
-                with open('catalog.json', 'r+') as f:
-                    catalog = json.load(f)
-                    try:
-                        ip = new_device_info['ip']
-                        dev_name = new_device_info['dev_name']
-                    except KeyError:
-                        f.close()
-                        raise cherrypy.HTTPError(400, 'Bad request')
-
-                    found = False
-                    for d in catalog['devices'][dev_name]['sensors']:
-                        print("LISTAAAAAAAAAAAAA",catalog['devices'][dev_name]['sensors'])
-                        print("CERCO IP: ",d['ip'])
-                        if d['ip'] == ip:
-                            catalog['devices'][dev_name]['sensors'].pop(catalog['devices'][dev_name]['sensors'].index(d))
-                            print("NUOVA LISTA", catalog['devices'][dev_name]['sensors'])
-                            found = True
-
-                    if found is False:
-                        f.close()
-                        raise cherrypy.HTTPError(404, "Device not found")
-
-                    catalog['last_updated'] = time.time()
-                    f.seek(0)
-                    f.write(json.dumps(catalog, indent=4, sort_keys=True))
-                    f.truncate()
-                    f.close()
                     return 'catalog file successfully written'
             except KeyError:
                 raise cherrypy.HTTPError(404, 'The catalog file was not found')
