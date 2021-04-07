@@ -6,7 +6,9 @@ import pandas as pd
 from telegramBot.sensors_db import SensorsDB
 
 global CATALOG_ADDRESS
+global CATEGORY
 CATALOG_ADDRESS = "http://localhost:9090" # deciso che sarà una variabile globale, accessibile da tutti gli script di tutto il progetto
+CATEGORY = 'White'
 
 class co2Sensor:
 	def __init__(self, sensorID, db):
@@ -58,16 +60,9 @@ class co2Sensor:
 		print ("Topic:'" + msg.topic+"', QoS: '"+str(msg.qos)+"' Message: '"+str(msg.payload) + "'")
 		try:
 			data=json.loads(msg.payload)
-			json_body = [
-				{
-				"measurement": data['measurement'],
-				"time": data['time_stamp'],
-				"value": data['value'],
-				"typology": 'Standard'
-				}
-			]
-			self.insertData(json_body[0])
-			#self.client.write_points(json_body,time_precision='s')
+			data["typology"] = CATEGORY
+			self.insertData(data)
+
 		except Exception as e:
 			print (e)
 
@@ -76,10 +71,9 @@ class co2Sensor:
 		:param data: dictionary whose keys represent the time, the value of the measurement and the type of bread
 		:return: record these data in the table related to the sensor
 		'''
-		print(data["time"], data["value"], data["type"])
-		sql ="INSERT INTO CO2 (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
-		self.db.cursor.execute(sql,[data["time"], data["value"], data["type"]])
-		self.db.mydb.commit()
+		sql ="INSERT INTO co2 (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
+		self.db.cursor.execute(sql,[data["timestamp"], data["value"], data["typology"]])
+		self.db.db.commit()
 
 	def registerDevice(self):
 		'''
@@ -116,7 +110,8 @@ class co2Sensor:
 
 if __name__ == "__main__":
 
-	db = SensorsDB()
+	dataDB = requests.get("http://localhost:9090/db")
+	db = SensorsDB(json.loads(dataDB.text))
 	db.start()
 
 	sensor = co2Sensor('co2', db)

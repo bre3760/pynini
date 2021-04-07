@@ -30,7 +30,7 @@
                 },
                 {
                     "ip": "172.20.10.11",
-                    "last_seen": 1617467832.9563808,
+                    "last_seen": 1617781249.4628403,
                     "name": "co2",
                     "port": 8080
                 }
@@ -38,7 +38,7 @@
         }
     },
     "ip_address": "172.20.10.11",
-    "last_updated": 1617693370.5034273,
+    "last_updated": 1617781251.506743,
     "telegramBot": {
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
@@ -53,6 +53,14 @@
         "write_key": "7FP7K9V4HN68HHTV"
     },
     "thresholds": {
+        "White": {
+            "max_co2_th": "10",
+            "max_humidity_th": "50",
+            "max_temperature_th": "100",
+            "min_co2_th": "10",
+            "min_humidity_th": "50",
+            "min_temperature_th": "12"
+        },
         "glutenfree": {
             "max_co2_th": "10",
             "max_humidity_th": "50",
@@ -62,14 +70,6 @@
             "min_temperature_th": "12"
         },
         "wheat": {
-            "max_co2_th": "10",
-            "max_humidity_th": "50",
-            "max_temperature_th": "100",
-            "min_co2_th": "10",
-            "min_humidity_th": "50",
-            "min_temperature_th": "12"
-        },
-        "white": {
             "max_co2_th": "10",
             "max_humidity_th": "50",
             "max_temperature_th": "100",

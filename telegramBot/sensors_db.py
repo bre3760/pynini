@@ -21,14 +21,18 @@ class SensorsDB():
         except Error as e:
             print(e)
 
-        self.mydb = connect(
+        self.db = connect(
                 host=self.host,
                 user=self.user,
                 password=self.password,
                 database=self.nameDB
         )
 
-        self.cursor = self.mydb.cursor()
+        self.cursor = self.db.cursor()
+        #
+        # sql = '''SET GLOBAL max_allowed_packet=1073741824'''
+        # self.cursor.execute(sql)
+
         # sql = '''CREATE TABLE CO2(
         #    TIMESTAMP timestamp(0),
         #    VALUE float,
@@ -46,14 +50,14 @@ class SensorsDB():
         # )'''
         #
         # self.cursor.execute(sql)
-
+        #
         # sql = ''' INSERT INTO best (TYPOLOGY, TEMPERATURE, CO2, HUMIDITY, INFO) values (%s,%s,%s,%s,%s)'''
-        # self.cursor.execute(sql,['Standard', 28.0, 2.0, 25.0, 'https://www.allrecipes.com/recipe/20066/traditional-white-bread/'])
+        # self.cursor.execute(sql,['White', 28.0, 2.0, 25.0, 'https://www.allrecipes.com/recipe/20066/traditional-white-bread/'])
         # self.mydb.commit()
 
         #return self.cursor
     #mycursor.execute("CREATE DATABASE sensors_data")
-    #mycursor.execute("DELETE mydatabase")
+        #self.cursor.execute("Drop table co2")
     #mycursor.execute("SHOW DATABASES")
 
 
