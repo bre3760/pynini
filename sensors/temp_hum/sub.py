@@ -11,11 +11,12 @@ class MySubscriber:
 			# register the callback
 			self._paho_mqtt.on_connect = self.myOnConnect
 			self._paho_mqtt.on_message = self.myOnMessageReceived
-			self.topic = 'pynini/temperature_humidity'
-			self.messageBroker = 'localhost'
-
+			self.topic = "breadType/"  #'measure/temperature'
+			self.messageBroker = '127.0.0.1'
 
 		def start (self):
+			self._paho_mqtt.username_pw_set(username="brendan", password="pynini")
+
 			#manage connection to broker
 			self._paho_mqtt.connect(self.messageBroker, 1883)
 			self._paho_mqtt.loop_start()

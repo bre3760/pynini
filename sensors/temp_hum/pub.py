@@ -7,11 +7,10 @@ import Adafruit_DHT
 
 
 class TemperatureHumiditySensor:
-    def __init__(self, sensorID, db):
+    def __init__(self, sensorID):
         self.sensorID = sensorID
         self._paho_mqtt = PahoMQTT.Client(sensorID, False)
-        self.db = db
-        self.sensorIP = "localhost"
+        self.sensorIP = "192.168.1.2"
         self.sensorPort = 8080
 
         # register the callback
@@ -28,13 +27,13 @@ class TemperatureHumiditySensor:
 
     def start(self):
         # manage connection to broker
-        # self._paho_mqtt.username_pw_set(password=pynini)
+        self._paho_mqtt.username_pw_set(username="brendan", password="pynini")
         self._paho_mqtt.connect(self.messageBroker, 1883)
         self._paho_mqtt.loop_start()
-        self._paho_mqtt.subscribe(self.topic, 2)  # subscribe to the topic
 
     def stop(self):
-        self._paho_mqtt.unsubscribe(self.topic)
+        self._paho_mqtt.unsubscribe(self.topic_temp)
+        self._paho_mqtt.unsubscribe(self.topic_hum)
         self._paho_mqtt.loop_stop()
         self._paho_mqtt.disconnect()
 
@@ -54,9 +53,10 @@ class TemperatureHumiditySensor:
         sensor_dict["dev_name"] = 'rpi'
 
         r = requests.post("http://localhost:9090/addSensor", json=sensor_dict)
-
-        self.topic_temp = json.loads(r.text)['topic_temp']
-        self.topic_hum = json.loads(r.text)['topic_hum']
+        dict_of_topics = json.loads(r.text)['topic']
+        print("dict_of_topics",dict_of_topics)
+        self.topic_temp = dict_of_topics["topic_temp"]
+        self.topic_hum = dict_of_topics["topic_hum"]
 
         self.messageBroker = json.loads(r.text)['broker_ip']
 

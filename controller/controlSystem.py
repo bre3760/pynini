@@ -44,3 +44,16 @@ case_controller.myMqttClient.mySubscribe("trigger/threshold")
 case_controller.myMqttClient.mySubscribe("measure/temperature")
 case_controller.myMqttClient.mySubscribe("measure/humidity")
 case_controller.myMqttClient.mySubscribe("measure/CO2")
+
+
+
+
+while 1:
+    if !case_controller.isTemperatureValid:
+        case_controller.myMqttClient.myPublish("trigger/fan",json.dumps({"message":"on"}))
+        
+    
+    
+    
+    
+    
