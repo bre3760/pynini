@@ -1,6 +1,6 @@
 import json
 import requests
-from controller.MyMQTT import *
+from MyMQTT import *
 
 class CaseControl(object):
     def __init__(self, clientID, IP_broker, port_broker, IP_catalogue, port_catalogue):
