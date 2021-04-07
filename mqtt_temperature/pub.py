@@ -4,14 +4,25 @@ import json
 from datetime import datetime
 import Adafruit_DHT
 
-class MyPublisher:
+class TemperatureHumiditySensor:
 	def __init__(self, clientID):
-		self.clientID = clientID
-		# create an instance of paho.mqtt.client
-		self._paho_mqtt = PahoMQTT.Client(self.clientID, False)
+		self.sensorID =  sensorID
+		self._paho_mqtt = PahoMQTT.Client(sensorID, False)
+		self.db = db
+		self.sensorIP =  "localhost"
+		self.sensorPort = 8080
+
 		# register the callback
 		self._paho_mqtt.on_connect = self.myOnConnect
-		self.messageBroker = 'localhost'
+		self._paho_mqtt.on_message = self.myOnMessageReceived
+		self.messageBroker = "" # will get after post request where device registers
+		self.topic_temp = "" # will get after post request where device registers
+		self.topic_hum = ""
+		self.message = {
+			'measurement': self.sensorID,
+			'timestamp': '',
+			'value': '',
+		}
 		
 
 	def start (self):
@@ -19,8 +30,10 @@ class MyPublisher:
 		#self._paho_mqtt.username_pw_set(password=pynini)
 		self._paho_mqtt.connect(self.messageBroker, 1883)
 		self._paho_mqtt.loop_start()
+		self._paho_mqtt.subscribe(self.topic, 2) # subscribe to the topic
 
 	def stop (self):
+		self._paho_mqtt.unsubscribe(self.topic)
 		self._paho_mqtt.loop_stop()
 		self._paho_mqtt.disconnect()
 
@@ -31,30 +44,66 @@ class MyPublisher:
 	def myOnConnect (self, paho_mqtt, userdata, flags, rc):
 		print ("Connected to %s with result code: %d" % (self.messageBroker, rc))
 
+	
+	def registerDevice(self):
+		sensor_dict = {}
+		sensor_dict["ip"] = self.sensorIP
+		sensor_dict["port"] = self.sensorPort
+		sensor_dict["name"] = self.sensorID
+		sensor_dict["last_seen"] = time.time()
+		sensor_dict["dev_name"] = 'rpi'
+
+		r = requests.post("http://localhost:9090/addSensor", json=sensor_dict)
+
+		self.topic_temp = json.loads(r.text)['topic_temp']
+		self.topic_hum = json.loads(r.text)['topic_hum']
+
+		self.messageBroker = json.loads(r.text)['broker_ip']
+
+		print("[{}] Device Registered on Catalog".format(
+			int(time.time()),
+		))
+
+	def removeDevice(self):
+
+		sensor_dict = {}
+		sensor_dict["ip"] = self.sensorIP
+		sensor_dict["port"] = self.sensorPort
+		sensor_dict["name"] = self.sensorID
+		sensor_dict["dev_name"] = 'rpi'
+
+		requests.post("http://localhost:9090/removeDevice", json=sensor_dict)
+		print("[{}] Device Removed from Catalog".format(
+			int(time.time()),
+		))
 
 
 
+if __name__ == "__main__":
 
-pub = MyPublisher("MyPublisher")
-pub.start()
 
-sensor_data = {'temperature': 0, 'humidity': 0}
 
-try:
-    while True:
-        humidity, temperature = Adafruit_DHT.read_retry(11, 4) #(sensor,pin)
+	sensor = co2Sensor('TempHum')
+	sensor.registerDevice()
+	sensor.start()
 
-        print('Temp: {0:0.1f} C  Humidity: {1:0.1f} %'.format(temperature, humidity))
+	try:
+		while True:
+			# read temperature and humidity
+			humidity, temperature = Adafruit_DHT.read_retry(11, 4) #(sensor,pin)
 
-        sensor_data['temperature'] = temperature
-        sensor_data['humidity'] = humidity
-        payload={"time_stamp":datetime.utcnow().isoformat(),"data_t_h":sensor_data}
-        print(payload)
-        pub.myPublish('pynini/temperature_humidity', json.dumps(payload))
-       
-        time.sleep(1)
-        
-except KeyboardInterrupt:
-    pass
-        
-pub.stop()
+			print('Temp: {0:0.1f} C  Humidity: {1:0.1f} %'.format(temperature, humidity))
+
+			payload_temp={"measurement": "temperature", "timestamp":datetime.utcnow().isoformat(),"value":temperature}
+			payload_hum={"measurement": "humidity", "timestamp":datetime.utcnow().isoformat(),"value":humidity}
+
+			sensor.myPublish(self.topic_temp, json.dumps(payload_temp))
+			sensor.myPublish(self.topic_hum, json.dumps(payload_hum))
+		
+			time.sleep(10)
+			
+	except KeyboardInterrupt:
+		pass
+			
+	sensor.stop()
+	sensor.removeDevice()
