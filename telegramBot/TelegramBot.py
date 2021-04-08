@@ -350,6 +350,91 @@ class TelegramBot(object):
 
         return INFO
 
+    def maxTemp(self, update, context):
+        user_input = update.effective_message.text.split()
+        #print("before minTemp", self.actual_thresh)
+        self.actual_thresh["max_temperature_th"] = user_input[1]
+        #print("after minTemp", self.actual_thresh)
+
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text='The new configuration of thresholds is: \
+                                      \n- min Temperature: {}, \n - max Temperature: {}, \n - min Humidity: {}, \n - max Humidity: {}, \n - min CO2: {}, \n - max CO2: {}.\
+                                      \nSelect the threshold you want to modify and type in the chat /<threshold> <value>: \
+                                      \ne.g. /minTemperature 34'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
+                        )
+
+        self.optionEnd(update,context)
+
+        return INFO
+
+    def minHum(self, update, context):
+        user_input = update.effective_message.text.split()
+        #print("before minTemp", self.actual_thresh)
+        self.actual_thresh["min_humidity_th"] = user_input[1]
+        #print("after minTemp", self.actual_thresh)
+
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text='The new configuration of thresholds is: \
+                                      \n- min Temperature: {}, \n - max Temperature: {}, \n - min Humidity: {}, \n - max Humidity: {}, \n - min CO2: {}, \n - max CO2: {}.\
+                                      \nSelect the threshold you want to modify and type in the chat /<threshold> <value>: \
+                                      \ne.g. /minTemperature 34'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
+                        )
+
+        self.optionEnd(update,context)
+
+        return INFO
+
+    def maxHum(self, update, context):
+        user_input = update.effective_message.text.split()
+        #print("before minTemp", self.actual_thresh)
+        self.actual_thresh["max_humidity_th"] = user_input[1]
+        #print("after minTemp", self.actual_thresh)
+
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text='The new configuration of thresholds is: \
+                                      \n- min Temperature: {}, \n - max Temperature: {}, \n - min Humidity: {}, \n - max Humidity: {}, \n - min CO2: {}, \n - max CO2: {}.\
+                                      \nSelect the threshold you want to modify and type in the chat /<threshold> <value>: \
+                                      \ne.g. /minTemperature 34'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
+                        )
+
+        self.optionEnd(update,context)
+
+        return INFO
+
+    def minCO2(self, update, context):
+        user_input = update.effective_message.text.split()
+        #print("before minTemp", self.actual_thresh)
+        self.actual_thresh["min_co2_th"] = user_input[1]
+        #print("after minTemp", self.actual_thresh)
+
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text='The new configuration of thresholds is: \
+                                      \n- min Temperature: {}, \n - max Temperature: {}, \n - min Humidity: {}, \n - max Humidity: {}, \n - min CO2: {}, \n - max CO2: {}.\
+                                      \nSelect the threshold you want to modify and type in the chat /<threshold> <value>: \
+                                      \ne.g. /minTemperature 34'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
+                        )
+
+        self.optionEnd(update,context)
+
+        return INFO
+
+    def maxCO2(self, update, context):
+        user_input = update.effective_message.text.split()
+        #print("before minTemp", self.actual_thresh)
+        self.actual_thresh["max_co2_th"] = user_input[1]
+        #print("after minTemp", self.actual_thresh)
+
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text='The new configuration of thresholds is: \
+                                      \n- min Temperature: {}, \n - max Temperature: {}, \n - min Humidity: {}, \n - max Humidity: {}, \n - min CO2: {}, \n - max CO2: {}.\
+                                      \nSelect the threshold you want to modify and type in the chat /<threshold> <value>: \
+                                      \ne.g. /minTemperature 34'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
+                        )
+
+        self.optionEnd(update,context)
+
+        return INFO
+
     def optionThresholds(self, update, context, keyboard_thre):
 
         res = requests.get("http://localhost:9090/thresholds")
@@ -376,65 +461,6 @@ class TelegramBot(object):
                                       \ne.g. /minTemperature 14'.format(self.type, minTemp, maxTemp, minHum, maxHum, minCo2, maxCo2),
                                  parse_mode='Markdown'
         )
-    #     # cerca il primisimo script con il cambio valuta: utente scrive /soglia valore -> valore preso come new value
-    #     reply_markup_thre = InlineKeyboardMarkup(keyboard_thre)
-    #     context.bot.send_message(chat_id=update.effective_chat.id,
-    #                              reply_markup=reply_markup_thre,
-    #                              text='Select the threshold you want to modify: ',
-    #                              parse_mode='Markdown')
-    #
-    #     context.bot.send_message(chat_id=update.effective_chat.id,
-    #                              text='Write the name of the threshold you want to modify and its new value: ')
-    #
-    #     user_input = update.effective_message.text
-    #
-    #     print("SELEZIONEEEEEEEEEEEE", user_input)
-    #
-    #     #return THRESHOLD
-    #
-    #     update.callback_query.message.reply_text('Please insert the new value of the threshold:')
-    #     newValue = update.effective_message.reply_text
-    #     print("newValue", newValue)
-    #
-    #     #self.resetThreshold(update, context, newValue)
-    #     print("NEW CONFIG", self.actual_thresh)
-    #
-    # #def resetThreshold(self, update, context, newValue):
-    #
-    #     query = update.callback_query
-    #
-    #     print("RESEEEEEEEEEEEEEEET: selected threshold: ", query.data)
-    #
-    #     update.callback_query.message.reply_text('Please insert the new value of the threshold:')
-    #     newValue = update.effective_message.reply_text
-    #     print("newValue", newValue)
-    #
-    #     # cascata di if per modificare nel catalog la threshold che l'utente vuole cambiare
-    #     if query.data ==  "minTemp":
-    #         self.actual_thresh["min_temperature_th"] = newValue
-    #
-    #     elif query.data ==  "maxTemp":
-    #         self.actual_thresh["max_temperature_th"] = newValue
-    #
-    #     elif query.data ==  "minHum":
-    #         self.actual_thresh["min_humidity_th"] = newValue
-    #
-    #     elif query.data == "maxHum":
-    #         self.actual_thresh["max_humidity_th"] = newValue
-    #
-    #     elif query.data ==  "minCo2":
-    #         self.actual_thresh["min_co2_th"] = newValue
-    #
-    #     elif query.data ==  "maxCo2":
-    #         self.actual_thresh["max_co2_th"] = newValue
-    #
-    #     context.bot.send_message(chat_id=update.effective_chat.id,
-    #                              text='This is the new configuration for the <b> {} </b> bread typology: '
-    #                                   '\n - min Temperature: {}, \n - max Temperature: {}, \n - min Humidity: {}, \n - max Humidity: {}, \n - min CO2: {}, \n - max CO2: {}.'.format(
-    #                                  self.type, self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"]),
-    #                              parse_mode='HTML')
-    #     return PARAM2
-
 
     def end(self, update, context):
 
@@ -485,7 +511,12 @@ class TelegramBot(object):
            fallbacks=[CommandHandler('cancel', self.cancel),
                       CommandHandler('home', self.home),
                       CommandHandler('exit', self.exit),
-                      CommandHandler('minTemperature', self.minTemp)
+                      CommandHandler('minTemperature', self.minTemp),
+                      CommandHandler('maxTemperature', self.maxTemp),
+                      CommandHandler('minHumidity', self.minHum),
+                      CommandHandler('maxHumidity', self.maxHum),
+                      CommandHandler('minCO2', self.minCO2),
+                      CommandHandler('minCO2', self.maxCO2)
                       ]
        )
 
@@ -510,4 +541,4 @@ if __name__=='__main__':
 
 
 # TODO:
-#  thresholds
+# aggiornare thresholds nel catalog
