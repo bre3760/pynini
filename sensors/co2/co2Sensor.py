@@ -41,7 +41,7 @@ class co2Sensor:
 		self._paho_mqtt.connect(self.messageBroker, 1883)
 		self._paho_mqtt.loop_start()
 		# subscribe for a topic
-		self._paho_mqtt.subscribe(self.topic, 2)
+		# self._paho_mqtt.subscribe(self.topic, 2)
 
 	def stop (self):
 		self._paho_mqtt.unsubscribe(self.topic)

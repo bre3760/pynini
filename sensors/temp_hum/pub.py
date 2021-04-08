@@ -3,8 +3,13 @@ import time
 import json
 import requests
 from datetime import datetime
+from telegramBot.sensors_db import SensorsDB
 import Adafruit_DHT
 
+global CATALOG_ADDRESS
+global CATEGORY
+CATALOG_ADDRESS = "http://localhost:9090" # deciso che sarà una variabile globale, accessibile da tutti gli script di tutto il progetto
+CATEGORY = 'White'
 
 class TemperatureHumiditySensor:
     def __init__(self, sensorID, db):
@@ -55,8 +60,8 @@ class TemperatureHumiditySensor:
 
         r = requests.post("http://localhost:9090/addSensor", json=sensor_dict)
 
-        self.topic_temp = json.loads(r.text)['topic_temp']
-        self.topic_hum = json.loads(r.text)['topic_hum']
+        self.topic_temp = json.loads(r.text)['topic']['topic_temp']
+        self.topic_hum = json.loads(r.text)['topic']['topic_hum']
 
         self.messageBroker = json.loads(r.text)['broker_ip']
 
@@ -104,14 +109,19 @@ class TemperatureHumiditySensor:
         :param data: dictionary whose keys represent the time, the value of the measurement and the type of bread
         :return: record these data in the table related to the sensor
         '''
-        sql = "INSERT INTO temperature (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
+        sql = "INSERT INTO humidity (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
         self.db.cursor.execute(sql, [data["timestamp"], data["value"], data["typology"]])
         self.db.db.commit()
 
 
 if __name__ == "__main__":
 
-    sensor = TemperatureHumiditySensor('TempHum')
+    dataDB = requests.get("http://localhost:9090/db")
+    db = SensorsDB(json.loads(dataDB.text))
+    db.start()
+    db.db.commit()
+
+    sensor = TemperatureHumiditySensor('TempHum', db)
     sensor.registerDevice()
     sensor.start()
 

@@ -66,16 +66,16 @@ class ThingSpeakConnector:
         if (message.topic == "measure/co2"):
             print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(message.payload) + "'")
             data = json.loads(message.payload)
-            json_body = [
-                {
-                    "measurement": data['measurement'],
-                    "time": data['time_stamp'],
-                    "fields":
-                        {
-                            "value": data['value']
-                        }
-                }
-            ]
+            # json_body = [
+            #     {
+            #         "measurement": data['measurement'],
+            #         "time": data['time_stamp'],
+            #         "fields":
+            #             {
+            #                 "value": data['value']
+            #             }
+            #     }
+            # ]
             self.field1_data = data['value']
             self.timestamp = data['time_stamp']
 
@@ -139,7 +139,7 @@ if __name__ == '__main__':
                                        "channel_id": tsa.channel,
                                        #"created_at": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
                                        #"entry_id": cnt,
-                                       "created_at": tsa.timestamp,
+                                       #"created_at": tsa.timestamp,
                                        "field1": tsa.field1_data #,
                                        # "field2": tsa.field2_data,
                                        # "field3": tsa.field3_data

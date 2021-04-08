@@ -1,4 +1,4 @@
-from caseControl import CaseControl
+from controller.caseControl import CaseControl
 import requests
 import json
 import os
