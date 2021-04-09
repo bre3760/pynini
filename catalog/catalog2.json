@@ -1,6 +1,85 @@
 {
+    "bots": [
+        {
+            "chat_ID": 490068659,
+            "ip": "127.0.0.0",
+            "last_seen": 1617964909.2674513
+        }
+    ],
     "broker_ip": "broker.emqx.io",
     "broker_port": 1883,
+    "cases": [
+        {
+            "arduino": {
+                "sensors": [
+                    {
+                        "ip": "192.168.178.200",
+                        "last_seen": 0,
+                        "name": "pluto",
+                        "port": 8080
+                    }
+                ]
+            },
+            "bread_type": "White",
+            "case_ID": "CCC1",
+            "rpi": {
+                "sensors": [
+                    {
+                        "ip": "192.168.178.200",
+                        "last_seen": 0,
+                        "name": "temperature",
+                        "port": 8080
+                    },
+                    {
+                        "ip": "172.20.10.11",
+                        "last_seen": 1617781249.4628403,
+                        "name": "co2",
+                        "port": 8080
+                    }
+                ]
+            }
+        },
+        {
+            "arduino": {
+                "sensors": []
+            },
+            "bread_type": "White",
+            "case_ID": "CCC3",
+            "rpi": {
+                "sensors": [
+                    {
+                        "ip": "172.20.10.11",
+                        "last_seen": 1617981949.8630166,
+                        "name": "co2",
+                        "port": 8080
+                    }
+                ]
+            }
+        },
+        {
+            "arduino": {
+                "sensors": []
+            },
+            "bread_type": "White",
+            "case_ID": "CCC2",
+            "rpi": {
+                "sensors": [
+                    {
+                        "ip": "172.20.10.11",
+                        "last_seen": 1617982702.9100754,
+                        "name": "co2",
+                        "port": 8080
+                    },
+                    {
+                        "ip": "172.20.10.10",
+                        "last_seen": 1617983269.8532972,
+                        "name": "co2",
+                        "port": 8080
+                    }
+                ]
+            }
+        }
+    ],
     "catalog_port": 9090,
     "db": {
         "host": "localhost",
@@ -8,38 +87,8 @@
         "password": "pynini",
         "user": "root"
     },
-    "cases": [{
-        "case_name": "CCC1",
-        "arduino": {
-            "sensors": [
-                {
-                    "ip": "192.168.178.200",
-                    "last_seen": 0,
-                    "name": "pluto",
-                    "port": 8080
-                }
-            ]
-        },
-        "rpi": {
-            "bots": [],
-            "sensors": [
-                {
-                    "ip": "192.168.178.200",
-                    "last_seen": 0,
-                    "name": "temperature",
-                    "port": 8080
-                },
-                {
-                    "ip": "172.20.10.11",
-                    "last_seen": 1617781249.4628403,
-                    "name": "co2",
-                    "port": 8080
-                }
-            ]
-        }
-    }],
     "ip_address": "172.20.10.11",
-    "last_updated": 1617781251.506743,
+    "last_updated": 1617983271.8802063,
     "telegramBot": {
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
@@ -53,38 +102,40 @@
         "url": "https://api.thingspeak.com/update.json",
         "write_key": "7FP7K9V4HN68HHTV"
     },
-    "thresholds": {
-        "White": {
+    "thresholds": [
+        {
             "max_co2_th": "10",
             "max_humidity_th": "50",
             "max_temperature_th": "100",
             "min_co2_th": "10",
             "min_humidity_th": "50",
-            "min_temperature_th": "12"
+            "min_temperature_th": "12",
+            "type": "White"
         },
-        "glutenfree": {
+        {
             "max_co2_th": "10",
             "max_humidity_th": "50",
             "max_temperature_th": "100",
             "min_co2_th": "10",
             "min_humidity_th": "50",
-            "min_temperature_th": "12"
+            "min_temperature_th": "12",
+            "type": "Wheat"
         },
-        "wheat": {
+        {
             "max_co2_th": "10",
             "max_humidity_th": "50",
             "max_temperature_th": "100",
             "min_co2_th": "10",
             "min_humidity_th": "50",
-            "min_temperature_th": "12"
+            "min_temperature_th": "12",
+            "type": "Glutenfree"
         }
-    },
+    ],
     "topics": {
-        "co2": "measure/co2",
-        "TempHum":
-            {
-                "topic_temp": "measure/temperature",
-                "topic_hum": "measure/humidity"
-            }
+        "TempHum": {
+            "topic_hum": "measure/humidity",
+            "topic_temp": "measure/temperature"
+        },
+        "co2": "measure/co2"
     }
 }

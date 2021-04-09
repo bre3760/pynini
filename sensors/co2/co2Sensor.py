@@ -16,8 +16,9 @@ class co2Sensor:
 		self.sensorID =  sensorID
 		self._paho_mqtt = PahoMQTT.Client(sensorID, False)
 		self.db = db
-		self.sensorIP =  "172.20.10.11"
+		self.sensorIP =  "172.20.10.10"
 		self.sensorPort = 8080
+		self.caseID = "CCC2"
 
 		# register the callback
 		self._paho_mqtt.on_connect = self.myOnConnect
@@ -80,14 +81,17 @@ class co2Sensor:
 		register the device on the Room Catalog by sending a post request to it
 		'''
 		sensor_dict = {}
+		sensor_dict["case_ID"] = self.caseID
 		sensor_dict["ip"] = self.sensorIP
 		sensor_dict["port"] = self.sensorPort
 		sensor_dict["name"] = self.sensorID
 		sensor_dict["last_seen"] = time.time()
 		sensor_dict["dev_name"] = 'rpi'
 
-		r = requests.post("http://localhost:9090/addSensor", json=sensor_dict)
+		print("type sensor_dict", sensor_dict, type(sensor_dict))
 
+		r = requests.post("http://localhost:9090/addSensor", json=sensor_dict)
+		print("json.loads(r.text)", json.loads(r.text))
 		self.topic = json.loads(r.text)['topic']
 		self.messageBroker = json.loads(r.text)['broker_ip']
 

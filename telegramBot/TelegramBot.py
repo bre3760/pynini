@@ -28,7 +28,7 @@ class TelegramBot(object):
     def start(self, update, context):
 
         self.chatID = update.message.chat_id
-        requests.post("http://localhost:9090/addBot", json={'ip': self.ip, 'chatID': self.chatID, 'last_seen': time.time()})
+        requests.post("http://localhost:9090/addBot", json={'ip': self.ip, 'chat_ID': self.chatID, 'last_seen': time.time()})
         print("Mi sono registrato al catalog")
 
         options = ["White", "Wheat", "Gluten-free", "Sales Statistics"]
@@ -149,19 +149,6 @@ class TelegramBot(object):
         self.optionEnd(update, context)
         return PARAM2
 
-    def optionEnd(self, update, context):
-        keyboard_info = [[InlineKeyboardButton("Tell Me More", callback_data='info'),
-                          InlineKeyboardButton("Reset Thresholds", callback_data='thresholds'),
-                          InlineKeyboardButton("Main menu", callback_data='home')],
-                         [InlineKeyboardButton("Exit", callback_data='exit')]]
-        reply_markup_info = InlineKeyboardMarkup(keyboard_info)
-        context.bot.send_message(chat_id=update.effective_chat.id,
-                                 reply_markup=reply_markup_info,
-                                 text='If you want to reset some thresholds, click on <b> Reset Thresholds </b>,\
-                                      \nif you want more information, click on <b> Tell me more </b> \
-                                      \nif you want to come back to the main menu, click on <b> Main Menu </b>', parse_mode='HTML')
-
-        return PARAM2
 
     def selectedParam(self, update, context, query, keyboard_params):
 
@@ -256,15 +243,6 @@ class TelegramBot(object):
 
         return res
 
-    def endMenu(self, update, context):
-        keyboard_info = [[InlineKeyboardButton("Back", callback_data='home')],
-                         [InlineKeyboardButton("Exit", callback_data='exit')]]
-        reply_markup_info = InlineKeyboardMarkup(keyboard_info)
-        context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=reply_markup_info,
-                                 text='If you want to explore other bread typologies, click on *Main menu!*',
-                                 parse_mode='Markdown')
-        return THRESHOLD
-
     def info(self, update, context):
 
         query = update.callback_query
@@ -294,35 +272,6 @@ class TelegramBot(object):
 
             self.optionThresholds(update, context, keyboard_thre)
 
-            # time.sleep(2)
-            #
-            # print("ho modificato la soglia", self.actual_thresh)
-            # keyboard_thre_expanded = [[InlineKeyboardButton("Min temperature", callback_data='minTemp'),
-            #                   InlineKeyboardButton("Max temperature", callback_data='maxTemp'),
-            #                   InlineKeyboardButton("Min humidity", callback_data='minHum'),
-            #                   InlineKeyboardButton("Max humidity", callback_data='maxHum'),
-            #                   InlineKeyboardButton("Min co2", callback_data='minCO2'),
-            #                   InlineKeyboardButton("Max co2", callback_data='maxCO2'),
-            #                   InlineKeyboardButton("Main menu", callback_data='home')],
-            #                   [InlineKeyboardButton("Exit", callback_data='exit')]]
-            #
-            # reply_markup_thre = InlineKeyboardMarkup(keyboard_thre_expanded)
-            #
-            # context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=reply_markup_thre,
-            #                          text='If you want to modify another threshold, select it, otherwise you can come back to the Main Menu or Exit',
-            #                          parse_mode='Markdown')
-            #
-            # if query.data != 'home' and query.data !='exit':
-            #     self.optionThresholds(update, context, keyboard_thre)
-            #
-            # elif query.data == 'home':
-            #     TYPOLOGY = self.home(update, context)
-            #     return TYPOLOGY
-            #
-            # elif query.data == 'exit':
-            #     res = self.exit(update, context)
-            #     return res
-
 
         elif query.data == 'exit':
             res = self.exit(update, context)
@@ -338,6 +287,10 @@ class TelegramBot(object):
         #print("before minTemp", self.actual_thresh)
         self.actual_thresh["min_temperature_th"] = user_input[1]
         #print("after minTemp", self.actual_thresh)
+
+        requests.post("http://localhost:9090/setThresholds",
+                     json=self.actual_thresh)
+        print("new config in maxTemp", json.dumps(self.actual_thresh), type(self.actual_thresh))
 
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='The new configuration of thresholds is: \
@@ -355,6 +308,10 @@ class TelegramBot(object):
         #print("before minTemp", self.actual_thresh)
         self.actual_thresh["max_temperature_th"] = user_input[1]
         #print("after minTemp", self.actual_thresh)
+
+        requests.put("http://localhost:9090/modifyThresholds",
+                      json=json.dumps(self.actual_thresh))
+        print("new config in maxTemp", json.dumps(self.actual_thresh), type(self.actual_thresh))
 
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='The new configuration of thresholds is: \
@@ -438,7 +395,9 @@ class TelegramBot(object):
     def optionThresholds(self, update, context, keyboard_thre):
 
         res = requests.get("http://localhost:9090/thresholds")
-        self.actual_thresh = json.loads(res.text)[self.type]
+        for elem in json.loads(res.text):
+            if elem['type'] == self.type:
+                self.actual_thresh = elem
         print("sono in optionThresh", self.actual_thresh)
 
         minTemp = self.actual_thresh["min_temperature_th"]
@@ -462,16 +421,46 @@ class TelegramBot(object):
                                  parse_mode='Markdown'
         )
 
+    def optionEnd(self, update, context):
+        print("sono in optionEnd")
+        keyboard_info = [[InlineKeyboardButton("Tell Me More", callback_data='info'),
+                          InlineKeyboardButton("Reset Thresholds", callback_data='thresholds'),
+                          InlineKeyboardButton("Main menu", callback_data='home')],
+                         [InlineKeyboardButton("Exit", callback_data='exit')]]
+        reply_markup_info = InlineKeyboardMarkup(keyboard_info)
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 reply_markup=reply_markup_info,
+                                 text='If you want to reset some thresholds, click on <b> Reset Thresholds </b>,\
+                                      \nif you want more information, click on <b> Tell me more </b> \
+                                      \nif you want to come back to the main menu, click on <b> Main Menu </b>', parse_mode='HTML')
+
+        return PARAM2
+
+    def endMenu(self, update, context):
+        print("sono in endMenu")
+        keyboard_info = [[InlineKeyboardButton("Back", callback_data='home')],
+                         [InlineKeyboardButton("Exit", callback_data='exit')]]
+        reply_markup_info = InlineKeyboardMarkup(keyboard_info)
+        context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=reply_markup_info,
+                                 text='If you want to explore other bread typologies, click on *Main menu!*',
+                                 parse_mode='Markdown')
+        #return THRESHOLD
+
     def end(self, update, context):
 
         print("query in end", update.callback_query.data)
-
         query = update.callback_query
 
         if query.data == 'home':
             TYPOLOGY = self.home(update, context)
-
             return TYPOLOGY
+
+        elif query.data == 'info':
+            link = self.sqlInfo()
+            context.bot.send_message(chat_id=update.effective_chat.id,
+                                     text='Click on the following link to learn more about the {}: {}.'.format(self.type, link))
+
+            self.endMenu(update, context)
 
         elif query.data == 'exit':
             res = self.exit(update, context)
@@ -539,6 +528,4 @@ if __name__=='__main__':
     bot = TelegramBot(db, json.loads(data.text)["telegramPort"], json.loads(data.text)["token"])
     bot.main()
 
-
-# TODO:
-# aggiornare thresholds nel catalog
+# file config con indirizzi url
