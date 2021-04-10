@@ -16,7 +16,7 @@ class co2Sensor:
 		self.sensorID =  sensorID
 		self._paho_mqtt = PahoMQTT.Client(sensorID, False)
 		self.db = db
-		self.sensorIP =  "172.20.10.10"
+		self.sensorIP =  "172.20.10.08"
 		self.sensorPort = 8080
 		self.caseID = "CCC2"
 
@@ -102,12 +102,13 @@ class co2Sensor:
 	def removeDevice(self):
 
 		sensor_dict = {}
+		sensor_dict["case_ID"] = self.caseID
 		sensor_dict["ip"] = self.sensorIP
 		sensor_dict["port"] = self.sensorPort
 		sensor_dict["name"] = self.sensorID
 		sensor_dict["dev_name"] = 'rpi'
 
-		requests.post("http://localhost:9090/removeDevice", json=sensor_dict)
+		requests.post("http://localhost:9090/removeSensor", json=sensor_dict)
 		print("[{}] Device Removed from Catalog".format(
 			int(time.time()),
 		))

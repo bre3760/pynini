@@ -283,14 +283,12 @@ class TelegramBot(object):
         return THRESHOLD
 
     def minTemp(self, update, context):
+
         user_input = update.effective_message.text.split()
-        #print("before minTemp", self.actual_thresh)
         self.actual_thresh["min_temperature_th"] = user_input[1]
-        #print("after minTemp", self.actual_thresh)
 
         requests.post("http://localhost:9090/setThresholds",
                      json=self.actual_thresh)
-        print("new config in maxTemp", json.dumps(self.actual_thresh), type(self.actual_thresh))
 
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='The new configuration of thresholds is: \
@@ -304,14 +302,15 @@ class TelegramBot(object):
         return INFO
 
     def maxTemp(self, update, context):
-        user_input = update.effective_message.text.split()
-        #print("before minTemp", self.actual_thresh)
-        self.actual_thresh["max_temperature_th"] = user_input[1]
-        #print("after minTemp", self.actual_thresh)
 
-        requests.put("http://localhost:9090/modifyThresholds",
-                      json=json.dumps(self.actual_thresh))
-        print("new config in maxTemp", json.dumps(self.actual_thresh), type(self.actual_thresh))
+        user_input = update.effective_message.text.split()
+        self.actual_thresh["max_temperature_th"] = user_input[1]
+
+        # requests.post("http://localhost:9090/setThresholds",
+        #               json=self.actual_thresh)
+        requests.put("http://localhost:9090/setThresholds",
+                      json=self.actual_thresh)
+        print("new config in maxTemp", self.actual_thresh)
 
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='The new configuration of thresholds is: \
@@ -325,10 +324,12 @@ class TelegramBot(object):
         return INFO
 
     def minHum(self, update, context):
+
         user_input = update.effective_message.text.split()
-        #print("before minTemp", self.actual_thresh)
         self.actual_thresh["min_humidity_th"] = user_input[1]
-        #print("after minTemp", self.actual_thresh)
+
+        requests.put("http://localhost:9090/setThresholds",
+                     json=self.actual_thresh)
 
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='The new configuration of thresholds is: \
@@ -342,10 +343,12 @@ class TelegramBot(object):
         return INFO
 
     def maxHum(self, update, context):
+
         user_input = update.effective_message.text.split()
-        #print("before minTemp", self.actual_thresh)
         self.actual_thresh["max_humidity_th"] = user_input[1]
-        #print("after minTemp", self.actual_thresh)
+
+        requests.put("http://localhost:9090/setThresholds",
+                     json=self.actual_thresh)
 
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='The new configuration of thresholds is: \
@@ -359,10 +362,12 @@ class TelegramBot(object):
         return INFO
 
     def minCO2(self, update, context):
+
         user_input = update.effective_message.text.split()
-        #print("before minTemp", self.actual_thresh)
         self.actual_thresh["min_co2_th"] = user_input[1]
-        #print("after minTemp", self.actual_thresh)
+
+        requests.put("http://localhost:9090/setThresholds",
+                     json=self.actual_thresh)
 
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='The new configuration of thresholds is: \
@@ -376,10 +381,12 @@ class TelegramBot(object):
         return INFO
 
     def maxCO2(self, update, context):
+
         user_input = update.effective_message.text.split()
-        #print("before minTemp", self.actual_thresh)
         self.actual_thresh["max_co2_th"] = user_input[1]
-        #print("after minTemp", self.actual_thresh)
+
+        requests.put("http://localhost:9090/setThresholds",
+                     json=self.actual_thresh)
 
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='The new configuration of thresholds is: \
@@ -473,7 +480,7 @@ class TelegramBot(object):
                                  text='Bye! Have a good day and come back to @Pynini soon. &#128400;',
                                  reply_markup=ReplyKeyboardRemove(), parse_mode='HTML')
         requests.post("http://localhost:9090/removeBot",
-                      json={'ip': self.ip, 'chatID': self.chatID, 'last_seen': time.time()})
+                      json={'ip': self.ip, 'chat_ID': self.chatID, 'last_seen': time.time()})
         print("Mi sono eliminato dal catalog")
         return ConversationHandler.END
 
@@ -528,4 +535,6 @@ if __name__=='__main__':
     bot = TelegramBot(db, json.loads(data.text)["telegramPort"], json.loads(data.text)["token"])
     bot.main()
 
+# TODO:
 # file config con indirizzi url
+# ritornare la nuova configurazione delle threshold tramite get
