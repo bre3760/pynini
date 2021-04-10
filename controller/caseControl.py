@@ -8,13 +8,13 @@ CATALOG_ADDRESS = "http://localhost:9090" # deciso che sarà una variabile globa
 CATEGORY = 'White'
 
 class CaseControl(object):
-    def __init__(self, clientID, IP_broker, port_broker, IP_catalog, port_catalog):
+    def __init__(self, clientID, IP_broker, port_broker, IP_catalog, port_catalog, topic):
 
         self.clientID = clientID
-        self.myMqttClient = MyMQTT(self.clientID, IP_broker, port_broker, self)
+        self.myMqttClient = MyMQTT(self.clientID, IP_broker, port_broker, topic)
         self.IP_catalog = IP_catalog
         self.port_catalog = port_catalog
-        self.type = self.getBreadType()
+        self.type = self.getBreadType() # la categoria di pane va ricercata nel catalog, nella teca
         self.minTemperature = self.getMinTemperatureThreshold()
         self.maxTemperature = self.getMaxTemperatureThreshold()
         self.maxHumidity = self.getMaxHumidityThreshold()
@@ -165,7 +165,7 @@ class CaseControl(object):
 
     def getBreadType(self):
         try:
-            threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/thresholds"
+            threshold_URL = "http://" + str(self.IP_catalog) + ":" + str(self.port_catalog) + "/thresholds"
             r = requests.get(threshold_URL)
             print("Bread in " + self.clientID)
             threshold = r.text

@@ -2,12 +2,11 @@ import paho.mqtt.client as PahoMQTT
 from time import time, sleep
 
 class MyMQTT:
-	def __init__(self, clientID, broker, port, notifier, topic):
+	def __init__(self, clientID, broker, port, notifier):
 		self.broker = broker
 		self.port = port
 		self.notifier = notifier
 		self.clientID = clientID
-		self.topic = topic
 		self._isSubscriber = False
 		# create an instance of paho.mqtt.client
 		self._paho_mqtt = PahoMQTT.Client(clientID, False)

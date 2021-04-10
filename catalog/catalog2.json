@@ -3,7 +3,7 @@
         {
             "chat_ID": 490068659,
             "ip": "127.0.0.0",
-            "last_seen": 1617988019.9186077
+            "last_seen": 1618041922.6127255
         }
     ],
     "broker_ip": "broker.emqx.io",
@@ -58,6 +58,42 @@
                         "last_seen": 1617983269.8532972,
                         "name": "co2",
                         "port": 8080
+                    },
+                    {
+                        "ip": "172.20.10.08",
+                        "last_seen": 1618042908.238661,
+                        "name": "co2",
+                        "port": 8080
+                    },
+                    {
+                        "ip": "172.20.10.08",
+                        "last_seen": 1618042908.238661,
+                        "name": "co2",
+                        "port": 8080
+                    },
+                    {
+                        "ip": "172.20.10.08",
+                        "last_seen": 1618043489.5457613,
+                        "name": "co2",
+                        "port": 8080
+                    },
+                    {
+                        "ip": "172.20.10.08",
+                        "last_seen": 1618043489.5457613,
+                        "name": "co2",
+                        "port": 8080
+                    },
+                    {
+                        "ip": "172.20.10.08",
+                        "last_seen": 1618043489.5457613,
+                        "name": "co2",
+                        "port": 8080
+                    },
+                    {
+                        "ip": "172.20.10.08",
+                        "last_seen": 1618043489.5457613,
+                        "name": "co2",
+                        "port": 8080
                     }
                 ]
             }
@@ -71,7 +107,7 @@
         "user": "root"
     },
     "ip_address": "172.20.10.11",
-    "last_updated": 1617988021.969846,
+    "last_updated": 1618043491.5849493,
     "telegramBot": {
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
@@ -119,6 +155,10 @@
             "topic_hum": "measure/humidity",
             "topic_temp": "measure/temperature"
         },
-        "co2": "measure/co2"
-    }
+        "co2": "measure/co2",
+        "breadType": "breadType/",
+        "fan": "trigger/fan",
+        "lamp": "trigger/lamp"
+    },
+    "breadCategories": ["White", "Wheat", "Glutenfree"]
 }

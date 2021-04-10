@@ -11,30 +11,26 @@ CATALOG_ADDRESS = "http://localhost:9090" # deciso che sarà una variabile globa
 CATEGORY = 'White'
 
 class co2Sensor:
-	def __init__(self, sensorID, db):
+	def __init__(self, sensor, db):
 		# create an instance of paho.mqtt.client
-		self.sensorID =  sensorID
-		self._paho_mqtt = PahoMQTT.Client(sensorID, False)
+		self.sensorID, self.caseID = sensor.split("-")
+		self._paho_mqtt = PahoMQTT.Client(self.sensorID, False)
 		self.db = db
 		self.sensorIP =  "172.20.10.08"
 		self.sensorPort = 8080
-		self.caseID = "CCC2"
 
 		# register the callback
 		self._paho_mqtt.on_connect = self.myOnConnect
 		self._paho_mqtt.on_message = self.myOnMessageReceived
 		self.messageBroker = ""
 		self.topic = ""
+		topicBreadType = requests.get("http://localhost:9090/topics")
+		self.topicBreadType = json.loads(topicBreadType.text)["breadType"]
 		self.message = {
 			'measurement': self.sensorID,
 			'timestamp': '',
 			'value': '',
 		}
-		#self.sensorPort = self.catalogPort
-
-		# s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		# s.connect(("8.8.8.8", 80))
-		# self.address = s.getsockname()[0]
 
 
 	def start (self):
@@ -42,7 +38,7 @@ class co2Sensor:
 		self._paho_mqtt.connect(self.messageBroker, 1883)
 		self._paho_mqtt.loop_start()
 		# subscribe for a topic
-		# self._paho_mqtt.subscribe(self.topic, 2)
+		self._paho_mqtt.subscribe(self.topicBreadType, 2)
 
 	def stop (self):
 		self._paho_mqtt.unsubscribe(self.topic)
@@ -59,13 +55,17 @@ class co2Sensor:
 	def myOnMessageReceived (self, paho_mqtt , userdata, msg):
 		# A new message is received
 		print ("Topic:'" + msg.topic+"', QoS: '"+str(msg.qos)+"' Message: '"+str(msg.payload) + "'")
-		try:
-			data=json.loads(msg.payload)
-			data["typology"] = CATEGORY
-			self.insertData(data)
+		if msg.topic == self.topicBreadType:
+			self.category = json.loads(msg.payload)['category']
+			print("category",self.category)
+		else:
+			try:
+				data=json.loads(msg.payload)
+				data["typology"] = self.category
+				self.insertData(data)
 
-		except Exception as e:
-			print (e)
+			except Exception as e:
+				print(e)
 
 	def insertData(self, data):
 		'''
@@ -119,7 +119,7 @@ if __name__ == "__main__":
 	db = SensorsDB(json.loads(dataDB.text))
 	db.start()
 
-	sensor = co2Sensor('co2', db)
+	sensor = co2Sensor('CC2-co2', db)
 	sensor.registerDevice()
 	sensor.start()
 

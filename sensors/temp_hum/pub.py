@@ -3,8 +3,8 @@ import time
 import json
 import requests
 from datetime import datetime
-from telegramBot.sensors_db import SensorsDB
 import Adafruit_DHT
+from telegramBot.sensors_db import SensorsDB
 
 global CATALOG_ADDRESS
 global CATEGORY
@@ -12,11 +12,12 @@ CATALOG_ADDRESS = "http://localhost:9090" # deciso che sarà una variabile globa
 CATEGORY = 'White'
 
 class TemperatureHumiditySensor:
-    def __init__(self, sensorID):
+    def __init__(self, sensorID, db):
         self.sensorID = sensorID
         self._paho_mqtt = PahoMQTT.Client(sensorID, False)
         self.sensorIP = "192.168.1.2"
         self.sensorPort = 8080
+        self.db = db
 
         # register the callback
         self._paho_mqtt.on_connect = self.myOnConnect
@@ -58,16 +59,10 @@ class TemperatureHumiditySensor:
         sensor_dict["dev_name"] = 'rpi'
 
         r = requests.post("http://localhost:9090/addSensor", json=sensor_dict)
-<<<<<<< HEAD
-
-        self.topic_temp = json.loads(r.text)['topic']['topic_temp']
-        self.topic_hum = json.loads(r.text)['topic']['topic_hum']
-=======
         dict_of_topics = json.loads(r.text)['topic']
         print("dict_of_topics",dict_of_topics)
         self.topic_temp = dict_of_topics["topic_temp"]
         self.topic_hum = dict_of_topics["topic_hum"]
->>>>>>> 2bd309b71d23a63f34604be878f0952b3fd597ba
 
         self.messageBroker = json.loads(r.text)['broker_ip']
 
@@ -115,19 +110,14 @@ class TemperatureHumiditySensor:
         :param data: dictionary whose keys represent the time, the value of the measurement and the type of bread
         :return: record these data in the table related to the sensor
         '''
-        sql = "INSERT INTO humidity (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
+        sql = "INSERT INTO temperature (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
         self.db.cursor.execute(sql, [data["timestamp"], data["value"], data["typology"]])
         self.db.db.commit()
 
 
 if __name__ == "__main__":
 
-    dataDB = requests.get("http://localhost:9090/db")
-    db = SensorsDB(json.loads(dataDB.text))
-    db.start()
-    db.db.commit()
-
-    sensor = TemperatureHumiditySensor('TempHum', db)
+    sensor = TemperatureHumiditySensor('TempHum')
     sensor.registerDevice()
     sensor.start()
 
