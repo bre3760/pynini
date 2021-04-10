@@ -97,7 +97,7 @@ class Catalog(object):
                     f.truncate()
                     f.close()
                     print(f'${new_dev["name"]} - added to the catalog')
-
+                    print(" ASOOOOOOO catalog['topics'][name]",catalog['topics'][name])
                     res["topic"] = catalog['topics'][name]
                     res["broker_ip"] = catalog["broker_ip"]
 
