@@ -27,6 +27,10 @@ void setup() {
  pinMode(10, OUTPUT); // controlled by the button
  pinMode(9, OUTPUT); // controlled by the button
  pinMode(8, OUTPUT); // controlled by the button
+
+ digitalWrite(13, LOW);
+ int testing13 = digitalRead(13);
+ Serial.print(testing13);
  
 }
 
