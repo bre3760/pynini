@@ -43,6 +43,7 @@ void setup() {
   Serial.begin(9600);
   // Initialise wifi connection
   wifiConnected = connectWifi();   
+  Serial.println("Connected To Wifi");
   local_ip = WiFi.localIP().toString();
   
   // send post request to catalog 
@@ -150,16 +151,26 @@ void LightsOff(int actuatorPin) {
 void httpConnect()
   {
     HTTPClient http; 
+
+
+    DynamicJsonDocument doc(1024);    
+    doc["name"] = "esp-arduino";
+    doc["ip"] = local_ip;
+    doc["port"] = 8080;
+    doc["last_seen"] = "01:00";
+    doc["dev_name"] = "esp-arduino";
+    String jsonData;
+    serializeJson(doc,jsonData);
     // opening the connection with the URL of the room catalog
     http.begin("http://192.168.1.2:9090/addSensor"); 
-    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-    
-    String httpRequestData = "dev_name=arduino&ip="+local_ip+"name=esp-arduino";
+    http.addHeader("Content-Type", "application/json");
     // code response of the POST request
-    int httpCode = http.POST(httpRequestData);
+    int httpCode = http.POST(jsonData);
+    String payload = http.getString();// to get the response payload
 
     Serial.print("HTTP response code: ");
     Serial.print(httpCode);
+    Serial.print(payload);
     Serial.print("\n");
     http.end(); // closing the HTTP connection
   }
