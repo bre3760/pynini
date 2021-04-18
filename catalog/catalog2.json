@@ -1,10 +1,14 @@
 {
-    "bots": [
-        {
-            "chat_ID": 490068659,
-            "ip": "127.0.0.0",
-            "last_seen": 1618041922.6127255
-        }
+    "InfluxDB": {
+        "bucket": "Pynini",
+        "token": "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg==",
+        "url": "https://eu-central-1-1.aws.cloud2.influxdata.com"
+    },
+    "bots": [],
+    "breadCategories": [
+        "White",
+        "Wheat",
+        "Glutenfree"
     ],
     "broker_ip": "broker.emqx.io",
     "broker_port": 1883,
@@ -21,7 +25,7 @@
                 ]
             },
             "bread_type": "White",
-            "case_ID": "CCC1",
+            "caseID": "CCC1",
             "rpi": {
                 "sensors": [
                     {
@@ -44,54 +48,12 @@
                 "sensors": []
             },
             "bread_type": "White",
-            "case_ID": "CCC2",
+            "caseID": "CCC2",
             "rpi": {
                 "sensors": [
                     {
-                        "ip": "172.20.10.11",
-                        "last_seen": 1617982702.9100754,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.10",
-                        "last_seen": 1617983269.8532972,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
                         "ip": "172.20.10.08",
-                        "last_seen": 1618042908.238661,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1618042908.238661,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1618043489.5457613,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1618043489.5457613,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1618043489.5457613,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1618043489.5457613,
+                        "last_seen": 1618741319.130749,
                         "name": "co2",
                         "port": 8080
                     }
@@ -107,7 +69,7 @@
         "user": "root"
     },
     "ip_address": "172.20.10.11",
-    "last_updated": 1618043491.5849493,
+    "last_updated": 1618781179.7175832,
     "telegramBot": {
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
@@ -144,9 +106,9 @@
             "max_co2_th": "10",
             "max_humidity_th": "50",
             "max_temperature_th": "34",
-            "min_co2_th": "10",
+            "min_co2_th": "1",
             "min_humidity_th": "50",
-            "min_temperature_th": "9",
+            "min_temperature_th": "10",
             "type": "White"
         }
     ],
@@ -155,10 +117,9 @@
             "topic_hum": "measure/humidity",
             "topic_temp": "measure/temperature"
         },
-        "co2": "measure/co2",
         "breadType": "breadType/",
+        "co2": "measure/co2",
         "fan": "trigger/fan",
         "lamp": "trigger/lamp"
-    },
-    "breadCategories": ["White", "Wheat", "Glutenfree"]
+    }
 }

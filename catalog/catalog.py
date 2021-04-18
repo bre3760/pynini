@@ -25,24 +25,22 @@ class Catalog(object):
             return json.dumps(catalog["broker_ip"])
         elif uri[0] == "broker_port":
             return json.dumps(catalog["broker_port"])
+        elif uri[0] == "cases":
+            return json.dumps(catalog["cases"])
         elif uri[0] == "catalog_port":
             return json.dumps(catalog["catalog_port"])
         elif uri[0] == "category":
             return json.dumps(catalog["category"])
-        elif uri[0] == "thresholds":
-            return json.dumps(catalog["thresholds"])
-        # elif uri[0] == "devices":
-            # return json.dumps(catalog["devices"])
-        elif uri[0] == "cases":
-            return json.dumps(catalog["cases"])
-        # elif uri[0] == "activeDev":
-        #     return json.dumps(catalog["devices"]["rpi"]["sensors"])
+        elif uri[0] == "db":
+            return json.dumps(catalog["db"])
+        elif uri[0] == "InfluxDB":
+            return json.dumps(catalog["InfluxDB"])
         elif uri[0] == "telegramBot":
             return json.dumps(catalog["telegramBot"])
         elif uri[0] == "thingspeak":
             return json.dumps(catalog["thingspeak"])
-        elif uri[0] == "db":
-            return json.dumps(catalog["db"])
+        elif uri[0] == "thresholds":
+            return json.dumps(catalog["thresholds"])
         elif uri[0] == "topics":
             return json.dumps(catalog["topics"])
 
@@ -56,26 +54,25 @@ class Catalog(object):
                 with open('catalog2.json', 'r+') as f:
                     catalog = json.load(f)
                     try:
-                        case_ID = new_device_info['case_ID']
+                        sensorID = new_device_info['sensorID']
+                        caseID = new_device_info['caseID']
                         ip = new_device_info['ip']
                         port = new_device_info['port']
-                        name = new_device_info['name'] # temp, hum, co2
                         last_seen = new_device_info['last_seen']
                         dev_name = new_device_info['dev_name']
                     except KeyError:
                         f.close()
                         raise cherrypy.HTTPError(400, 'Bad request')
 
-                    new_dev = {'ip': ip, 'port': port, 'name': name,
+                    new_dev = {'ip': ip, 'port': port, 'name': sensorID,
                                'last_seen': last_seen}
 
                     found = False
-                    print("catalog['cases']", catalog['cases'])
                     for c in catalog['cases']:
-                        if c['case_ID'] == case_ID:
+                        if c['caseID'] == caseID:
                             found = True
                             for d in c[dev_name]['sensors']:
-                                if d['ip'] == ip and d['name'] == name:
+                                if d['ip'] == ip and d['name'] == sensorID:
                                     c[dev_name]['sensors'].pop(c[dev_name]['sensors'].index(d))
                                 c[dev_name]['sensors'].append(new_dev)
 
@@ -85,7 +82,7 @@ class Catalog(object):
                                             "sensors": []
                                         },
                                         "bread_type": "White",
-                                        "case_ID": case_ID,
+                                        "caseID": caseID,
                                         "rpi": {
                                             "sensors": []
                                         }
@@ -99,8 +96,8 @@ class Catalog(object):
                     f.truncate()
                     f.close()
                     print(f'${new_dev["name"]} - added to the catalog')
-                    print(" ASOOOOOOO catalog['topics'][name]",catalog['topics'][name])
-                    res["topic"] = catalog['topics'][name]
+                    print("catalog['topics'][name]",catalog['topics'][sensorID])
+                    res["topic"] = catalog['topics'][sensorID]
                     res["broker_ip"] = catalog["broker_ip"]
 
                     print("res[topic]", res['topic'])
