@@ -3,22 +3,21 @@ import json
 import time
 import requests
 import pandas as pd
-from telegramBot.sensors_db import SensorsDB
 from database.influxDB import InfluxDB
 from database.query import ClientQuery
 
 # sensore pubblica su topi ca measurement/co2 e si sottoscrive alla topica breadType in cui il bottone pubblica il cambiamento di categoria
 # di default il sensore suppone di essere nella teca White
 
-global CATALOG_ADDRESS
-CATALOG_ADDRESS = "http://localhost:9090" # deciso che sarà una variabile globale, accessibile da tutti gli script di tutto il progetto
+# NOOOOOOOOOOOOO: ogni componente ha il proprio config da cui prende ip e porta
+# global CATALOG_ADDRESS
+# CATALOG_ADDRESS = "http://localhost:9090" # deciso che sarà una variabile globale, accessibile da tutti gli script di tutto il progetto
 
 class co2Sensor:
-	def __init__(self, sensor, db, influxDB):
+	def __init__(self, sensor, influxDB):
 		# create an instance of pahqtt.client
 		self.caseID, self.sensorID = sensor.split("-")
 		self._paho_mqtt = PahoMQTT.Client(self.sensorID, False)
-		self.db = db
 		self.influxDB = influxDB
 		self.sensorIP =  "172.20.10.08"
 		self.sensorPort = 8080
@@ -75,15 +74,6 @@ class co2Sensor:
 		except Exception as e:
 			print(e)
 
-	def insertData(self, data):
-		'''
-		:param data: dictionary whose keys represent the time, the value of the measurement and the type of bread
-		:return: record these data in the table related to the sensor
-		'''
-		sql ="INSERT INTO co2 (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
-		self.db.cursor.execute(sql,[data["timestamp"], data["value"], data["typology"]])
-		self.db.db.commit()
-
 	def registerDevice(self):
 		'''
 		register the device on the Room Catalog by sending a post request to it
@@ -124,14 +114,15 @@ class co2Sensor:
 
 if __name__ == "__main__":
 
-	dataDB = requests.get("http://localhost:9090/db")
-	db = SensorsDB(json.loads(dataDB.text))
-	db.start()
+	with open("config.json", 'r') as f:
+		config = json.load(f)
+	ip = config['ip']
+	port = config['port']
 
-	dataInfluxDB = requests.get("http://localhost:9090/InfluxDB")
+	dataInfluxDB = requests.get(f"http://{ip}:{port}/InfluxDB")
 	influxDB = InfluxDB(json.loads(dataInfluxDB.text))
 
-	sensor = co2Sensor('CCC2-co2', db, influxDB)
+	sensor = co2Sensor('CCC2-co2', influxDB)
 	sensor.registerDevice()
 	sensor.start()
 

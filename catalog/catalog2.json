@@ -53,7 +53,7 @@
                 "sensors": [
                     {
                         "ip": "172.20.10.08",
-                        "last_seen": 1618741319.130749,
+                        "last_seen": 1618781527.779002,
                         "name": "co2",
                         "port": 8080
                     }
@@ -69,7 +69,7 @@
         "user": "root"
     },
     "ip_address": "172.20.10.11",
-    "last_updated": 1618781179.7175832,
+    "last_updated": 1618781529.8061984,
     "telegramBot": {
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"

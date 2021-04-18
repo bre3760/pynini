@@ -55,12 +55,11 @@ class InfluxDB():
         write_api.write(self.bucket, self.org, record=p)
 
         write_api.close()
-
         #tag are indexed while field are not
 
-if __name__ == "__main__":
-
-    data = requests.get("http://localhost:9090/InfluxDB")
-    mydb = InfluxDB(json.loads(data.text))
+# if __name__ == "__main__":
+#
+#     data = requests.get("http://localhost:9090/InfluxDB")
+#     mydb = InfluxDB(json.loads(data.text))
     # mydb.clean()
     # mydb.best()
