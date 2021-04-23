@@ -112,6 +112,10 @@
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
     },
+    "freeboard": {
+        "freeboard_port":"8080",
+        "freeboard_host": "127.0.0.1"
+    },
     "thingspeak": {
         "broker_ip": "broker.emqx.io",
         "channel": "1327196",

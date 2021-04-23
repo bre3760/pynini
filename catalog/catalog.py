@@ -39,6 +39,8 @@ class Catalog(object):
         #     return json.dumps(catalog["devices"]["rpi"]["sensors"])
         elif uri[0] == "telegramBot":
             return json.dumps(catalog["telegramBot"])
+        elif uri[0] == "freeboard":
+            return json.dumps(catalog["freeboard"])
         elif uri[0] == "thingspeak":
             return json.dumps(catalog["thingspeak"])
         elif uri[0] == "db":
