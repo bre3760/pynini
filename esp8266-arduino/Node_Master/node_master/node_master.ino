@@ -4,12 +4,12 @@
 #include <Wire.h>
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
-
-
+#include <string.h>
+#include <typeinfo>
 // function prototypes
 
-boolean connectWifi();
-void httpConnect();
+void connectWifi();
+int httpConnect(char*, char*, char*);
 void LightsOn(int actuatorPin);
 void LightsOff(int actuatorPin);
 void callback(char* topic, byte* message, unsigned int length);
@@ -32,41 +32,47 @@ const char* mqtt_password = "pynini";
 const char* clientID = "esp-arduino";
 const char* topic = "breadType/";
 
+char breadTopic[10];
+char fanTopic[11];
+char lampTopic[12];
+String breadTopicString;
+String fanTopicString;
+String lampTopicString;
+// http
+
+String rpi_ip = "192.168.1.2"; // the raspberry ip for http request
+String rpi_port ="9090";
 
 // Creation of an ESP8266WiFi object
 WiFiClient espClient;
 // Creation of a PubSubClient object
 PubSubClient client(mqtt_server,1883,espClient);
 
-
 void setup() {
-  Serial.begin(9600);
-  // Initialise wifi connection
-  wifiConnected = connectWifi();   
-  Serial.println("Connected To Wifi");
-  local_ip = WiFi.localIP().toString();
+  Serial.begin(115200);
+  connectWifi();                           // Initialise wifi connection
+
+  int got_topics = 0;
+  got_topics = httpConnect(breadTopic,fanTopic,lampTopic);           // send post request to catalog 
+  delay(7000);
+  Serial.println("got_topics value: ");
+  Serial.println(got_topics);
   
-  // send post request to catalog 
-  httpConnect();
   
-  //client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
+  client.setCallback(callback);            // create callback function for mqtt
   
-  Wire.begin(D1, D2); // join i2c bus with SDA=D1 and SCL=D2 of NodeMCU 
-  
+  Wire.begin(D1, D2);                      // join i2c bus with SDA=D1 and SCL=D2 of NodeMCU 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  Serial.print("void loop starting \n");
-  
-  if (!client.connected()) {
+
+
+  if (!client.connected()) {               // reconnecting to broker 
     reconnect();
   }
   client.loop();
 
-
-  breadType = Wire.requestFrom(8,1); // ask on line 8 for 30 bits, then read while the wire gets data
+  breadType = Wire.requestFrom(8,1);       // ask on line/bus 8 for 30 bits, then read while the wire gets data
   String breadData="";
   while(Wire.available()){
     char c = Wire.read();
@@ -96,35 +102,11 @@ void loop() {
   Serial.print("\n");
 
   
-  if( client.publish(topic, payload.c_str()) ){
+  if( client.publish(breadTopic, payload.c_str()) ){
         Serial.println("Message sent with mqtt");
     } else {
         Serial.print("Failed to send");
     }
-
-
-
-  // if wire.write is json like
-//  DynamicJsonDocument doc(1024);
-//  DeserializationError error =  deserializeJson(doc, breadData);
-//   if (error) {
-//      Serial.print("DeserializeJson() failed with code \n");
-//      Serial.print(error.c_str());
-//   } else {
-//      char breadChosen = (doc["bread_chosen"]);
-//      Serial.print("The Bread type from button is: ");
-//      Serial.print(breadChosen);
-//      Serial.print("\n");
-//      if(  client.publish(topic, String(breadChosen).c_str() ) ){
-//        Serial.println("Message sent with mqtt");
-//        
-//      } else {
-//        Serial.print("Failed to send");
-//      }
-//   }
-  
-
-
 
   delay(125*60); // every 15 seconds
   
@@ -147,74 +129,91 @@ void LightsOff(int actuatorPin) {
     Wire.endTransmission();    /* stop transmitting */
 }
 
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+//      HTTP CONNECTION
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-void httpConnect()
+int httpConnect(char*, char*, char*)
   {
-    HTTPClient http; 
-
-
-    DynamicJsonDocument doc(1024);    
-    doc["name"] = "arduino";
-    doc["ip"] = local_ip;
-    doc["port"] = 8080;
-    doc["last_seen"] = "01:00";
-    doc["dev_name"] = "arduino";
-    doc["case_ID"] = "CCC1";
-    String jsonData;
-    serializeJson(doc,jsonData);
-    int httpCode;
-    while (httpCode != 200){
-      // opening the connection with the URL of the room catalog
-      http.begin("http://192.168.1.2:9090/addSensor"); 
+    int postDone=0;
+    if ((WiFi.status() == WL_CONNECTED)) {
+      HTTPClient http; 
+      DynamicJsonDocument doc(1024);    
+      doc["name"] = "arduino";
+      doc["ip"] = local_ip;
+      doc["port"] = "8080";
+      doc["last_seen"] = "01:00";
+      doc["dev_name"] = "arduino";
+      doc["caseID"] = "CCC1";
+      doc["sensorID"] = "arduino";
+      String jsonData;
+      serializeJson(doc,jsonData);
+      int httpCode;
+      String urlForPost = "http://" + rpi_ip + ":"+rpi_port + "/addSensor";
+      http.useHTTP10(true);
+      http.begin(espClient,urlForPost); 
       http.addHeader("Content-Type", "application/json");
-      // code response of the POST request
-      httpCode = http.POST(jsonData);
-      String payload = http.getString();// to get the response payload
-  
+      httpCode = http.POST(jsonData);        // code response of the POST request
       Serial.print("HTTP response code: ");
-      Serial.print(httpCode);
-      Serial.print(payload);
-      Serial.print("\n");
+      Serial.println(httpCode);
+
+      if (httpCode > 0) {
+        Serial.printf("[HTTP] POST... code: %d\n", httpCode);
+        if (httpCode == 200) { // status 200
+          postDone = 1;
+          DynamicJsonDocument docReceived(1024);
+          DeserializationError error =  deserializeJson(docReceived, http.getStream());
+          if (error) {
+            Serial.print("DeserializeJson() failed with code \n");
+            Serial.print(error.c_str());
+          } else {
+            String payloadFromPost = docReceived["topic"].as<String>();
+            Serial.println(payloadFromPost);
+            const char* fanTopicInside =  docReceived["topic"]["fan"].as<char*>();
+            const char* lampTopicInside =  docReceived["topic"]["lamp"].as<char*>();
+            const char* breadTopicInside =  docReceived["topic"]["breadType"].as<char*>();
+            strncpy(fanTopic,fanTopicInside,sizeof(fanTopic));
+            strncpy(lampTopic,lampTopicInside,sizeof(lampTopic));
+            strncpy(breadTopic,breadTopicInside,sizeof(breadTopic));
+
+    
+          }           
+//          const String& payload = http.getString();
+//          Serial.println("received payload:\n<<");
+//          Serial.println(payload);
+//          Serial.println(">>");
+            
+        }
+        if (httpCode == 404) { // status 404
+          Serial.println("ERROR 404");
+        }
+        } else {
+          Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
+      }
+    
       http.end(); // closing the HTTP connection
+      
+      Serial.println("Done Connecting");
     }
-    Serial.println("Done COnnecting");
+    return postDone;
   }
 
-
-boolean connectWifi(){
-  boolean state = true;
-  int i = 0;
   
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+//      WIFI CONNECTION
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+void connectWifi(){
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-  Serial.println("");
-  Serial.println("Connecting to WiFi");
 
-  // Wait for connection
-  Serial.print("Connecting ...");
+  Serial.print("Connecting ...");                // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
-    if (i > 10){
-      state = false;
-      break;
-    }
-    i++;
-  }
-  
-  if (state){
-    Serial.println("");
-    Serial.print("Connected to ");
-    Serial.println(ssid);
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-  }
-  else {
-    Serial.println("");
-    Serial.println("Connection failed.");
-  }
-  
-  return state;
+  } 
+  Serial.print("connected to wifi with local ip: ");
+  Serial.println(WiFi.localIP());
+  local_ip = WiFi.localIP().toString();
 }
 
 
@@ -241,13 +240,23 @@ void callback(char* topic, byte* message, unsigned int length) {
       LightsOff(13);
     }
   }
+  if (String(topic) == "trigger/lamp") {
+    Serial.print("Changing fan output to ");
+    if(messageTemp == "on"){
+      Serial.println("lamp on");
+      LightsOn(12);
+    }
+    else if(messageTemp == "off"){
+      Serial.println("lamp off");
+      LightsOff(12);
+    }
+  }
 }
 
 
 void reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
-
     // Attempt to connect
     if (client.connect(clientID, mqtt_username,mqtt_password)) {
       Serial.println("connected");
