@@ -40,6 +40,13 @@ class InfluxDB():
         glutenfree = Point("best").tag("category", "Glutenfree").field("co2", 1.95).field("temperature", 27).field("humidity", 32).field("info", "https://www.glutenfreepalate.com/gluten-free-bread-recipe/")
         write_api.write(self.bucket, self.org, record=[white, wheat, glutenfree])
 
+    def freeboard(self):
+
+        write_api = self.client.write_api(write_options=SYNCHRONOUS)
+        pieChart = Point("freeboard").tag("category", "Freeboard").field("link", "127.0.0.1:8080")
+        write_api.write(self.bucket, self.org, record=pieChart)
+
+
     def clean(self):
         start = "1970-01-01T00:00:00Z"
         stop = "2021-04-17T14:57:00Z"
@@ -57,9 +64,9 @@ class InfluxDB():
         write_api.close()
         #tag are indexed while field are not
 
-# if __name__ == "__main__":
+#if __name__ == "__main__":
 #
 #     data = requests.get("http://localhost:9090/InfluxDB")
 #     mydb = InfluxDB(json.loads(data.text))
     # mydb.clean()
-    # mydb.best()
+#     mydb.freeboard()

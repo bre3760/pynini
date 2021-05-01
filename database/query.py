@@ -59,10 +59,23 @@ class ClientQuery():
         print("results", res)
         return res
 
+    def getFreeboard(self):
+        query = f'from(bucket: "Pynini")|> range(start: -3d)|> filter(fn: (r) => r.category == "Freeboard")'
+        result = self.client.query_api().query(org=self.org, query=query)
+        results = []
+        for table in result:
+            for record in table.records:
+                results.append((record.get_field(), record.get_value()))
+                if record.get_field() == 'link':
+                    res = record.get_value()
+
+        print("resultsFreeboard", res)
+        return res
+
     def end(self):
         self.client.close()
 
-# if __name__ == "__main__":
+#if __name__ == "__main__":
 #      c = ClientQuery('co2', 'White')
 #      values = c.getData()
 #      res = c.getBest('temperature')
