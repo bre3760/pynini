@@ -121,6 +121,11 @@
             "topic_hum": "measure/humidity",
             "topic_temp": "measure/temperature"
         },
+        "arduino":{
+            "breadType": "breadType/",
+            "fan": "trigger/fan",
+            "lamp": "trigger/lamp"
+        },
         "breadType": "breadType/",
         "co2": "measure/co2",
         "fan": "trigger/fan",
