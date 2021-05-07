@@ -64,7 +64,7 @@
                 "sensors": [
                     {
                         "ip": "172.20.10.08",
-                        "last_seen": 1618781527.779002,
+                        "last_seen": 1620400501.5827658,
                         "name": "co2",
                         "port": 8080
                     }
@@ -84,7 +84,7 @@
         "freeboard_port": "8080"
     },
     "ip_address": "172.20.10.11",
-    "last_updated": 1619876646.28393,
+    "last_updated": 1620400503.62342,
     "telegramBot": {
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"

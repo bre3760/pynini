@@ -4,6 +4,8 @@ import json
 import requests
 from datetime import datetime
 import Adafruit_DHT
+from database.influxDB import InfluxDB
+from database.query import ClientQuery
 from telegramBot.sensors_db import SensorsDB
 
 global CATALOG_ADDRESS
@@ -13,22 +15,26 @@ CATEGORY = 'White'
 
 class TemperatureHumiditySensor:
     def __init__(self, sensorID, db):
-        self.sensorID = sensorID
-        self._paho_mqtt = PahoMQTT.Client(sensorID, False)
-        self.sensorIP = "192.168.1.2"
+        self.caseID, self.sensorID = sensor.split("-")
+        self._paho_mqtt = PahoMQTT.Client(self.sensorID, False)
+        self.influxDB = influxDB
+        self.sensorIP = "172.20.10.08"
         self.sensorPort = 8080
-        self.db = db
+        self.category = "White"
 
         # register the callback
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
-        self.messageBroker = ""  # will get after post request where device registers
-        self.topic_temp = ""  # will get after post request where device registers
-        self.topic_hum = ""
+        self.messageBroker = ""
+        r = requests.get("http://localhost:9090/topics")
+        self.topic = ""
+        self.topicBreadType = json.loads(r.text)["breadType"]
         self.message = {
             'measurement': self.sensorID,
+            'caseID': self.caseID,
             'timestamp': '',
             'value': '',
+            'category': self.category
         }
 
     def start(self):
@@ -36,6 +42,7 @@ class TemperatureHumiditySensor:
         self._paho_mqtt.username_pw_set(username="brendan", password="pynini")
         self._paho_mqtt.connect(self.messageBroker, 1883)
         self._paho_mqtt.loop_start()
+        self._paho_mqtt.subscribe(self.topicBreadType, 2)
 
     def stop(self):
         self._paho_mqtt.unsubscribe(self.topic_temp)
@@ -46,6 +53,7 @@ class TemperatureHumiditySensor:
     def myPublish(self, topic, message):
         # publish a message with a certain topic
         self._paho_mqtt.publish(topic, message, 2)
+        self.influxDB.write(message)
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print("Connected to %s with result code: %d" % (self.messageBroker, rc))
@@ -85,37 +93,51 @@ class TemperatureHumiditySensor:
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
         # A new message is received
         print("Topic:'" + msg.topic + "', QoS: '" + str(msg.qos) + "' Message: '" + str(msg.payload) + "'")
+
+        if msg.topic == self.topicBreadType:
+            self.category = json.loads(msg.payload)['category']
+            print("category", self.category)
+
         try:
             data = json.loads(msg.payload)
-            data["typology"] = CATEGORY
             if msg.topic == self.topic_temp:
                 self.insertDataTemp(data)
             elif msg.topic == self.topic_hum:
                 self.insertDataHum(data)
 
+            print("INFLUXDB", self.message)
+
         except Exception as e:
             print(e)
 
-    def insertDataTemp(self, data):
-        '''
-        :param data: dictionary whose keys represent the time, the value of the measurement and the type of bread
-        :return: record these data in the table related to the sensor
-        '''
-        sql = "INSERT INTO temperature (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
-        self.db.cursor.execute(sql, [data["timestamp"], data["value"], data["typology"]])
-        self.db.db.commit()
-
-    def insertDataHum(self, data):
-        '''
-        :param data: dictionary whose keys represent the time, the value of the measurement and the type of bread
-        :return: record these data in the table related to the sensor
-        '''
-        sql = "INSERT INTO temperature (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
-        self.db.cursor.execute(sql, [data["timestamp"], data["value"], data["typology"]])
-        self.db.db.commit()
+    # def insertDataTemp(self, data):
+    #     '''
+    #     :param data: dictionary whose keys represent the time, the value of the measurement and the type of bread
+    #     :return: record these data in the table related to the sensor
+    #     '''
+    #     sql = "INSERT INTO temperature (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
+    #     self.db.cursor.execute(sql, [data["timestamp"], data["value"], data["typology"]])
+    #     self.db.db.commit()
+    #
+    # def insertDataHum(self, data):
+    #     '''
+    #     :param data: dictionary whose keys represent the time, the value of the measurement and the type of bread
+    #     :return: record these data in the table related to the sensor
+    #     '''
+    #     sql = "INSERT INTO temperature (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
+    #     self.db.cursor.execute(sql, [data["timestamp"], data["value"], data["typology"]])
+    #     self.db.db.commit()
 
 
 if __name__ == "__main__":
+
+    with open("config.json", 'r') as f:
+        config = json.load(f)
+    ip = config['ip']
+    port = config['port']
+
+    dataInfluxDB = requests.get(f"http://{ip}:{port}/InfluxDB")
+    influxDB = InfluxDB(json.loads(dataInfluxDB.text))
 
     sensor = TemperatureHumiditySensor('TempHum')
     sensor.registerDevice()
@@ -129,7 +151,7 @@ if __name__ == "__main__":
             print('Temp: {0:0.1f} C  Humidity: {1:0.1f} %'.format(temperature, humidity))
 
             payload_temp = {"measurement": "temperature", "timestamp": datetime.utcnow().isoformat(),
-                            "value": temperature}
+                            "value": temperature, "category": sensor.category }
             payload_hum = {"measurement": "humidity", "timestamp": datetime.utcnow().isoformat(), "value": humidity}
 
             sensor.myPublish(sensor.topic_temp, json.dumps(payload_temp))
@@ -142,3 +164,6 @@ if __name__ == "__main__":
 
     sensor.stop()
     sensor.removeDevice()
+
+    c = ClientQuery(sensor.sensorID, sensor.category)
+    c.start()

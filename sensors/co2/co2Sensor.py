@@ -32,6 +32,7 @@ class co2Sensor:
 		self.topicBreadType = json.loads(r.text)["breadType"]
 		self.message = {
 			'measurement': self.sensorID,
+			'caseID': self.caseID,
 			'timestamp': '',
 			'value': '',
 			'category': self.category
