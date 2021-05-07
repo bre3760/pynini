@@ -30,6 +30,7 @@ class TemperatureHumiditySensor:
             'timestamp': '',
             'value': '',
         }
+        
 
     def start(self):
         # manage connection to broker
