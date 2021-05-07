@@ -4,14 +4,20 @@ import json
 import requests
 from datetime import datetime
 import Adafruit_DHT
+from telegramBot.sensors_db import SensorsDB
 
+global CATALOG_ADDRESS
+global CATEGORY
+CATALOG_ADDRESS = "http://localhost:9090" # deciso che sarà una variabile globale, accessibile da tutti gli script di tutto il progetto
+CATEGORY = 'White'
 
 class TemperatureHumiditySensor:
-    def __init__(self, sensorID):
+    def __init__(self, sensorID, db):
         self.sensorID = sensorID
         self._paho_mqtt = PahoMQTT.Client(sensorID, False)
         self.sensorIP = "192.168.1.2"
         self.sensorPort = 8080
+        self.db = db
 
         # register the callback
         self._paho_mqtt.on_connect = self.myOnConnect

@@ -1,6 +1,7 @@
 from telegram import (ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
 from telegramBot.sensors_db import SensorsDB
+from database.query import ClientQuery
 import requests
 import logging
 import json
@@ -19,11 +20,10 @@ import numpy as np
 TYPOLOGY, PARAM, PARAMS, PARAM2, HOME, INFO, THRESHOLD, EXIT = range(8)
 
 class TelegramBot(object):
-    def __init__(self, db, port, token):
+    def __init__(self, port, token):
         self.telegramPort = port
         self.token = token
-        self.db = db
-        self.ip = "127.0.0.0"
+        self.ip = "127.0.0.0" # prendi da config specifico
 
     def start(self, update, context):
 
@@ -85,8 +85,8 @@ class TelegramBot(object):
     def getParam(self, update, context):
         query = update.callback_query
         print("Ho selezionato %s: (getParam)", query.data)
-        keyboard = [[InlineKeyboardButton("Temperature", callback_data='temp'),
-                     InlineKeyboardButton("Humidity", callback_data='hum'),
+        keyboard = [[InlineKeyboardButton("Temperature", callback_data='temperature'),
+                     InlineKeyboardButton("Humidity", callback_data='humidity'),
                      InlineKeyboardButton("CO2", callback_data='co2'),
                      InlineKeyboardButton("Back", callback_data='home')],
                      [InlineKeyboardButton("Exit", callback_data='exit')]]
@@ -100,17 +100,17 @@ class TelegramBot(object):
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='You can retrieve optimal and actual values for: <b> \n temperature,\n humidity, \n CO2 emitted, \n go back, \n or Exit </b>',
                                      reply_markup=reply_markup, parse_mode='HTML')
-        self.type = query.data
+        self.category = query.data
         return PARAM
 
     def getActualParams(self, update, context):
 
         query = update.callback_query
-        print("self.type", self.type)
+        print("category", self.category)
         print("query.data in getActualParams", query.data)
 
-        keyboard_params = [[InlineKeyboardButton("Temperature", callback_data='temp'),
-                            InlineKeyboardButton("Humidity", callback_data='hum'),
+        keyboard_params = [[InlineKeyboardButton("Temperature", callback_data='temperature'),
+                            InlineKeyboardButton("Humidity", callback_data='humidity'),
                             InlineKeyboardButton("CO2", callback_data='co2'),
                             InlineKeyboardButton("Back", callback_data='home')
                             ],
@@ -126,7 +126,7 @@ class TelegramBot(object):
                  res = self.exit(update, context)
                  return res
 
-             elif query.data == 'co2' or query.data == 'temp' or query.data == 'hum':
+             elif query.data == 'co2' or query.data == 'temperature' or query.data == 'humidity':
                  self.selectedParam(update, context, query, keyboard_params)
 
         except Exception as e:
@@ -156,32 +156,21 @@ class TelegramBot(object):
                                  text='You have chosen the <b> {} </b> parameter.'.format(query.data),
                                  parse_mode='HTML')
 
-        if query.data == 'co2':
-            res = self.sqlCO2()
+        self.clientQuery = ClientQuery(query.data, self.category)
+        actualValues = self.clientQuery.getData()
 
-        elif query.data == 'temp':
-            res = self.sqlTemp()
+        best = self.clientQuery.getBest(query.data)
 
-        elif query.data == 'hum':
-            res = self.sqlHum()
+        print("AFTER QUERY", actualValues, best, type(actualValues))
 
-        best = res['best'][0]
-
-        values = []
-        for v in res['actualValues']:
-            values.append(round(v[0], 2))
-        #             # interrogo db su parametri ottimali e di temperatura per il tipo di pane
-        #             # -> cerco in tabella "TEMP" il type = "TYPE" ed estraggo tutti i valori della colonna "value"
-        # -> cerco in tabella "BEST" il type = "TYPE" ed estraggo il valore della colonna "temp"
-        #                  [il mio db è costruito con tabelle per ogni parametro (temp, hum, co2) le cui colonne sono (timestamp, value, type = common, whole, gluten-free)]
-
-        if values != []:
+        if actualValues != []:
+            print("actualValues != []")
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='The optimal value {} for the {} typology is: {}. \n The actual minimum is: {}, \n the actual maximum is: {}, \n the actual mean is: {}.'.format(
-                                         query.data, self.type, best, min(values), max(values), round(np.mean(values), 2)))
+                                         query.data, self.category, best, min(actualValues), max(actualValues), round(np.mean(actualValues), 2)))
             time.sleep(2)
 
-        elif values == []:
+        elif actualValues == []:
             self.error(update, context)
             print("No data avaiable")
             reply_markup = InlineKeyboardMarkup(keyboard_params)
@@ -197,51 +186,6 @@ class TelegramBot(object):
                                      text='Hey, an error occoured. Wait a little bit, try again. \nTo try again, push one of the buttons below!',
                                      reply_markup=reply_markup, parse_mode='Markdown')
 
-    def sqlCO2(self):
-        res = {}
-
-        sql1 = '''select VALUE from co2 where TYPE = %s '''
-        self.db.cursor.execute(sql1, [self.type])
-        res['actualValues'] = self.db.cursor.fetchall()
-
-        sql2 = '''select CO2 from best where TYPOLOGY = %s '''
-        self.db.cursor.execute(sql2, [self.type])
-        res['best'] = self.db.cursor.fetchone()
-
-        return res
-
-    def sqlTemp(self):
-        res = {}
-
-        sql1 = '''select VALUE from temperature where TYPE = %s '''
-        self.db.cursor.execute(sql1, [self.type])
-        res = self.db.cursor.fetchall()
-
-        sql2 = '''select TEMPERATURE from best where TYPOLOGY = %s '''
-        self.db.cursor.execute(sql2, [self.type])
-        res['best'] = self.db.cursor.fetchall()
-
-        return res
-
-    def sqlHum(self):
-        res = {}
-
-        sql1 = '''select VALUE from humidity where TYPE = %s '''
-        self.db.cursor.execute(sql1, [self.type])
-        res['actualValues'] = self.db.cursor.fetchall()
-
-        sql2 = '''select HUMIDITY from best where TYPOLOGY = %s '''
-        self.db.cursor.execute(sql2, [self.type])
-        res['best'] = self.db.cursor.fetchall()
-
-        return res
-
-    def sqlInfo(self):
-        sql = '''select INFO from best where TYPOLOGY = %s '''
-        self.db.cursor.execute(sql, [self.type])
-        res = self.db.cursor.fetchall()
-
-        return res
 
     def info(self, update, context):
 
@@ -252,9 +196,9 @@ class TelegramBot(object):
             return TYPOLOGY
 
         elif query.data == 'info':
-            link = self.sqlInfo()
+            link = self.clientQuery.getBest(query.data)
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text='Click on the following link to learn more about the {}: {}.'.format(self.type, link))
+                                     text='Click on the following link to learn more about the {}: {}.'.format(self.category, link))
 
             self.endMenu(update, context)
 
@@ -306,8 +250,6 @@ class TelegramBot(object):
         user_input = update.effective_message.text.split()
         self.actual_thresh["max_temperature_th"] = user_input[1]
 
-        # requests.post("http://localhost:9090/setThresholds",
-        #               json=self.actual_thresh)
         requests.put("http://localhost:9090/setThresholds",
                       json=self.actual_thresh)
         print("new config in maxTemp", self.actual_thresh)
@@ -403,7 +345,7 @@ class TelegramBot(object):
 
         res = requests.get("http://localhost:9090/thresholds")
         for elem in json.loads(res.text):
-            if elem['type'] == self.type:
+            if elem['type'] == self.category:
                 self.actual_thresh = elem
         print("sono in optionThresh", self.actual_thresh)
 
@@ -424,7 +366,7 @@ class TelegramBot(object):
                                       \n- max CO2: {}.\
                                       \nSelect the threshold you want to modify and type in the chat \
                                       \n/<threshold> <value>: \
-                                      \ne.g. /minTemperature 14'.format(self.type, minTemp, maxTemp, minHum, maxHum, minCo2, maxCo2),
+                                      \ne.g. /minTemperature 14'.format(self.category, minTemp, maxTemp, minHum, maxHum, minCo2, maxCo2),
                                  parse_mode='Markdown'
         )
 
@@ -463,9 +405,9 @@ class TelegramBot(object):
             return TYPOLOGY
 
         elif query.data == 'info':
-            link = self.sqlInfo()
+            link = self.clientQuery.getBest(query.data)
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text='Click on the following link to learn more about the {}: {}.'.format(self.type, link))
+                                     text='Click on the following link to learn more about the {}: {}.'.format(self.category, link))
 
             self.endMenu(update, context)
 
@@ -482,6 +424,8 @@ class TelegramBot(object):
         requests.post("http://localhost:9090/removeBot",
                       json={'ip': self.ip, 'chat_ID': self.chatID, 'last_seen': time.time()})
         print("Mi sono eliminato dal catalog")
+        self.clientQuery.end()
+        
         return ConversationHandler.END
 
     def main(self):
@@ -525,16 +469,15 @@ class TelegramBot(object):
 
 if __name__=='__main__':
 
-    dataDB = requests.get("http://localhost:9090/db")
-    db = SensorsDB(json.loads(dataDB.text))
-    db.start()
-    db.db.commit()
-    #db.mydb.close()
-
-    data = requests.get("http://localhost:9090/telegramBot")
-    bot = TelegramBot(db, json.loads(data.text)["telegramPort"], json.loads(data.text)["token"])
+    with open("config.json", 'r') as f:
+        config = json.load(f)
+    ip = config['ip']
+    port = config['port']
+    data = requests.get(f"http://{ip}:{port}/telegramBot")
+    bot = TelegramBot(json.loads(data.text)["telegramPort"], json.loads(data.text)["token"])
     bot.main()
 
 # TODO:
-# file config con indirizzi url
-# ritornare la nuova configurazione delle threshold tramite get
+# Set alert quando vengono oltrepassate le soglie
+# -> caseControl pubblica sulla topica "alert", il bot si sottoscrive alla topica ed onMessageReceived manda l'alert nel bot
+
