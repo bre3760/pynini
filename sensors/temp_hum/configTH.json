@@ -1,17 +1,6 @@
 {
-    "InfluxDB": {
-        "bucket": "Pynini",
-        "token": "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg==",
-        "url": "https://eu-central-1-1.aws.cloud2.influxdata.com"
-    },
-    "bots": [],
-    "breadCategories": [
-        "White",
-        "Wheat",
-        "Glutenfree"
-    ],
-    "broker_ip": "broker.emqx.io",
-    "broker_port": 1883,
+  "ipCatalog": "localhost",
+  "catalogPort":"9090",
     "cases": [
         {
             "arduino": {
@@ -25,7 +14,7 @@
                 ]
             },
             "bread_type": "White",
-            "caseID": "CCC1",
+            "case_ID": "CCC1",
             "rpi": {
                 "sensors": [
                     {
@@ -34,10 +23,10 @@
                         "name": "temperature",
                         "port": 8080
                     },
-                    {
-                        "ip": "172.20.10.11",
+                     {
+                        "ip": "192.168.178.201",
                         "last_seen": 1617781249.4628403,
-                        "name": "co2",
+                        "name": "humidity",
                         "port": 8080
                     }
                 ]
@@ -48,13 +37,19 @@
             "sensors": []
             },
             "bread_type": "White",
-            "caseID": "CCC2",
+            "case_ID": "CCC2",
             "rpi": {
                 "sensors": [
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1618781527.779002,
-                        "name": "co2",
+                     {
+                        "ip": "192.168.178.202",
+                        "last_seen": 0,
+                        "name": "temperature",
+                        "port": 8080
+                    },
+                  {
+                        "ip": "192.168.178.203",
+                        "last_seen": 1617781249.4628403,
+                        "name": "humidity",
                         "port": 8080
                     }
                 ]
@@ -69,61 +64,41 @@
         "user": "root"
     },
     "ip_address": "172.20.10.11",
-    "last_updated": 1618781529.8061984,
-    "telegramBot": {
-        "telegramPort": "8086",
-        "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
-    },
-    "freeboard": {
-        "freeboard_port":"8080",
-        "freeboard_host": "127.0.0.1"
-    },
-    "thingspeak": {
-        "broker_ip": "broker.emqx.io",
-        "channel": "1327196",
-        "name": "pynini",
-        "port1": "1883",
-        "port2": 60,
-        "url": "https://api.thingspeak.com/update.json",
-        "write_key": "7FP7K9V4HN68HHTV"
-    },
+    "last_updated": 1618043491.5849493,
     "thresholds": [
         {
-            "max_co2_th": "10",
             "max_humidity_th": "50",
             "max_temperature_th": "100",
-            "min_co2_th": "10",
+
             "min_humidity_th": "50",
             "min_temperature_th": "12",
             "type": "Wheat"
         },
         {
-            "max_co2_th": "10",
             "max_humidity_th": "50",
             "max_temperature_th": "100",
-            "min_co2_th": "10",
+
             "min_humidity_th": "50",
             "min_temperature_th": "12",
             "type": "Glutenfree"
         },
         {
-            "max_co2_th": "10",
             "max_humidity_th": "50",
             "max_temperature_th": "34",
-            "min_co2_th": "1",
+
             "min_humidity_th": "50",
-            "min_temperature_th": "10",
+            "min_temperature_th": "9",
             "type": "White"
         }
     ],
     "topics": {
+
         "TempHum": {
             "topic_hum": "measure/humidity",
             "topic_temp": "measure/temperature"
         },
-        "breadType": "breadType/",
-        "co2": "measure/co2",
-        "fan": "trigger/fan",
-        "lamp": "trigger/lamp"
-    }
+        "breadType": "breadType/"
+
+    },
+    "breadCategories": ["White", "Wheat", "Glutenfree"]
 }

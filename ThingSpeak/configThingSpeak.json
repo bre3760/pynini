@@ -1,0 +1,30 @@
+{
+
+    "ipCatalog": "localhost",
+    "broker_ip": "broker.emqx.io",
+    "broker_port": 1883,
+    "catalog_port": 9090,
+    "db": {
+        "host": "localhost",
+        "nameDB": "mydatabase",
+        "password": "pynini",
+        "user": "root"
+    },
+    "ip_address": "172.20.10.11",
+    "last_updated": 1618043491.5849493,
+    "telegramBot": {
+        "telegramPort": "8086",
+        "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
+    },
+    "topics": {
+        "TempHum": {
+            "topic_hum": "measure/humidity",
+            "topic_temp": "measure/temperature"
+        },
+        "co2": "measure/co2",
+        "breadType": "breadType/",
+        "fan": "trigger/fan",
+        "lamp": "trigger/lamp"
+    },
+    "breadCategories": ["White", "Wheat", "Glutenfree"]
+}
