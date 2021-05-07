@@ -130,5 +130,6 @@
         "co2": "measure/co2",
         "fan": "trigger/fan",
         "lamp": "trigger/lamp"
-    }
+    },
+    "breadCategories": ["White", "Wheat", "Glutenfree"]
 }
