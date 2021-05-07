@@ -2,6 +2,7 @@
 <html lang="en-US">
 <body>
 <div id="piechart"></div>
+
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
 google.charts.load('current', {'packages':['corechart']});
@@ -17,9 +18,21 @@ var data = google.visualization.arrayToDataTable([
 
 var options = {'title':'Italian population: Most eaten types of bread in 2020', 'width':550, 'height':400};
 
-var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+var chart_div = document.getElementById('piechart');
+var chart = new google.visualization.PieChart(chart_div);
+
+google.visualization.events.addListener(chart, 'ready', function () {
+    chart_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
+    console.log(chart_div.innerHTML);
+});
+
 chart.draw(data, options);
 }
+
 </script>
+
+<div id='chart_div'></div>
+
+
 </body>
 </html>

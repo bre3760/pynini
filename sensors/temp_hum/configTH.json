@@ -1,0 +1,104 @@
+{
+  "ipCatalog": "localhost",
+  "catalogPort":"9090",
+    "cases": [
+        {
+            "arduino": {
+                "sensors": [
+                    {
+                        "ip": "192.168.178.200",
+                        "last_seen": 0,
+                        "name": "pluto",
+                        "port": 8080
+                    }
+                ]
+            },
+            "bread_type": "White",
+            "case_ID": "CCC1",
+            "rpi": {
+                "sensors": [
+                    {
+                        "ip": "192.168.178.200",
+                        "last_seen": 0,
+                        "name": "temperature",
+                        "port": 8080
+                    },
+                     {
+                        "ip": "192.168.178.201",
+                        "last_seen": 1617781249.4628403,
+                        "name": "humidity",
+                        "port": 8080
+                    }
+                ]
+            }
+        },
+        {
+            "arduino": {
+            "sensors": []
+            },
+            "bread_type": "White",
+            "case_ID": "CCC2",
+            "rpi": {
+                "sensors": [
+                     {
+                        "ip": "192.168.178.202",
+                        "last_seen": 0,
+                        "name": "temperature",
+                        "port": 8080
+                    },
+                  {
+                        "ip": "192.168.178.203",
+                        "last_seen": 1617781249.4628403,
+                        "name": "humidity",
+                        "port": 8080
+                    }
+                ]
+            }
+        }
+    ],
+    "catalog_port": 9090,
+    "db": {
+        "host": "localhost",
+        "nameDB": "mydatabase",
+        "password": "pynini",
+        "user": "root"
+    },
+    "ip_address": "172.20.10.11",
+    "last_updated": 1618043491.5849493,
+    "thresholds": [
+        {
+            "max_humidity_th": "50",
+            "max_temperature_th": "100",
+
+            "min_humidity_th": "50",
+            "min_temperature_th": "12",
+            "type": "Wheat"
+        },
+        {
+            "max_humidity_th": "50",
+            "max_temperature_th": "100",
+
+            "min_humidity_th": "50",
+            "min_temperature_th": "12",
+            "type": "Glutenfree"
+        },
+        {
+            "max_humidity_th": "50",
+            "max_temperature_th": "34",
+
+            "min_humidity_th": "50",
+            "min_temperature_th": "9",
+            "type": "White"
+        }
+    ],
+    "topics": {
+
+        "TempHum": {
+            "topic_hum": "measure/humidity",
+            "topic_temp": "measure/temperature"
+        },
+        "breadType": "breadType/"
+
+    },
+    "breadCategories": ["White", "Wheat", "Glutenfree"]
+}

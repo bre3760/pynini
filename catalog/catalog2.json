@@ -41,7 +41,7 @@
         },
         {
             "arduino": {
-                "sensors": []
+            "sensors": []
             },
             "bread_type": "White",
             "case_ID": "CCC2",
