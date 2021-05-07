@@ -50,10 +50,17 @@ while 1:
     if not case_controller.isTemperatureValid():
         case_controller.myMqttClient.myPublish("trigger/fan",json.dumps({"message":"on"}))
         print("Ho accceso la ventola")
+    else:
+        case_controller.myMqttClient.myPublish("trigger/fan",json.dumps({"message":"off"}))
+        print("Ho spento la ventola")
+
 
     if not case_controller.isCO2Valid():
         case_controller.myMqttClient.myPublish("trigger/", json.dumps({"message": "on"}))
         print("Ho acceso la lampada")
+    else:
+        case_controller.myMqttClient.myPublish("trigger/", json.dumps({"message": "off"}))
+        print("Ho spento la lampada")
         
     
     
