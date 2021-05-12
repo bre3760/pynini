@@ -36,7 +36,11 @@ class Catalog(object):
         elif uri[0] == "catalog_port":
             return json.dumps(catalog["catalog_port"])
         elif uri[0] == "category":
-            return json.dumps(catalog["category"])
+            res = []
+            for d in catalog['cases']:
+                if d['caseID'] == params['caseID']:
+                    res = d["bread_type"]
+            return json.dumps(res)
         elif uri[0] == "db":
             return json.dumps(catalog["db"])
         elif uri[0] == "freeboard":

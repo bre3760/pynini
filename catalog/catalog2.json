@@ -13,7 +13,7 @@
         {
             "chat_ID": 490068659,
             "ip": "localhost",
-            "last_seen": 1619876644.2289202
+            "last_seen": 1620827447.4237807
         }
     ],
     "breadCategories": [
@@ -64,7 +64,7 @@
                 "sensors": [
                     {
                         "ip": "172.20.10.08",
-                        "last_seen": 1620400501.5827658,
+                        "last_seen": 1620813280.5418553,
                         "name": "co2",
                         "port": 8080
                     }
@@ -84,7 +84,7 @@
         "freeboard_port": "8080"
     },
     "ip_address": "172.20.10.11",
-    "last_updated": 1620400503.62342,
+    "last_updated": 1620827449.4642417,
     "telegramBot": {
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"

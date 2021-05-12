@@ -4,8 +4,9 @@ import requests
 import json
 
 class ClientQuery():
-    def __init__(self, sensor, category):
+    def __init__(self, sensor, category, caseID):
         self.sensor = sensor
+        self.caseID = caseID
         self.category = category
         dataInfluxDB = requests.get("http://localhost:9090/InfluxDB")
         self.url = json.loads(dataInfluxDB.text)['url']
@@ -22,7 +23,7 @@ class ClientQuery():
         )
 
     def getData(self):
-        query = f'from(bucket: "Pynini")|> range(start: -3d)|> filter(fn: (r) => r["_measurement"] == "{self.sensor}") |> filter(fn: (r) => r.category == "{self.category}")'
+        query = f'from(bucket: "Pynini")|> range(start: -3d)|> filter(fn: (r) => r.caseID == "{self.caseID}") |> filter(fn: (r) => r["_measurement"] == "{self.sensor}") |> filter(fn: (r) => r.category == "{self.category}")'
         result = self.client.query_api().query(org=self.org, query=query)
         results = []
         values = []
@@ -40,23 +41,35 @@ class ClientQuery():
         print("results", results, res)
         return res
 
-    def getBest(self, param):
+
+    def getBest(self):
         query = f'from(bucket: "Pynini")|> range(start: -3d)|> filter(fn: (r) => r["_measurement"] == "best") |> filter(fn: (r) => r.category == "{self.category}")'
         result = self.client.query_api().query(org=self.org, query=query)
         results = []
         for table in result:
             for record in table.records:
                 results.append((record.get_field(), record.get_value()))
-                if record.get_field() == 'temperature' and param == 'temperature':
+                if record.get_field() == 'temperature' and self.sensor == 'temperature':
                     res = int(record.get_value())
-                elif record.get_field() == 'humidity' and param == 'humidity':
+                elif record.get_field() == 'humidity' and self.sensor == 'humidity':
                     res = int(record.get_value())
-                elif record.get_field() == 'co2' and param == 'co2':
+                elif record.get_field() == 'co2' and self.sensor == 'co2':
                     res = int(record.get_value())
-                elif record.get_field() == 'info' and param == 'info':
+                elif record.get_field() == 'info' and self.sensor == 'info':
                     res = record.get_value()
 
-        print("results", res)
+        return res
+
+    def getLink(self):
+        query = f'from(bucket: "Pynini")|> range(start: -3d)|> filter(fn: (r) => r["_measurement"] == "best") |> filter(fn: (r) => r.category == "{self.category}")'
+        result = self.client.query_api().query(org=self.org, query=query)
+        results = []
+        for table in result:
+            for record in table.records:
+                results.append((record.get_field(), record.get_value()))
+                if record.get_field() == 'info':
+                    res = record.get_value()
+
         return res
 
     def getFreeboard(self):
@@ -75,7 +88,8 @@ class ClientQuery():
     def end(self):
         self.client.close()
 
-#if __name__ == "__main__":
-#      c = ClientQuery('co2', 'White')
-#      values = c.getData()
-#      res = c.getBest('temperature')
+if __name__ == "__main__":
+     c = ClientQuery('co2', 'White', 'CCC2')
+     values = c.getData()
+     print("getData CCC2", values)
+     res = c.getBest()

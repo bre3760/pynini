@@ -8,14 +8,7 @@ import time
 import numpy as np
 import paho.mqtt.client as PahoMQTT
 
-# IDEA: l'utente seleziona una tipologia di pane (comune, integrale, semola, etc..).
-# Ciascuna tipologia è caratterizzata da uno specifico processo di lievitazione, si può monitorare temperatura, umidità, co2 emessa, (pH?)
-# -> per ciascun tipo di pane: breve mex esplicativo, parametri ottimali di temp-umid-co2-pH, media valori reali
-# Statistcihe relative alle vendite: diagrammi a torta presi da freeboard? oppure leggo valori da db e realizzo grafici python
-
-# Mi serve un db per salvare dati relativi a ciascun tipo di pane e per plottare i dati sulle vendite
-
-# devo ciclare sui cases e registrarmi alle topiche degli arduino connessi
+#TODO: CHECK IF SENDALERT WORKS!!!!!!!!
 
 TYPOLOGY, PARAM, PARAMS, PARAM2, HOME, INFO, THRESHOLD, EXIT = range(8)
 
@@ -36,12 +29,10 @@ class TelegramBot(object):
     def myPublish(self, message):
         # publish a message with a certain topic
         self._paho_mqtt.publish(self.topic, json.dumps(message), 2)
-        self.influxDB.write(message)
-
-    #	self.influxDB.clean()
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg, update, context):
-        # A new message is received: non mi interessa distinguere le topiche, quando leggo un messaggio devo mandare l'alert
+        # A new message is received: non mi interessa distinguere le topiche perchè sono sottoscritto solo a quelle relative agli allarmi,
+        # quando leggo un messaggio su una di queste topiche mando l'alert specificando la topica (= il valore fuori threshold)
         print("Topic:'" + msg.topic + "', QoS: '" + str(msg.qos) + "' Message: '" + str(msg.payload) + "'")
 
         self.sendAlert(update, context, msg.topic)
@@ -72,21 +63,54 @@ class TelegramBot(object):
         requests.post("http://localhost:9090/addBot", json={'ip': self.ip, 'chat_ID': self.chatID, 'last_seen': time.time()})
         print("Mi sono registrato al catalog")
 
-        options = ["White", "Wheat", "Gluten-free", "Statistics"]
-        reply_keyboard = []
-        for elem in options:
-            reply_keyboard.append([InlineKeyboardButton(elem, callback_data=elem)])
-        reply_markup = InlineKeyboardMarkup(reply_keyboard)
         update.message.reply_text(
             text = ' <b> Hi {}! &#128522; Welcome to @Pynini! &#128523 </b> \
                     \nHere you can find information about different typologies of bread &#127838'.format(update.message.from_user.first_name), parse_mode = 'HTML')
         pass
         time.sleep(2)
         pass
+
         context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text='Choose the one you are interested in: ', reply_markup=reply_markup,
-                                     parse_mode='Markdown')
+                                 text='Choose the *ID* of the case you are interested in and type it in the chat: \
+                                      \n/caseID <your caseID>',
+                                 parse_mode='Markdown')
         return TYPOLOGY
+
+    def selectCaseID(self, update, context):
+        # l'utente ha selezionato il case, vuole ricevere i dati relativi a tale case:
+        # devo selezionare il parametro: co2, temp, hum
+        user_input = update.effective_message.text.split()
+        self.caseID = user_input[1]
+        print("Chosen %s: ", self.caseID)
+
+        if self.checkPresence():
+            self.getParam(update, context)
+
+        else:
+            context.bot.send_message(chat_id=update.effective_chat.id,
+                                     text='The selected caseID is not present in the catalog. &#128533; Check if it is correct, you wrote: {}'.format(
+                                         self.caseID), parse_mode='HTML')
+            self.home(update, context)
+
+        return
+
+
+    def checkPresence(self):
+
+        allCasesID = []
+        r = requests.get("http://localhost:9090/cases")
+        allCases = json.loads(r.text)
+
+        print("allCases", allCases)
+        for c in allCases:
+            allCasesID.append(c['caseID'])
+
+        if self.caseID in allCasesID:
+            res = True
+        else:
+            res = False
+
+        return res
 
 
     def unknown(self, update, context):
@@ -111,46 +135,43 @@ class TelegramBot(object):
 
     def home(self, update, context):
         print("SONO IN HOME")
-        options = ["White", "Wheat", "Gluten-free", "Statistics"]
-        reply_keyboard = []
-        for elem in options:
-            reply_keyboard.append([InlineKeyboardButton(elem, callback_data=elem)])
-        reply_markup = InlineKeyboardMarkup(reply_keyboard)
-        context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text='Here you can find information about different typologies of bread &#127838 \
-                                 \nChoose the one you are interested in: ',
-                                 reply_markup=reply_markup, parse_mode='HTML')
 
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text='Choose the *ID* of the case you are interested in and type it in the chat: \
+                                      \n/caseID <your caseID>',
+                                 parse_mode='Markdown')
         return TYPOLOGY
 
     def getParam(self, update, context):
-        query = update.callback_query
-        print("Ho selezionato %s: (getParam)", query.data)
-        if query.data == "Statistics":
-            self.image(update,context)
-        else:
-            keyboard = [[InlineKeyboardButton("Temperature", callback_data='temperature'),
-                         InlineKeyboardButton("Humidity", callback_data='humidity'),
-                         InlineKeyboardButton("CO2", callback_data='co2'),
-                         InlineKeyboardButton("Back", callback_data='home')],
-                         [InlineKeyboardButton("Exit", callback_data='exit')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            if query.data != 'home' and query.data != 'exit':
-                context.bot.send_message(chat_id=update.effective_chat.id,
-                                         text='You have selected <b> {} </b> typology, now you have to select the parameter you want to investigate!'.format(query.data), parse_mode = 'HTML')
-                pass
-                time.sleep(2)
-                pass
-                context.bot.send_message(chat_id=update.effective_chat.id,
-                                         text='You can retrieve optimal and actual values for: <b> \n temperature,\n humidity, \n CO2 emitted, \n go back, \n or Exit </b>',
-                                         reply_markup=reply_markup, parse_mode='HTML')
-        self.category = query.data
+
+        print("Ho selezionato il case ID: %s (getParam)", self.caseID)
+
+        keyboard = [[InlineKeyboardButton("Temperature", callback_data='temperature'),
+                     InlineKeyboardButton("Humidity", callback_data='humidity'),
+                     InlineKeyboardButton("CO2", callback_data='co2'),
+                     InlineKeyboardButton("Back", callback_data='home')],
+                     [InlineKeyboardButton("Exit", callback_data='exit')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text='You have selected the case <b> {} </b>, now you have to select the parameter you want to investigate!'.format(self.caseID), parse_mode = 'HTML')
+        pass
+        time.sleep(2)
+        pass
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text='You can retrieve optimal and actual values for: <b> \n temperature,\n humidity, \n CO2 emitted, \n go back, \n or Exit </b>',
+                                 reply_markup=reply_markup, parse_mode='HTML')
+
+        params = {'caseID': self.caseID}
+        r = requests.get("http://localhost:9090/category", params=params)
+        self.category = json.loads(r.text)
+
+        # PROBLEMA: ESEGUE DUE VOLTE QUESTA FUNZIONE PRIMA DI FAR PARTIRE GETACTUALPARAMS
         return PARAM
 
     def getActualParams(self, update, context):
 
         query = update.callback_query
-        print("category", self.category)
         print("query.data in getActualParams", query.data)
 
         keyboard_params = [[InlineKeyboardButton("Temperature", callback_data='temperature'),
@@ -196,20 +217,22 @@ class TelegramBot(object):
 
     def selectedParam(self, update, context, query, keyboard_params):
 
+        param = query.data
+
         context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text='You have chosen the <b> {} </b> parameter.'.format(query.data),
+                                 text='You have chosen the <b> {} </b> parameter.'.format(param),
                                  parse_mode='HTML')
 
-        self.clientQuery = ClientQuery(query.data, self.category)
+        self.clientQuery = ClientQuery(param, self.category, self.caseID)
         actualValues = self.clientQuery.getData()
 
-        best = self.clientQuery.getBest(query.data)
+        best = self.clientQuery.getBest()
 
         if actualValues != []:
             print("actualValues != []")
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text='The optimal value {} for the {} typology is: {}. \n The actual minimum is: {}, \n the actual maximum is: {}, \n the actual mean is: {}.'.format(
-                                         query.data, self.category, best, min(actualValues), max(actualValues), round(np.mean(actualValues), 2)))
+                                     text='The optimal {} value for the {} typology is: {}. \n The actual minimum is: {}, \n the actual maximum is: {}, \n the actual mean is: {}.'.format(
+                                         param, self.category, best, min(actualValues), max(actualValues), round(np.mean(actualValues), 2)))
             time.sleep(2)
 
         elif actualValues == []:
@@ -238,7 +261,7 @@ class TelegramBot(object):
             return TYPOLOGY
 
         elif query.data == 'info':
-            link = self.clientQuery.getBest(query.data)
+            link = self.clientQuery.getLink()
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='Click on the following link to learn more about the {}: {}.'.format(self.category, link))
 
@@ -252,7 +275,7 @@ class TelegramBot(object):
                               InlineKeyboardButton("Min co2", callback_data='minCO2'),
                               InlineKeyboardButton("Max co2", callback_data='maxCO2')]]
 
-            self.optionThresholds(update, context, keyboard_thre)
+            self.optionThresholds(update, context)
 
 
         elif query.data == 'exit':
@@ -380,7 +403,7 @@ class TelegramBot(object):
         return INFO
 
 
-    def optionThresholds(self, update, context, keyboard_thre):
+    def optionThresholds(self, update, context):
 
         res = requests.get("http://localhost:9090/thresholds")
         for elem in json.loads(res.text):
@@ -444,7 +467,7 @@ class TelegramBot(object):
             return TYPOLOGY
 
         elif query.data == 'info':
-            link = self.clientQuery.getBest(query.data)
+            link = self.clientQuery.getLink()
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='Click on the following link to learn more about the {}: {}.'.format(self.category, link))
 
@@ -494,7 +517,9 @@ class TelegramBot(object):
                INFO: [CallbackQueryHandler(self.end)]
            },
 
-           fallbacks=[CommandHandler('cancel', self.cancel),
+           fallbacks=[
+                      CommandHandler('caseID', self.selectCaseID),
+                      CommandHandler('cancel', self.cancel),
                       CommandHandler('home', self.home),
                       CommandHandler('exit', self.exit),
                       CommandHandler('minTemperature', self.minTemp),

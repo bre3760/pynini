@@ -58,6 +58,7 @@ class co2Sensor:
 		# publish a message with a certain topic
 		self._paho_mqtt.publish(self.topic, json.dumps(message), 2)
 		self.influxDB.write(message)
+		print("su influx", message)
 	#	self.influxDB.clean()
 
 	def myOnMessageReceived (self, paho_mqtt , userdata, msg):
@@ -144,5 +145,5 @@ if __name__ == "__main__":
 	sensor.stop()
 	sensor.removeDevice()
 
-	c = ClientQuery(sensor.sensorID, sensor.category)
+	c = ClientQuery(sensor.sensorID, sensor.category, sensor.caseID)
 	c.start()
