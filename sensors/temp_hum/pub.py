@@ -127,7 +127,7 @@ if __name__ == "__main__":
         port = config['port']
 
 	dataInfluxDB = requests.get(f"http://{ip}:{port}/InfluxDB")
-	influxDB = InfluxDB(json.loads(dataInfluxDB.text))
+    influxDB = InfluxDB(json.loads(dataInfluxDB.text))
 
     sensor = TemperatureHumiditySensor('CCC2-TempHum', influxDB)
     sensor.registerDevice()
