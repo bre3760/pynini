@@ -125,6 +125,7 @@ if __name__ == "__main__":
         config = json.load(f)
         ip = config['ip']
         port = config['port']
+    print("ip and port from config", ip, port)
 
 	dataInfluxDB = requests.get(f"http://{ip}:{port}/InfluxDB")
     influxDB = InfluxDB(json.loads(dataInfluxDB.text))
