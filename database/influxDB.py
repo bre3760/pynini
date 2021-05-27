@@ -1,6 +1,6 @@
 from datetime import datetime
-from influxdb_client import InfluxDBClient, Point, WritePrecision
-from influxdb_client.client.write_api import SYNCHRONOUS
+from influxdb import InfluxDBClient, Point, WritePrecision
+from influxdb.client.write_api import SYNCHRONOUS
 import requests
 import json
 import pandas as pd
