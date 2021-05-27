@@ -39,9 +39,10 @@ class co2Sensor:
 
 	def start (self):
 		#manage connection to broker
+		self._paho_mqtt.username_pw_set(username="brendan", password="pynini")
 		self._paho_mqtt.connect(self.messageBroker, 1883)
 		self._paho_mqtt.loop_start()
-		# subscribe for a topic
+		# subscribe to a topic
 		self._paho_mqtt.subscribe(self.topicBreadType, 2)
 		print("Subscribed to: ", self.topicBreadType)
 

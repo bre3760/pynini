@@ -4,7 +4,8 @@ import json
 import requests
 from datetime import datetime
 import Adafruit_DHT
-from telegramBot.sensors_db import SensorsDB
+from database.influxDB import InfluxDB
+from database.query import ClientQuery
 
 global CATALOG_ADDRESS
 global CATEGORY
@@ -12,12 +13,13 @@ CATALOG_ADDRESS = "http://localhost:9090" # deciso che sarà una variabile globa
 CATEGORY = 'White'
 
 class TemperatureHumiditySensor:
-    def __init__(self, sensorID, db):
-        self.sensorID = sensorID
-        self._paho_mqtt = PahoMQTT.Client(sensorID, False)
-        self.sensorIP = "192.168.1.2"
+    def __init__(self, sensor, influxDB):
+        self.caseID  = sensor.split("-")[0]
+        self.sensorID = sensor.split("-")[1]
+        self._paho_mqtt = PahoMQTT.Client(self.sensorID, False)
+        self.influxDB = influxDB
+        self.sensorIP = "192.168.1.7"
         self.sensorPort = 8080
-        self.db = db
 
         # register the callback
         self._paho_mqtt.on_connect = self.myOnConnect
@@ -47,6 +49,8 @@ class TemperatureHumiditySensor:
     def myPublish(self, topic, message):
         # publish a message with a certain topic
         self._paho_mqtt.publish(topic, message, 2)
+        
+
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print("Connected to %s with result code: %d" % (self.messageBroker, rc))
@@ -117,8 +121,15 @@ class TemperatureHumiditySensor:
 
 
 if __name__ == "__main__":
+    with open("config.json", 'r') as f:
+        config = json.load(f)
+        ip = config['ip']
+        port = config['port']
 
-    sensor = TemperatureHumiditySensor('TempHum')
+	dataInfluxDB = requests.get(f"http://{ip}:{port}/InfluxDB")
+	influxDB = InfluxDB(json.loads(dataInfluxDB.text))
+
+    sensor = TemperatureHumiditySensor('CCC2-TempHum', influxDB)
     sensor.registerDevice()
     sensor.start()
 
@@ -127,14 +138,16 @@ if __name__ == "__main__":
             # read temperature and humidity
             humidity, temperature = Adafruit_DHT.read_retry(11, 4)  # (sensor,pin)
 
-            print('Temp: {0:0.1f} C  Humidity: {1:0.1f} %'.format(temperature, humidity))
+            print('Temp: {0:0.1f} °C  Humidity: {1:0.1f} %'.format(temperature, humidity))
 
-            payload_temp = {"measurement": "temperature", "timestamp": datetime.utcnow().isoformat(),
-                            "value": temperature}
+            payload_temp = {"measurement": "temperature", "timestamp": datetime.utcnow().isoformat(), "value": temperature}
             payload_hum = {"measurement": "humidity", "timestamp": datetime.utcnow().isoformat(), "value": humidity}
 
             sensor.myPublish(sensor.topic_temp, json.dumps(payload_temp))
             sensor.myPublish(sensor.topic_hum, json.dumps(payload_hum))
+
+            sensor.insertDataTemp(payload_temp)
+            sensor.insertDataHum(payload_hum)
 
             time.sleep(10)
 

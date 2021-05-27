@@ -2,6 +2,7 @@ import cherrypy
 import json
 import requests
 import os
+import sys
 #import cherrypy_cors
 
 
@@ -15,8 +16,7 @@ class ClientREST(object):
 			pass
 	def GET(self,*uri,**params):
 		if len(uri) == 0:
-			return open('index.html')
-
+			return open(os.path.join(sys.path[0], "index.html"), "r").read()
 
 
 			#r sarà il testo su chrome
@@ -51,23 +51,23 @@ if __name__ == '__main__':
 		},
 	'/css':{
 		'tools.staticdir.on': True,
-		'tools.staticdir.dir':'./css'
+		'tools.staticdir.dir':'./freeboard/css'
 		},
 	'/examples':{
 		'tools.staticdir.on': True,
-		'tools.staticdir.dir':'./examples'
+		'tools.staticdir.dir':'./freeboard/examples'
 		},
 	'/img':{
 		'tools.staticdir.on': True,
-		'tools.staticdir.dir':'./img'
+		'tools.staticdir.dir':'./freeboard/img'
 		},
 	'/js':{
 		'tools.staticdir.on': True,
-		'tools.staticdir.dir':'./js'
+		'tools.staticdir.dir':'./freeboard/js'
 		},
 	'/plugins':{
 		'tools.staticdir.on': True,
-		'tools.staticdir.dir':'./plugins'
+		'tools.staticdir.dir':'./freeboard/plugins'
 		}
 	}
 	cherrypy.config.update({
