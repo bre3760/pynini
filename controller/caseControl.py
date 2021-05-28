@@ -4,11 +4,11 @@ from controller.MyMQTT import *
 
 
 class CaseControl(object):
-    def __init__(self, clientID, IP_broker, port_broker, IP_catalog, port_catalog, topic):
+    def __init__(self, clientID, broker_ip, broker_port, catalog_address, port_catalog):
 
         self.clientID = clientID
-        self.myMqttClient = MyMQTT(self.clientID, IP_broker, port_broker, topic)
-        self.IP_catalog = IP_catalog
+        self.myMqttClient = MyMQTT(self.clientID, broker_ip, broker_port, self)
+        self.catalog_address = catalog_address
         self.port_catalog = str(port_catalog)
         self.allBreadTypes = self.getAllBreadTypes()
         self.breadTypeChosen = self.allBreadTypes[0]
@@ -17,9 +17,9 @@ class CaseControl(object):
         self.maxHumidity = self.getMaxHumidityThreshold()
         self.minHumidity = self.getMinHumidityThreshold()
         self.maxC02 = self.getMaxCO2Threshold()
-        self.currentTemperature = 25
-        self.currentHumidity = 33
-        self.currentCO2 = 5
+        self.currentTemperature = 0
+        self.currentHumidity = 0
+        self.currentCO2 = 0
         
     def run(self):
 
@@ -36,32 +36,32 @@ class CaseControl(object):
         # print("%s received '%s' under topic '%s'" % (self.clientID, msg, topic))
 
 
-        # if topic == "measure/temperature":
-        #     msg = str.replace(msg_payload, "'", '"')
-        #     json_mex = json.loads(msg_payload)
-        #     value = json_mex["msg"]
-        #     # the received value of temperature is saved
-        #     self.currentTemperature = value
+        if topic == "measure/temperature":
+            msg = str.replace(msg_payload, "'", '"')
+            json_mex = json.loads(msg_payload)
+            value = json_mex["msg"]
+            # the received value of temperature is saved
+            self.currentTemperature = value
 
-        # if topic == "measure/humidity":
-        #     msg = str.replace(msg, "'", '"')
-        #     json_mex = json.loads(msg)
-        #     value = json_mex["msg"]
-        #     # the received value of humidity is saved
-        #     self.currentHumidity = int(value)
+        if topic == "measure/humidity":
+            msg = str.replace(msg_payload, "'", '"')
+            json_mex = json.loads(msg)
+            value = json_mex["msg"]
+            # the received value of humidity is saved
+            self.currentHumidity = int(value)
 
-        # if topic == "measure/CO2":
-        #     msg = str.replace(msg, "'", '"')
-        #     json_mex = json.loads(msg)
-        #     value = json_mex["msg"]
-        #     # the received value of humidity is saved
-        #     self.currentCO2 = int(value)
+        if topic == "measure/CO2":
+            msg = str.replace(msg_payload, "'", '"')
+            json_mex = json.loads(msg)
+            value = json_mex["msg"]
+            # the received value of humidity is saved
+            self.currentCO2 = int(value)
 
-        # if topic == "breadType":
-        #     msg = str.replace(msg, "'", '"')
-        #     json_mex = json.loads(msg)
-        #     indexBreadTypeChosen = int(json_mex["bread_index"])
-        #     self.breadTypeChosen = self.allBreadTypes[indexBreadTypeChosen]
+        if topic == "breadType/":
+            msg = str.replace(msg_payload, "'", '"')
+            json_mex = json.loads(msg)
+            indexBreadTypeChosen = int(json_mex["bread_index"])
+            self.breadTypeChosen = self.allBreadTypes[indexBreadTypeChosen]
 
     def getAllBreadTypes(self):
         with open("config.json", 'r') as f:
@@ -78,7 +78,7 @@ class CaseControl(object):
 
     def getMaxTemperatureThreshold(self):
         try:
-            threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/thresholds"
+            threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
             threshold = r.text
 
@@ -97,7 +97,7 @@ class CaseControl(object):
     def getMinTemperatureThreshold(self):
         minTemperature = 20
         try:
-            threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/thresholds"
+            threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
             threshold = r.text
             obj = json.loads(threshold) # list of the thresholds
@@ -114,9 +114,8 @@ class CaseControl(object):
 
     def getMaxHumidityThreshold(self):
         try:
-            threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/thresholds"
+            threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
-            print("Maximum humidity allowed by " + self.clientID)
             threshold = r.text
 
             obj = json.loads(threshold) # list of the thresholds
@@ -134,7 +133,7 @@ class CaseControl(object):
 
     def getMinHumidityThreshold(self):
         try:
-            threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/thresholds"
+            threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
             threshold = r.text
 
@@ -152,9 +151,8 @@ class CaseControl(object):
 
     def getMaxCO2Threshold(self):
         try:
-            threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/thresholds"
+            threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
-            print("Maximum CO2 allowed by " + self.clientID)
             threshold = r.text
 
             obj = json.loads(threshold) # list of the thresholds
@@ -171,7 +169,7 @@ class CaseControl(object):
 
     def getMinCO2Threshold(self):
         try:
-            threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/thresholds"
+            threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
             threshold = r.text
 
@@ -189,7 +187,7 @@ class CaseControl(object):
 
     def getBreadTypeThresholds(self):
         try:
-            threshold_URL = "http://" + str(self.IP_catalog) + ":" + str(self.port_catalog) + "/thresholds"
+            threshold_URL = "http://" + str(self.catalog_address) + ":" + str(self.port_catalog) + "/thresholds"
             r = requests.get(threshold_URL)
             print("Bread in " + self.clientID)
             threshold = r.text
@@ -209,20 +207,26 @@ class CaseControl(object):
         method that checks if current temperature is valid: 
         if it is, the method returns True, False otherwise
         """
-        if int(self.minTemperature) < self.currentTemperature < int(self.maxTemperature):
+        if self.minTemperature < self.currentTemperature < self.maxTemperature:
             return True
         else:
             return False
 
     def isHumidityValid(self):
-        """method that checks if current humidity is valid: if it is, the method returns True, False otherwise"""
+        """
+        method that checks if current humidity is valid: 
+        if it is, the method returns True, False otherwise
+        """
         if self.minHumidity < self.currentHumidity < self.maxHumidity:
             return True
         else:
             return False
 
     def isCO2Valid(self):
-        """method that checks if current humidity is valid: if it is, the method returns True, False otherwise"""
+        """
+        method that checks if current humidity is valid: 
+        if it is, the method returns True, False otherwise
+        """
         if self.currentCO2 < self.maxC02:
             return True
         else:

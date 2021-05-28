@@ -8,6 +8,7 @@ class MyMQTT:
 		self.notifier = notifier
 		self.clientID = clientID
 		self._isSubscriber = False
+		self._topic = []
 		# create an instance of paho.mqtt.client
 		self._paho_mqtt = PahoMQTT.Client(clientID, False)
 		# register the callback
@@ -17,27 +18,19 @@ class MyMQTT:
 	def myOnConnect (self, paho_mqtt, userdata, flags, rc):
 		print ("Connected to %s with result code: %d" % (self.broker, rc))
 
-	def myOnMessageReceived (self, paho_mqtt , userdata, msg):
-		# print ("Topic:'" + msg.topic+"', QoS: '"+str(msg.qos)+"' Message: '"+str(msg.payload) + "'")
-
+	def myOnMessageReceived (self, paho_mqtt, userdata, msg):
+		print ("Topic:'" + msg.topic+"', QoS: '"+str(msg.qos)+"' Message: '"+str(msg.payload) + "'")
 		if msg.topic == "breadType/":
 			print(f'breadType chosen!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {msg.payload}')
-			
-
-		self.notify(msg.topic, msg.payload)
+		self.notifier.notify(msg.topic, msg.payload)
 
 	def myPublish (self, topic, msg):
-		# if needed, you can do some computation or error-check before,→publishing
 		print ("publishing '%s' with topic '%s'" % (msg, topic))
-		# publish a message with a certain topic
 		self._paho_mqtt.publish(topic, msg, 2)
 		
 	def mySubscribe (self, topic):
-		# if needed, you can do some computation or error-check before,→subscribing
 		print ("subscribing to %s" % (topic))
-		# subscribe for a topic
 		self._paho_mqtt.subscribe(topic, 2)
-		# just to remember that it works also as a subscriber
 		self._isSubscriber = True
 		self._topic = topic
 
