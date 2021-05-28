@@ -26,7 +26,7 @@ class MyMQTT:
 			print(f'breadType chosen {msg.payload}')
 			
 
-		self.notifier.notify(msg.topic, msg.payload)
+		# self.notifier.notify(msg.topic, msg.payload)
 
 	def myPublish (self, topic, msg):
 		# if needed, you can do some computation or error-check before,→publishing
