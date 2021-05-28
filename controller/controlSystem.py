@@ -4,6 +4,7 @@ from controller.caseControl import CaseControl
 import requests
 import json
 import os
+import time
 
 
 cur_path = os.path.dirname(__file__)
@@ -87,11 +88,14 @@ if __name__ == '__main__':
 
 
         if not case_controller.isCO2Valid():
-            case_controller.myMqttClient.myPublish("trigger/", json.dumps({"message": "on"}))
+            case_controller.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "on"}))
             print("Ho acceso la lampada")
         else:
-            case_controller.myMqttClient.myPublish("trigger/", json.dumps({"message": "off"}))
+            case_controller.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "off"}))
             print("Ho spento la lampada")
+
+        time.sleep(5)
+        
             
         
         
