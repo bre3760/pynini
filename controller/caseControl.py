@@ -39,30 +39,27 @@ class CaseControl(object):
         if topic == "measure/temperature":
             #msg = str.replace(msg_payload, "'", '"')
             json_mex = json.loads(msg_payload)
-            print("JSONMEXXXXX",json_mex )
-            value = json_mex["msg"]
-            # the received value of temperature is saved
-            self.currentTemperature = value
+            value = json_mex["value"]
+            self.currentTemperature = int(value)
 
         if topic == "measure/humidity":
 
             #msg = str.replace(msg_payload, "'", '"')
             json_mex = json.loads(msg_payload)
-            print("JSONMEXXXXX",json_mex )
-            value = json_mex["msg"]
+            value = json_mex["value"]
             # the received value of humidity is saved
             self.currentHumidity = int(value)
 
         if topic == "measure/CO2":
             msg = str.replace(msg_payload, "'", '"')
             json_mex = json.loads(msg)
-            value = json_mex["msg"]
+            value = json_mex["value"]
             # the received value of humidity is saved
             self.currentCO2 = int(value)
 
         if topic == "breadType/":
-            msg = str.replace(msg_payload, "'", '"')
-            json_mex = json.loads(msg)
+            json_mex = json.loads(msg_payload)
+            print("JSSSSONNMEEEXX BREADTYPE", json_mex)
             indexBreadTypeChosen = int(json_mex["bread_index"])
             self.breadTypeChosen = self.allBreadTypes[indexBreadTypeChosen]
 
