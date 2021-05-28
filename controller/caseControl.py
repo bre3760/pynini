@@ -40,7 +40,8 @@ class CaseControl(object):
             #msg = str.replace(msg_payload, "'", '"')
             json_mex = json.loads(msg_payload)
             value = json_mex["value"]
-            self.currentTemperature = int(value)
+            int_value = value.split(".")[0]
+            self.currentTemperature = int(int_value)
 
         if topic == "measure/humidity":
 
