@@ -113,13 +113,14 @@ class CaseControl(object):
         try:
             threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
-            print("Minimum temperature allowed by " + self.clientID)
 
             threshold = r.text
 
             obj = json.loads(threshold)
-            threshold = obj["thresholds"]
-            minTemperature = threshold[self.breadTypeChosen]["min_temperature_th"]
+
+            print("OBJ FROM THRESH", obj)
+            # threshold = obj["thresholds"]
+            # minTemperature = threshold[self.breadTypeChosen]["min_temperature_th"]
 
         except requests.exceptions.RequestException as e:
             print(e)
