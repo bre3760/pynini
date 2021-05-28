@@ -4,7 +4,7 @@
 int inputPin = 11;
 int reading;
 int previous=LOW;
-long time = 0;
+long time_passed = 0;
 long debounce=200;
 
 int numberOfBreads = 3;
@@ -16,17 +16,16 @@ int outPin;
 
 void setup() {
  Serial.begin(9600);           /* start serial for debug */
-
  Wire.begin(8);                /* join i2c bus with address 8 */
  Wire.onReceive(receiveEvent); /* register receive event */
  Wire.onRequest(requestEvent);
   
  pinMode(13, OUTPUT); // fan actuator
  pinMode(12, OUTPUT); // lamp actuator
- pinMode(11, INPUT); // for the button input
+ pinMode(11, INPUT);  // for the button input
  pinMode(10, OUTPUT); // controlled by the button
- pinMode(9, OUTPUT); // controlled by the button
- pinMode(8, OUTPUT); // controlled by the button
+ pinMode(9, OUTPUT);  // controlled by the button
+ pinMode(8, OUTPUT);  // controlled by the button
 
  digitalWrite(13, LOW);
  int testing13 = digitalRead(13);
@@ -41,15 +40,15 @@ void loop() {
   // if the input just went from LOW and HIGH and we've waited long enough
   // to ignore any noise on the circuit, toggle the output pin and remember
   // the time
-  if (reading == HIGH && previous == LOW && millis() - time > debounce) {
-    
+  if (reading == HIGH && previous == LOW && millis() - time_passed > debounce) {
+ 
     outPinIndex = timesPressed % 3; // find which led to turn on
     outPin = chooseBread[outPinIndex]; // this is the pin for the led to turn on
     Serial.print("which led should be on: ");
     Serial.print(outPin);
     Serial.print("\n");
 
-    // i also need to turn of the others
+    // i also need to turn off the others
     for (int i=0; i<numberOfBreads; i++){
       if (i == outPinIndex){
               digitalWrite(outPin, HIGH);
@@ -58,7 +57,7 @@ void loop() {
         }
     }
     timesPressed++;
-    time = millis();
+    time_passed = millis();
   }
   previous = reading;
 }

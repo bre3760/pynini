@@ -52,7 +52,7 @@ void setup() {
   connectWifi();                           // Initialise wifi connection
 
   int got_topics = 0;
-  got_topics = httpConnect(breadTopic,fanTopic,lampTopic);           // send post request to catalog 
+  got_topics = httpConnect(breadTopic,fanTopic,lampTopic);     // send post request to catalog 
   delay(7000);
   Serial.println("got_topics value: ");
   Serial.println(got_topics);
@@ -85,7 +85,7 @@ void loop() {
     Serial.print(breadData);
     Serial.print("\n");
 
-  String messageDescription = "message" ;
+  String messageDescription = "bread_index" ;
   String payload = "{";
   payload +=  '"';
   payload+= messageDescription;
@@ -143,7 +143,7 @@ int httpConnect(char*, char*, char*)
       doc["port"] = "8080";
       doc["last_seen"] = "01:00";
       doc["dev_name"] = "arduino";
-      doc["caseID"] = "CCC1";
+      doc["caseID"] = "CCC2";
       doc["sensorID"] = "arduino";
       String jsonData;
       serializeJson(doc,jsonData);
@@ -253,6 +253,10 @@ void callback(char* topic, byte* message, unsigned int length) {
 }
 
 
+  
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+//      MQTT RE-CONNECTION
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 void reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
