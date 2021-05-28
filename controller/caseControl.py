@@ -109,7 +109,7 @@ class CaseControl(object):
         return int(maxTemperature)
 
     def getMinTemperatureThreshold(self):
-
+        minTemperature = 15
         try:
             threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
