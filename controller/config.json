@@ -1,5 +1,5 @@
 {
-    "catalog_address":"172.20.10.11",
+    "catalog_address":"0.0.0.0",
     "catalog_port":9090,
     "ip": "localhost",
     "port": 9090,
