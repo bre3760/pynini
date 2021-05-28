@@ -101,7 +101,7 @@
         {
             "max_co2_th": "10",
             "max_humidity_th": "50",
-            "max_temperature_th": "34",
+            "max_temperature_th": "22",
             "min_co2_th": "1",
             "min_humidity_th": "50",
             "min_temperature_th": "10",
