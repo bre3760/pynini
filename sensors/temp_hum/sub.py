@@ -14,6 +14,7 @@ class MySubscriber:
 			self.topic = "breadType/"  #'measure/temperature'
 			self.messageBroker = '127.0.0.1'
 
+
 		def start (self):
 			self._paho_mqtt.username_pw_set(username="brendan", password="pynini")
 

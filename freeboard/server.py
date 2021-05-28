@@ -74,6 +74,7 @@ if __name__ == '__main__':
 		"server.socket_port": 8080,
 		})
 	cherrypy.tree.mount(ClientREST(),'/',conf)
+	#bisogna connetterlo al catalog
 	# ClientREST() IP and port assignment
 	cherrypy.server.socket_host = "127.0.0.1"
 	cherrypy.server.socket_port = 8080

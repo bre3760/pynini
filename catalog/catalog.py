@@ -21,7 +21,13 @@ class Catalog(object):
         with open("catalog2.json", 'r') as f:
             catalog = json.load(f)
             #cc = catalog['Catalog']
-        if uri[0] == "broker_ip":
+        if uri[0] == "active_arduino":
+            active_arduino = []
+            for d in catalog['cases']:
+                for s in d["arduino"]["sensors"]:
+                    active_arduino.append(s["name"])
+            return json.dumps(active_arduino)
+        elif uri[0] == "broker_ip":
             return json.dumps(catalog["broker_ip"])
         elif uri[0] == "broker_port":
             return json.dumps(catalog["broker_port"])
@@ -30,9 +36,15 @@ class Catalog(object):
         elif uri[0] == "catalog_port":
             return json.dumps(catalog["catalog_port"])
         elif uri[0] == "category":
-            return json.dumps(catalog["category"])
+            res = []
+            for d in catalog['cases']:
+                if d['caseID'] == params['caseID']:
+                    res = d["bread_type"]
+            return json.dumps(res)
         elif uri[0] == "db":
             return json.dumps(catalog["db"])
+        elif uri[0] == "freeboard":
+            return json.dumps(catalog["freeboard"])
         elif uri[0] == "InfluxDB":
             return json.dumps(catalog["InfluxDB"])
         elif uri[0] == "telegramBot":

@@ -1,51 +1,116 @@
 from telegram import (ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
-from telegramBot.sensors_db import SensorsDB
 from database.query import ClientQuery
 import requests
 import logging
 import json
 import time
 import numpy as np
+import paho.mqtt.client as PahoMQTT
 
-# https://iaassassari.files.wordpress.com/2012/07/panificazione.pdf
-
-# IDEA: l'utente seleziona una tipologia di pane (comune, integrale, semola, etc..).
-# Ciascuna tipologia è caratterizzata da uno specifico processo di lievitazione, si può monitorare temperatura, umidità, co2 emessa, (pH?)
-# -> per ciascun tipo di pane: breve mex esplicativo, parametri ottimali di temp-umid-co2-pH, media valori reali
-# Statistcihe relative alle vendite: diagrammi a torta presi da freeboard? oppure leggo valori da db e realizzo grafici python
-
-# Mi serve un db per salvare dati relativi a ciascun tipo di pane e per plottare i dati sulle vendite
+#TODO: CHECK IF SENDALERT WORKS!!!!!!!!
 
 TYPOLOGY, PARAM, PARAMS, PARAM2, HOME, INFO, THRESHOLD, EXIT = range(8)
 
 class TelegramBot(object):
-    def __init__(self, port, token):
+    def __init__(self, port, token, ip):
         self.telegramPort = port
         self.token = token
-        self.ip = "127.0.0.0" # prendi da config specifico
+        self.ip = ip # prendi da config specifico
+
+    def stop(self):
+        self._paho_mqtt.unsubscribe(self.topic)
+        self._paho_mqtt.loop_stop()
+        self._paho_mqtt.disconnect()
+
+    def myOnConnect(self, paho_mqtt, userdata, flags, rc):
+        print("Connected to %s with result code: %d" % (self.messageBroker, rc))
+
+    def myPublish(self, message):
+        # publish a message with a certain topic
+        self._paho_mqtt.publish(self.topic, json.dumps(message), 2)
+
+    def myOnMessageReceived(self, paho_mqtt, userdata, msg, update, context):
+        # A new message is received: non mi interessa distinguere le topiche perchè sono sottoscritto solo a quelle relative agli allarmi,
+        # quando leggo un messaggio su una di queste topiche mando l'alert specificando la topica (= il valore fuori threshold)
+        print("Topic:'" + msg.topic + "', QoS: '" + str(msg.qos) + "' Message: '" + str(msg.payload) + "'")
+
+        self.sendAlert(update, context, msg.topic)
+        print("send Alert, msg.topic: ", msg.topic)
+
+    def sendAlert(self, update, context, topic):
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text='ALERT! Your {} threshold is over!'.format(topic), parse_mode='HTML')
 
     def start(self, update, context):
+
+        self._paho_mqtt = PahoMQTT.Client("bot", False)
+        self._paho_mqtt.on_connect = self.myOnConnect
+        self._paho_mqtt.on_message = self.myOnMessageReceived
+        r = requests.get("http://localhost:9090/broker_ip")
+        self.messageBroker = json.loads(r.text)
+        r = requests.get("http://localhost:9090/active_arduino")
+        self.topics = json.loads(r.text)
+        # subscribe for a topic
+        for t in self.topics:
+            self._paho_mqtt.subscribe("trigger/"+t, 2)
+        print("Subscribed to: ", self.topics)
+
+        self._paho_mqtt.connect(self.messageBroker, 1883)
+        self._paho_mqtt.loop_start()
 
         self.chatID = update.message.chat_id
         requests.post("http://localhost:9090/addBot", json={'ip': self.ip, 'chat_ID': self.chatID, 'last_seen': time.time()})
         print("Mi sono registrato al catalog")
 
-        options = ["White", "Wheat", "Gluten-free", "Sales Statistics"]
-        reply_keyboard = []
-        for elem in options:
-            reply_keyboard.append([InlineKeyboardButton(elem, callback_data=elem)])
-        reply_markup = InlineKeyboardMarkup(reply_keyboard)
         update.message.reply_text(
             text = ' <b> Hi {}! &#128522; Welcome to @Pynini! &#128523 </b> \
                     \nHere you can find information about different typologies of bread &#127838'.format(update.message.from_user.first_name), parse_mode = 'HTML')
         pass
         time.sleep(2)
         pass
+
         context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text='Choose the one you are interested in: ', reply_markup=reply_markup,
-                                     parse_mode='Markdown')
+                                 text='Choose the *ID* of the case you are interested in and type it in the chat: \
+                                      \n/caseID <your caseID>',
+                                 parse_mode='Markdown')
         return TYPOLOGY
+
+    def selectCaseID(self, update, context):
+        # l'utente ha selezionato il case, vuole ricevere i dati relativi a tale case:
+        # devo selezionare il parametro: co2, temp, hum
+        user_input = update.effective_message.text.split()
+        self.caseID = user_input[1]
+        print("Chosen %s: ", self.caseID)
+
+        if self.checkPresence():
+            self.getParam(update, context)
+
+        else:
+            context.bot.send_message(chat_id=update.effective_chat.id,
+                                     text='The selected caseID is not present in the catalog. &#128533; Check if it is correct, you wrote: {}'.format(
+                                         self.caseID), parse_mode='HTML')
+            self.home(update, context)
+
+        return
+
+
+    def checkPresence(self):
+
+        allCasesID = []
+        r = requests.get("http://localhost:9090/cases")
+        allCases = json.loads(r.text)
+
+        print("allCases", allCases)
+        for c in allCases:
+            allCasesID.append(c['caseID'])
+
+        if self.caseID in allCasesID:
+            res = True
+        else:
+            res = False
+
+        return res
 
 
     def unknown(self, update, context):
@@ -70,43 +135,43 @@ class TelegramBot(object):
 
     def home(self, update, context):
         print("SONO IN HOME")
-        options = ["White", "Wheat", "Gluten-free", "Sales Statistics"]
-        reply_keyboard = []
-        for elem in options:
-            reply_keyboard.append([InlineKeyboardButton(elem, callback_data=elem)])
-        reply_markup = InlineKeyboardMarkup(reply_keyboard)
-        context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text='Here you can find information about different typologies of bread &#127838 \
-                                 \nChoose the one you are interested in: ',
-                                 reply_markup=reply_markup, parse_mode='HTML')
 
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text='Choose the *ID* of the case you are interested in and type it in the chat: \
+                                      \n/caseID <your caseID>',
+                                 parse_mode='Markdown')
         return TYPOLOGY
 
     def getParam(self, update, context):
-        query = update.callback_query
-        print("Ho selezionato %s: (getParam)", query.data)
+
+        print("Ho selezionato il case ID: %s (getParam)", self.caseID)
+
         keyboard = [[InlineKeyboardButton("Temperature", callback_data='temperature'),
                      InlineKeyboardButton("Humidity", callback_data='humidity'),
                      InlineKeyboardButton("CO2", callback_data='co2'),
                      InlineKeyboardButton("Back", callback_data='home')],
                      [InlineKeyboardButton("Exit", callback_data='exit')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        if query.data != 'home' and query.data != 'exit':
-            context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text='You have selected <b> {} </b> typology, now you have to select the parameter you want to investigate!'.format(query.data), parse_mode = 'HTML')
-            pass
-            time.sleep(2)
-            pass
-            context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text='You can retrieve optimal and actual values for: <b> \n temperature,\n humidity, \n CO2 emitted, \n go back, \n or Exit </b>',
-                                     reply_markup=reply_markup, parse_mode='HTML')
-        self.category = query.data
+
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text='You have selected the case <b> {} </b>, now you have to select the parameter you want to investigate!'.format(self.caseID), parse_mode = 'HTML')
+        pass
+        time.sleep(2)
+        pass
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text='You can retrieve optimal and actual values for: <b> \n temperature,\n humidity, \n CO2 emitted, \n go back, \n or Exit </b>',
+                                 reply_markup=reply_markup, parse_mode='HTML')
+
+        params = {'caseID': self.caseID}
+        r = requests.get("http://localhost:9090/category", params=params)
+        self.category = json.loads(r.text)
+
+        # PROBLEMA: ESEGUE DUE VOLTE QUESTA FUNZIONE PRIMA DI FAR PARTIRE GETACTUALPARAMS
         return PARAM
 
     def getActualParams(self, update, context):
 
         query = update.callback_query
-        print("category", self.category)
         print("query.data in getActualParams", query.data)
 
         keyboard_params = [[InlineKeyboardButton("Temperature", callback_data='temperature'),
@@ -152,22 +217,22 @@ class TelegramBot(object):
 
     def selectedParam(self, update, context, query, keyboard_params):
 
+        param = query.data
+
         context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text='You have chosen the <b> {} </b> parameter.'.format(query.data),
+                                 text='You have chosen the <b> {} </b> parameter.'.format(param),
                                  parse_mode='HTML')
 
-        self.clientQuery = ClientQuery(query.data, self.category)
+        self.clientQuery = ClientQuery(param, self.category, self.caseID)
         actualValues = self.clientQuery.getData()
 
-        best = self.clientQuery.getBest(query.data)
-
-        print("AFTER QUERY", actualValues, best, type(actualValues))
+        best = self.clientQuery.getBest()
 
         if actualValues != []:
             print("actualValues != []")
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text='The optimal value {} for the {} typology is: {}. \n The actual minimum is: {}, \n the actual maximum is: {}, \n the actual mean is: {}.'.format(
-                                         query.data, self.category, best, min(actualValues), max(actualValues), round(np.mean(actualValues), 2)))
+                                     text='The optimal {} value for the {} typology is: {}. \n The actual minimum is: {}, \n the actual maximum is: {}, \n the actual mean is: {}.'.format(
+                                         param, self.category, best, min(actualValues), max(actualValues), round(np.mean(actualValues), 2)))
             time.sleep(2)
 
         elif actualValues == []:
@@ -196,7 +261,7 @@ class TelegramBot(object):
             return TYPOLOGY
 
         elif query.data == 'info':
-            link = self.clientQuery.getBest(query.data)
+            link = self.clientQuery.getLink()
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='Click on the following link to learn more about the {}: {}.'.format(self.category, link))
 
@@ -210,11 +275,7 @@ class TelegramBot(object):
                               InlineKeyboardButton("Min co2", callback_data='minCO2'),
                               InlineKeyboardButton("Max co2", callback_data='maxCO2')]]
 
-            # per come è strutturato il catalog, bisogna re-inserire le soglie di tutti i sensori:
-            # posso interrogare il cataolg e copiare le soglie già in vigore per i sensori che non voglio modificare e
-            # risettare solo le soglie che voglio aggiornare
-
-            self.optionThresholds(update, context, keyboard_thre)
+            self.optionThresholds(update, context)
 
 
         elif query.data == 'exit':
@@ -341,7 +402,8 @@ class TelegramBot(object):
 
         return INFO
 
-    def optionThresholds(self, update, context, keyboard_thre):
+
+    def optionThresholds(self, update, context):
 
         res = requests.get("http://localhost:9090/thresholds")
         for elem in json.loads(res.text):
@@ -405,7 +467,7 @@ class TelegramBot(object):
             return TYPOLOGY
 
         elif query.data == 'info':
-            link = self.clientQuery.getBest(query.data)
+            link = self.clientQuery.getLink()
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='Click on the following link to learn more about the {}: {}.'.format(self.category, link))
 
@@ -428,6 +490,13 @@ class TelegramBot(object):
         
         return ConversationHandler.END
 
+    def image(self, update, context):
+        clientQuery = ClientQuery("bot", "Freeboard")
+        link = clientQuery.getFreeboard()
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text='Click on the following link to see the Freeboard: {}'.format(link))
+        self.home(update, context)
+
     def main(self):
 
        upd= Updater(self.token, use_context=True)
@@ -448,7 +517,9 @@ class TelegramBot(object):
                INFO: [CallbackQueryHandler(self.end)]
            },
 
-           fallbacks=[CommandHandler('cancel', self.cancel),
+           fallbacks=[
+                      CommandHandler('caseID', self.selectCaseID),
+                      CommandHandler('cancel', self.cancel),
                       CommandHandler('home', self.home),
                       CommandHandler('exit', self.exit),
                       CommandHandler('minTemperature', self.minTemp),
@@ -456,7 +527,8 @@ class TelegramBot(object):
                       CommandHandler('minHumidity', self.minHum),
                       CommandHandler('maxHumidity', self.maxHum),
                       CommandHandler('minCO2', self.minCO2),
-                      CommandHandler('minCO2', self.maxCO2)
+                      CommandHandler('minCO2', self.maxCO2),
+                      CommandHandler('image', self.image)
                       ]
        )
 
@@ -474,10 +546,5 @@ if __name__=='__main__':
     ip = config['ip']
     port = config['port']
     data = requests.get(f"http://{ip}:{port}/telegramBot")
-    bot = TelegramBot(json.loads(data.text)["telegramPort"], json.loads(data.text)["token"])
+    bot = TelegramBot(json.loads(data.text)["telegramPort"], json.loads(data.text)["token"], ip)
     bot.main()
-
-# TODO:
-# Set alert quando vengono oltrepassate le soglie
-# -> caseControl pubblica sulla topica "alert", il bot si sottoscrive alla topica ed onMessageReceived manda l'alert nel bot
-
