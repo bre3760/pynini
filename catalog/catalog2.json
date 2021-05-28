@@ -56,7 +56,7 @@
         },
         {
             "arduino": {
-            "sensors": []
+                "sensors": []
             },
             "bread_type": "White",
             "caseID": "CCC2",
@@ -64,7 +64,7 @@
                 "sensors": [
                     {
                         "ip": "172.20.10.08",
-                        "last_seen": 1620813280.5418553,
+                        "last_seen": 1622192112.842865,
                         "name": "co2",
                         "port": 8080
                     }
@@ -84,14 +84,10 @@
         "freeboard_port": "8080"
     },
     "ip_address": "172.20.10.11",
-    "last_updated": 1620827449.4642417,
+    "last_updated": 1622192112.846342,
     "telegramBot": {
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
-    },
-    "freeboard": {
-        "freeboard_port":"8080",
-        "freeboard_host": "127.0.0.1"
     },
     "thingspeak": {
         "broker_ip": "broker.emqx.io",
@@ -136,7 +132,7 @@
             "topic_hum": "measure/humidity",
             "topic_temp": "measure/temperature"
         },
-        "arduino":{
+        "arduino": {
             "breadType": "breadType/",
             "fan": "trigger/fan",
             "lamp": "trigger/lamp"

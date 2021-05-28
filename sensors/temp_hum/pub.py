@@ -4,6 +4,8 @@ import json
 import requests
 from datetime import datetime
 import Adafruit_DHT
+import sys
+sys.path.append("../../")
 from database.influxDB import InfluxDB
 from database.query import ClientQuery
 from telegramBot.sensors_db import SensorsDB
