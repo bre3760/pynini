@@ -15,7 +15,7 @@ class CaseControl(object):
         #self.IP_catalog = IP_catalog
         #self.port_catalog = port_catalog
         self.IP_catalog, self.port_catalog = self.getCatalog()
-        self.type = self.getBreadType() # la categoria di pane va ricercata nel catalog, nella teca
+        self.breadType = self.getBreadType() # la categoria di pane va ricercata nel catalog, nella teca
         self.minTemperature = self.getMinTemperatureThreshold()
         self.maxTemperature = self.getMaxTemperatureThreshold()
         self.maxHumidity = self.getMaxHumidityThreshold()
@@ -36,11 +36,11 @@ class CaseControl(object):
         self.myMqttClient.stop()
 
     def notify(self, topic, msg):
-
+        print(f'received {str(self.clientID)} {msg} under topic {topic}')
         # print("%s received '%s' under topic '%s'" % (self.clientID, msg, topic))
 
         if topic == "trigger/threshold":
-            # update of thresholds contained in the room catalog
+            # update of thresholds contained in the catalog
 
             # if json_mex["msg"] == "timeout":
             self.timeOut = self.getTimeOut()
