@@ -130,7 +130,7 @@ class CaseControl(object):
 
     def getMaxHumidityThreshold(self):
         try:
-            threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/threshold"
+            threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
             print("Maximum humidity allowed by " + self.clientID)
             threshold = r.text
@@ -150,7 +150,7 @@ class CaseControl(object):
 
     def getMinHumidityThreshold(self):
         try:
-            threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/threshold"
+            threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
             threshold = r.text
 
@@ -168,7 +168,7 @@ class CaseControl(object):
 
     def getMaxCO2Threshold(self):
         try:
-            threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/threshold"
+            threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
             print("Maximum CO2 allowed by " + self.clientID)
             threshold = r.text
@@ -187,7 +187,7 @@ class CaseControl(object):
 
     def getMinCO2Threshold(self):
         try:
-            threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/threshold"
+            threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
             threshold = r.text
 
