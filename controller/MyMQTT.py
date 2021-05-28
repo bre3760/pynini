@@ -18,15 +18,13 @@ class MyMQTT:
 		print ("Connected to %s with result code: %d" % (self.broker, rc))
 
 	def myOnMessageReceived (self, paho_mqtt , userdata, msg):
-		# A new message is received
-		print("Message received!")
-		print ("Topic:'" + msg.topic+"', QoS: '"+str(msg.qos)+"' Message: '"+str(msg.payload) + "'")
+		# print ("Topic:'" + msg.topic+"', QoS: '"+str(msg.qos)+"' Message: '"+str(msg.payload) + "'")
 
-		if msg.topic == "breadType":
+		if msg.topic == "breadType/":
 			print(f'breadType chosen!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {msg.payload}')
 			
 
-		# self.notifier.notify(msg.topic, msg.payload)
+		self.notify(msg.topic, msg.payload)
 
 	def myPublish (self, topic, msg):
 		# if needed, you can do some computation or error-check before,→publishing

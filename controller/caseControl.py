@@ -17,9 +17,9 @@ class CaseControl(object):
         self.maxHumidity = self.getMaxHumidityThreshold()
         self.minHumidity = self.getMinHumidityThreshold()
         self.maxC02 = self.getMaxCO2Threshold()
-        self.currentTemperature = 20
-        self.currentHumidity = 0
-        self.currentCO2 = 0
+        self.currentTemperature = None
+        self.currentHumidity = None
+        self.currentCO2 = None
         
     def run(self):
 
@@ -31,49 +31,37 @@ class CaseControl(object):
         print("ending %s" % self.clientID)
         self.myMqttClient.stop()
 
-    def notify(self, topic, msg):
-        print(f'received {str(self.clientID)} {msg} under topic {topic}')
+    def notify(self, topic, msg_payload):
+        print(f' IN NOTIFYYYYY received {msg_payload} under topic {topic}')
         # print("%s received '%s' under topic '%s'" % (self.clientID, msg, topic))
 
-        if topic == "trigger/threshold":
-            # update of thresholds contained in the catalog
 
-            # if json_mex["msg"] == "timeout":
-            self.timeOut = self.getTimeOut()
-            # if json_mex["msg"] == "max_temp":
-            self.maxTemperature = self.getMaxTemperatureThreshold()
-            # if json_mex["msg"] == "min_temp":
-            self.minTemperature = self.getMinTemperatureThreshold()
-            self.maxHumidity = self.getMaxHumidityThreshold()
-            self.controlHeating()
+        # if topic == "measure/temperature":
+        #     msg = str.replace(msg_payload, "'", '"')
+        #     json_mex = json.loads(msg_payload)
+        #     value = json_mex["msg"]
+        #     # the received value of temperature is saved
+        #     self.currentTemperature = value
 
-        if topic == "measure/temperature":
-            msg = str.replace(msg, "'", '"')
-            json_mex = json.loads(msg)
-            value = json_mex["msg"]
-            # the received value of temperature is saved
-            self.currentTemperature = value
+        # if topic == "measure/humidity":
+        #     msg = str.replace(msg, "'", '"')
+        #     json_mex = json.loads(msg)
+        #     value = json_mex["msg"]
+        #     # the received value of humidity is saved
+        #     self.currentHumidity = int(value)
 
-        if topic == "measure/humidity":
-            msg = str.replace(msg, "'", '"')
-            json_mex = json.loads(msg)
-            value = json_mex["msg"]
-            # the received value of humidity is saved
-            self.currentHumidity = int(value)
+        # if topic == "measure/CO2":
+        #     msg = str.replace(msg, "'", '"')
+        #     json_mex = json.loads(msg)
+        #     value = json_mex["msg"]
+        #     # the received value of humidity is saved
+        #     self.currentCO2 = int(value)
 
-        if topic == "measure/CO2":
-            msg = str.replace(msg, "'", '"')
-            json_mex = json.loads(msg)
-            value = json_mex["msg"]
-            # the received value of humidity is saved
-            self.currentCO2 = int(value)
-
-        if topic == "breadType":
-            msg = str.replace(msg, "'", '"')
-            json_mex = json.loads(msg)
-            indexBreadTypeChosen = int(json_mex["bread_index"])
-            
-            self.breadTypeChosen = self.allBreadTypes[indexBreadTypeChosen]
+        # if topic == "breadType":
+        #     msg = str.replace(msg, "'", '"')
+        #     json_mex = json.loads(msg)
+        #     indexBreadTypeChosen = int(json_mex["bread_index"])
+        #     self.breadTypeChosen = self.allBreadTypes[indexBreadTypeChosen]
 
     def getAllBreadTypes(self):
         with open("config.json", 'r') as f:
@@ -82,16 +70,13 @@ class CaseControl(object):
            return allBreadTypes 
 
     def getCatalog(self):
-        
         with open("config.json", 'r') as f:
             config_dict = json.load(f)
             catalog_port = config_dict["catalog_port"]
             catalog_address = config_dict["catalog_address"]
-
         return catalog_address, catalog_port
 
     def getMaxTemperatureThreshold(self):
-        maxTemperature = 30
         try:
             threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
@@ -115,7 +100,6 @@ class CaseControl(object):
             threshold_URL = "http://" + self.IP_catalog + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
             threshold = r.text
-
             obj = json.loads(threshold) # list of the thresholds
             for th in obj:
                 if th["type"] == self.breadTypeChosen:
@@ -221,7 +205,10 @@ class CaseControl(object):
         return name
 
     def isTemperatureValid(self):
-        """method that checks if current temperature is valid: if it is, the method returns True, False otherwise"""
+        """
+        method that checks if current temperature is valid: 
+        if it is, the method returns True, False otherwise
+        """
         if int(self.minTemperature) < self.currentTemperature < int(self.maxTemperature):
             return True
         else:
@@ -241,14 +228,4 @@ class CaseControl(object):
         else:
             return False
 
-    def controlHeating(self):
-        """method that, basing on the current temperature or humidity or co2, sends alerts or complement tha status of the cooling system"""
-
-        print('bella')
-
-    def getTimeOut(self):
-
-        pippo = "ciao"
-        print("work in progress")
-
-        return pippo
+ 

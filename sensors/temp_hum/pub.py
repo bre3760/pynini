@@ -170,8 +170,6 @@ if __name__ == "__main__":
             time.sleep(1)
             payload_hum  = {"caseID":sensor.caseID, "measurement": "humidity", "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "value": str(humidity), "category": sensor.category}
 
-            #sensor.myPublish(sensor.topic_temp, json.dumps(payload_temp))
-            #sensor.myPublish(sensor.topic_hum, json.dumps(payload_hum))
             sensor.myPublish(sensor.topic_temp, payload_temp)
             sensor.myPublish(sensor.topic_hum, payload_hum)
 

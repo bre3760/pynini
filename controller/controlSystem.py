@@ -60,7 +60,7 @@ if __name__ == '__main__':
             continue
         else:
             topics.append(value)
-    print("topics",topics)
+    print("topics that the controller subscribed to: \n",topics)
 
 
     # initiate class of CaseControl which houses all necessary functions
@@ -81,18 +81,18 @@ if __name__ == '__main__':
         """
         if not case_controller.isTemperatureValid():
             case_controller.myMqttClient.myPublish("trigger/fan",json.dumps({"message":"on"}))
-            print("Ho accceso la ventola")
+            # print("Ho accceso la ventola")
         else:
             case_controller.myMqttClient.myPublish("trigger/fan",json.dumps({"message":"off"}))
-            print("Ho spento la ventola")
+            # print("Ho spento la ventola")
 
 
-        if not case_controller.isCO2Valid():
-            case_controller.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "on"}))
-            print("Ho acceso la lampada")
-        else:
-            case_controller.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "off"}))
-            print("Ho spento la lampada")
+        # if not case_controller.isCO2Valid():
+        #     case_controller.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "on"}))
+        #     # print("Ho acceso la lampada")
+        # else:
+        #     case_controller.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "off"}))
+        #     # print("Ho spento la lampada")
 
         time.sleep(5)
         
