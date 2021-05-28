@@ -9,7 +9,7 @@ class CaseControl(object):
         self.clientID = clientID
         self.myMqttClient = MyMQTT(self.clientID, IP_broker, port_broker, topic)
         self.IP_catalog = IP_catalog
-        self.port_catalog = port_catalog
+        self.port_catalog = str(port_catalog)
         self.minTemperature = self.getMinTemperatureThreshold()
         self.maxTemperature = self.getMaxTemperatureThreshold()
         self.maxHumidity = self.getMaxHumidityThreshold()
