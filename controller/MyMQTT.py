@@ -22,7 +22,7 @@ class MyMQTT:
 		print ("Topic:'" + msg.topic+"', QoS: '"+str(msg.qos)+"' Message: '"+str(msg.payload) + "'")
 		if msg.topic == "breadType/":
 			print(f'breadType chosen!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {msg.payload}')
-		self.notifier.notify(msg.topic, msg.payload)
+		self.notifier.notify(msg.topic, str(msg.payload))
 
 	def myPublish (self, topic, msg):
 		print ("publishing '%s' with topic '%s'" % (msg, topic))

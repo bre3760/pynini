@@ -32,7 +32,7 @@ class CaseControl(object):
         self.myMqttClient.stop()
 
     def notify(self, topic, msg_payload):
-        print(f' IN NOTIFYYYYY received {msg_payload} under topic {topic}')
+        # print(f' IN NOTIFYYYYY received {msg_payload} under topic {topic}')
         # print("%s received '%s' under topic '%s'" % (self.clientID, msg, topic))
 
 
