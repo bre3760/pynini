@@ -37,7 +37,7 @@ class CaseControl(object):
 
 
         if topic == "measure/temperature":
-            print("THE TYPE ISSSSSSSSS",type(msg_payload))
+            print("THE TYPE ISSSSSSSSS",type(str(msg_payload)))
             msg = str.replace(msg_payload, "'", '"')
             json_mex = json.loads(msg_payload)
             value = json_mex["msg"]
@@ -45,7 +45,7 @@ class CaseControl(object):
             self.currentTemperature = value
 
         if topic == "measure/humidity":
-            print("THE TYPE ISSSSSSSSS",type(msg_payload))
+            print("THE TYPE ISSSSSSSSS",type(str(msg_payload)))
 
             msg = str.replace(msg_payload, "'", '"')
             json_mex = json.loads(msg)
