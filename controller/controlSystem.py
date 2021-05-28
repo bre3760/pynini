@@ -1,5 +1,5 @@
 import sys
-sys.path.append('.')
+sys.path.append('../')
 from controller.caseControl import CaseControl
 import requests
 import json
