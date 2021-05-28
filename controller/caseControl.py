@@ -17,9 +17,9 @@ class CaseControl(object):
         self.maxHumidity = self.getMaxHumidityThreshold()
         self.minHumidity = self.getMinHumidityThreshold()
         self.maxC02 = self.getMaxCO2Threshold()
-        self.currentTemperature = None
-        self.currentHumidity = None
-        self.currentCO2 = None
+        self.currentTemperature = 25
+        self.currentHumidity = 33
+        self.currentCO2 = 5
         
     def run(self):
 

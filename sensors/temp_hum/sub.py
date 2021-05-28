@@ -41,6 +41,7 @@ class MySubscriber:
 					"time": data['time_stamp'],
 					"data_t_h":data['data_t_h']
 					}
+				print("JSONBODY IN SUB", json_body)
 			except Exception as e:
 				print(e)
 
