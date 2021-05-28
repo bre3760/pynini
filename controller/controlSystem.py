@@ -69,7 +69,10 @@ if __name__ == '__main__':
     # no need to subscribe to trigger topics but could always be helpful to 
     # know their status
     for topic in topics:
-        case_controller.myMqttClient.mySubscribe(topic)
+        if topic in ["TempHum", "arduino"]:
+            continue
+        else:
+            case_controller.myMqttClient.mySubscribe(topic)
 
 
     while 1:
