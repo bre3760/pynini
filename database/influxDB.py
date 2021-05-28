@@ -9,7 +9,7 @@ token = "m--UwwUcp-7FJffZeWJO2XbJ84XfIKjg1kSzgHPsPF92ffajo4ipGR9bSVeDfKZrG9Pwl15
 tokenPynini = "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg=="
 bucket = "Pynini"
 url = "https://eu-central-1-1.aws.cloud2.influxdata.com"
-
+#hi
 class InfluxDB():
     def __init__(self, data):
         self.url = data['url']
