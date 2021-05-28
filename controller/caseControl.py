@@ -37,18 +37,18 @@ class CaseControl(object):
 
 
         if topic == "measure/temperature":
-            print("THE TYPE ISSSSSSSSS",type(str(msg_payload)))
-            msg = str.replace(msg_payload, "'", '"')
+            #msg = str.replace(msg_payload, "'", '"')
             json_mex = json.loads(msg_payload)
+            print("JSONMEXXXXX",json_mex )
             value = json_mex["msg"]
             # the received value of temperature is saved
             self.currentTemperature = value
 
         if topic == "measure/humidity":
-            print("THE TYPE ISSSSSSSSS",type(str(msg_payload)))
 
-            msg = str.replace(msg_payload, "'", '"')
-            json_mex = json.loads(msg)
+            #msg = str.replace(msg_payload, "'", '"')
+            json_mex = json.loads(msg_payload)
+            print("JSONMEXXXXX",json_mex )
             value = json_mex["msg"]
             # the received value of humidity is saved
             self.currentHumidity = int(value)
