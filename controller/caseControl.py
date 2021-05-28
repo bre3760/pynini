@@ -77,6 +77,8 @@ class CaseControl(object):
         return catalog_address, catalog_port
 
     def getMaxTemperatureThreshold(self):
+        maxTemperature = 30
+
         try:
             threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
@@ -85,14 +87,12 @@ class CaseControl(object):
             obj = json.loads(threshold) # list of the thresholds
             for th in obj:
                 if th["type"] == self.breadTypeChosen:
-                    maxTemperature = th["max_temperature_th"]
+                    maxTemperature = int(th["max_temperature_th"])
 
         except requests.exceptions.RequestException as e:
             print(e)
             # if connection to the catalog fails, the max temperature allowed is set to a default value
-            maxTemperature = 30
-
-        return int(maxTemperature)
+        return (maxTemperature)
 
     def getMinTemperatureThreshold(self):
         minTemperature = 20
@@ -103,16 +103,16 @@ class CaseControl(object):
             obj = json.loads(threshold) # list of the thresholds
             for th in obj:
                 if th["type"] == self.breadTypeChosen:
-                    minTemperature = th["min_temperature_th"]
+                    minTemperature = int(th["min_temperature_th"])
 
         except requests.exceptions.RequestException as e:
             print(e)
             # if connection to the catalog fails, the minimum humidity allowed is set to a default value
-            minTemperature = 15
 
         return minTemperature
 
     def getMaxHumidityThreshold(self):
+        maxHumidity = 50
         try:
             threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
@@ -121,17 +121,16 @@ class CaseControl(object):
             obj = json.loads(threshold) # list of the thresholds
             for th in obj:
                 if th["type"] == self.breadTypeChosen:
-                    maxHumidity = th["max_humidity_th"]
-
+                    maxHumidity = int(th["max_humidity_th"])
 
         # if connection to the catalog fails, the max humidity allowed is set to a default value
         except requests.exceptions.RequestException as e:
             print(e)
-            maxHumidity = 50
 
         return int(maxHumidity)
 
     def getMinHumidityThreshold(self):
+        minHumidity = 0
         try:
             threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
@@ -140,16 +139,17 @@ class CaseControl(object):
             obj = json.loads(threshold) # list of the thresholds
             for th in obj:
                 if th["type"] == self.breadTypeChosen:
-                    minHumidity = th["min_humidity_th"]
+                    minHumidity = int(th["min_humidity_th"])
 
         # if connection to the catalog fails, the min humidity allowed is set to a default value
         except requests.exceptions.RequestException as e:
             print(e)
-            minHumidity = 0
+            
 
-        return int(minHumidity)
+        return (minHumidity)
 
     def getMaxCO2Threshold(self):
+        maxco2 = 50
         try:
             threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
@@ -158,32 +158,31 @@ class CaseControl(object):
             obj = json.loads(threshold) # list of the thresholds
             for th in obj:
                 if th["type"] == self.breadTypeChosen:
-                    maxco2 = th["max_co2_th"]
+                    maxco2 = int(th["max_co2_th"])
 
         # if connection to the catalog fails, the max co2 allowed is set to a default value
         except requests.exceptions.RequestException as e:
             print(e)
-            maxco2 = 50
+            
 
-        return int(maxco2)
+        return (maxco2)
 
     def getMinCO2Threshold(self):
+        minco2 = 50
         try:
             threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
             threshold = r.text
-
             obj = json.loads(threshold) # list of the thresholds
             for th in obj:
                 if th["type"] == self.breadTypeChosen:
-                    minco2 = th["min_co2_th"]
+                    minco2 = int(th["min_co2_th"])
 
         # if connection to the catalog fails, the max co2 allowed is set to a default value
         except requests.exceptions.RequestException as e:
             print(e)
-            minco2 = 50
 
-        return int(minco2)
+        return (minco2)
 
     def getBreadTypeThresholds(self):
         try:
