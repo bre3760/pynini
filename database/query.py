@@ -89,7 +89,7 @@ class ClientQuery():
         self.client.close()
 
 if __name__ == "__main__":
-     c = ClientQuery('co2', 'White', 'CCC2')
+     c = ClientQuery('humidity', 'White', 'CCC2')
      values = c.getData()
      print("getData CCC2", values)
      res = c.getBest()

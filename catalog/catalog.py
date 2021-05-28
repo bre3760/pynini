@@ -4,6 +4,7 @@ import json
 import time
 import datetime
 import socket
+sys.path.append(".")
 
 sys.path.insert(0, "../")
 HOST = "0.0.0.0"

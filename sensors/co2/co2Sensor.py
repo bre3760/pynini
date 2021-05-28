@@ -9,13 +9,6 @@ from database.influxDB import InfluxDB
 from database.query import ClientQuery
 from datetime import datetime
 
-# sensore pubblica su topi ca measurement/co2 e si sottoscrive alla topica breadType in cui il bottone pubblica il cambiamento di categoria
-# di default il sensore suppone di essere nella teca White
-
-# NOOOOOOOOOOOOO: ogni componente ha il proprio config da cui prende ip e porta
-# global CATALOG_ADDRESS
-# CATALOG_ADDRESS = "http://localhost:9090" # deciso che sarà una variabile globale, accessibile da tutti gli script di tutto il progetto
-
 class co2Sensor:
 	def __init__(self, sensor, influxDB):
 		# create an instance of pahqtt.client

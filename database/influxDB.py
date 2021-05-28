@@ -58,6 +58,11 @@ class InfluxDB():
         # p = Point(data["measurement"]).tag("category", data["category"]).field("value", data["value"]).field("uniq", self.counter).time(datetime.utcnow(), WritePrecision.NS)
         # da provare quando più sensori inseriscono dati in influxdb contemporaneamente -> in teoria dovrebbe incazzarsi e volere il campo uniq
         # avendo più field, la funzione get_field() ritorna per ogni entry tutti i fields
+        #print(type(data["measurement"]))
+        print(type( data["caseID"]))
+        print(type( data["category"]))
+        print(type( data["value"]))
+    
         p = Point(data["measurement"]).tag("caseID", data["caseID"]).tag("category", data["category"]).field("value", data["value"]).field("uniq", self.counter).time(datetime.utcnow(), WritePrecision.NS)
         write_api.write(self.bucket, self.org, record=p)
 

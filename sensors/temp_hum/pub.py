@@ -8,7 +8,6 @@ import sys
 sys.path.append("../../")
 from database.influxDB import InfluxDB
 from database.query import ClientQuery
-from telegramBot.sensors_db import SensorsDB
 
 global CATALOG_ADDRESS
 global CATEGORY
@@ -16,7 +15,7 @@ CATALOG_ADDRESS = "http://localhost:9090" # deciso che sarà una variabile globa
 CATEGORY = 'White'
 
 class TemperatureHumiditySensor:
-    def __init__(self, sensorID, db):
+    def __init__(self, sensor, db):
         self.caseID, self.sensorID = sensor.split("-")
         self._paho_mqtt = PahoMQTT.Client(self.sensorID, False)
         self.influxDB = influxDB
@@ -29,7 +28,8 @@ class TemperatureHumiditySensor:
         self._paho_mqtt.on_message = self.myOnMessageReceived
         self.messageBroker = ""
         r = requests.get("http://localhost:9090/topics")
-        self.topic = ""
+        self.topic_temp = ""
+        self.topic_hum= ""
         self.topicBreadType = json.loads(r.text)["breadType"]
         self.message = {
             'measurement': self.sensorID,
@@ -55,7 +55,8 @@ class TemperatureHumiditySensor:
 
     def myPublish(self, topic, message):
         # publish a message with a certain topic
-        self._paho_mqtt.publish(topic, message, 2)
+        print("message to publish in myPublish", message)
+        self._paho_mqtt.publish(topic, json.dumps(message), 2)
         self.influxDB.write(message)
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
@@ -63,8 +64,10 @@ class TemperatureHumiditySensor:
 
     def registerDevice(self):
         sensor_dict = {}
+        sensor_dict["sensorID"] = self.sensorID
         sensor_dict["ip"] = self.sensorIP
         sensor_dict["port"] = self.sensorPort
+        sensor_dict["caseID"] = self.caseID
         sensor_dict["name"] = self.sensorID
         sensor_dict["last_seen"] = time.time()
         sensor_dict["dev_name"] = 'rpi'
@@ -133,6 +136,7 @@ class TemperatureHumiditySensor:
 
 
 if __name__ == "__main__":
+    
     with open("config.json", 'r') as f:
         config = json.load(f)
         ip = config['ip']
@@ -143,10 +147,11 @@ if __name__ == "__main__":
     influxDB = InfluxDB(json.loads(dataInfluxDB.text))
 
     sensor = TemperatureHumiditySensor('CCC2-TempHum', influxDB)
+    
     with open("config.json", 'r') as f:
         config = json.load(f)
-    ip = config['ip']
-    port = config['port']
+        ip = config['ip']
+        port = config['port']
 
     dataInfluxDB = requests.get(f"http://{ip}:{port}/InfluxDB")
     influxDB = InfluxDB(json.loads(dataInfluxDB.text))
@@ -161,12 +166,14 @@ if __name__ == "__main__":
 
             print('Temp: {0:0.1f} °C  Humidity: {1:0.1f} %'.format(temperature, humidity))
 
-            payload_temp = {"measurement": "temperature", "timestamp": datetime.utcnow().isoformat(),
-                            "value": temperature, "category": sensor.category }
-            payload_hum = {"measurement": "humidity", "timestamp": datetime.utcnow().isoformat(), "value": humidity}
+            payload_temp = {"caseID":sensor.caseID, "measurement": "temperature", "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "value": str(temperature), "category": sensor.category }
+            time.sleep(1)
+            payload_hum  = {"caseID":sensor.caseID, "measurement": "humidity", "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "value": str(humidity), "category": sensor.category}
 
-            sensor.myPublish(sensor.topic_temp, json.dumps(payload_temp))
-            sensor.myPublish(sensor.topic_hum, json.dumps(payload_hum))
+            #sensor.myPublish(sensor.topic_temp, json.dumps(payload_temp))
+            #sensor.myPublish(sensor.topic_hum, json.dumps(payload_hum))
+            sensor.myPublish(sensor.topic_temp, payload_temp)
+            sensor.myPublish(sensor.topic_hum, payload_hum)
 
             
 
