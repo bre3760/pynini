@@ -1,8 +1,9 @@
+import sys
+sys.path.append('.')
 from controller.caseControl import CaseControl
 import requests
 import json
 import os
-
 
 
 cur_path = os.path.dirname(__file__)
