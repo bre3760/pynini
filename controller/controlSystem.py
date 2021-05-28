@@ -53,9 +53,10 @@ if __name__ == '__main__':
         print("REST service not active")
 
     for key, value in dict_of_topics.items():
-        if key == "TempHum":
-            for k, v in value.items():
-                topics.append(v)
+        if key == "TempHum" or key == "arduino":
+            # for k, v in value.items():
+            #     topics.append(v)
+            continue
         else:
             topics.append(value)
     print("topics",topics)
@@ -69,10 +70,8 @@ if __name__ == '__main__':
     # no need to subscribe to trigger topics but could always be helpful to 
     # know their status
     for topic in topics:
-        if topic in ["TempHum", "arduino"]:
-            continue
-        else:
-            case_controller.myMqttClient.mySubscribe(topic)
+        
+        case_controller.myMqttClient.mySubscribe(topic)
 
 
     while 1:
