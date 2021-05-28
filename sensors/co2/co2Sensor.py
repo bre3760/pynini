@@ -3,8 +3,11 @@ import json
 import time
 import requests
 import pandas as pd
+import sys
+sys.path.append("../../")
 from database.influxDB import InfluxDB
 from database.query import ClientQuery
+from datetime import datetime
 
 # sensore pubblica su topi ca measurement/co2 e si sottoscrive alla topica breadType in cui il bottone pubblica il cambiamento di categoria
 # di default il sensore suppone di essere nella teca White
@@ -116,11 +119,11 @@ class co2Sensor:
 		))
 
 if __name__ == "__main__":
-
+	
 	with open("config.json", 'r') as f:
 		config = json.load(f)
-	ip = config['ip']
-	port = config['port']
+		ip = config['ip']
+		port = config['port']
 
 	dataInfluxDB = requests.get(f"http://{ip}:{port}/InfluxDB")
 	influxDB = InfluxDB(json.loads(dataInfluxDB.text))
