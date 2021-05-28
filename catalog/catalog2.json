@@ -1,4 +1,6 @@
 {
+    "HOST":"0.0.0.0",
+    "PORT" : 9090, 
     "InfluxDB": {
         "bucket": "Pynini",
         "token": "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg==",
@@ -27,30 +29,14 @@
         {
             "arduino": {
                 "sensors": [
-                    {
-                        "ip": "192.168.178.200",
-                        "last_seen": 0,
-                        "name": "fan",
-                        "port": 8080
-                    }
+                   
                 ]
             },
             "bread_type": "White",
             "caseID": "CCC1",
             "rpi": {
                 "sensors": [
-                    {
-                        "ip": "192.168.178.200",
-                        "last_seen": 0,
-                        "name": "temperature",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.11",
-                        "last_seen": 1617781249.4628403,
-                        "name": "co2",
-                        "port": 8080
-                    }
+                   
                 ]
             }
         },
@@ -62,120 +48,7 @@
             "caseID": "CCC2",
             "rpi": {
                 "sensors": [
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622194894.5697896,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622194894.5697896,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622195829.1765003,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196008.7044334,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196008.7044334,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196079.3787422,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196079.3787422,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196079.3787422,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196079.3787422,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196299.90395,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196299.90395,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196299.90395,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196299.90395,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196299.90395,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196299.90395,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196299.90395,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196299.90395,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196299.90395,
-                        "name": "TempHum",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1622196299.90395,
-                        "name": "TempHum",
-                        "port": 8080
-                    }
+                    
                 ]
             }
         }

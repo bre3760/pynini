@@ -10,7 +10,7 @@ long debounce=200;
 int numberOfBreads = 3;
 int chooseBread [3] = {10,9,8};
 int choiches [3] = {0,1,2};
-int timesPressed = 0;
+int timesPressed = 1;
 int outPinIndex=0;
 int outPin;
 
@@ -30,6 +30,7 @@ void setup() {
  digitalWrite(13, LOW);
  int testing13 = digitalRead(13);
  Serial.print(testing13);
+ digitalWrite(10,HIGH); // turning on default zero LED
  
 }
 

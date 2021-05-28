@@ -12,8 +12,9 @@ class CaseControl(object):
 
         self.clientID = clientID
         self.myMqttClient = MyMQTT(self.clientID, IP_broker, port_broker, topic)
-        self.IP_catalog = IP_catalog
-        self.port_catalog = port_catalog
+        #self.IP_catalog = IP_catalog
+        #self.port_catalog = port_catalog
+        self.IP_catalog, self.port_catalog = self.getCatalog()
         self.type = self.getBreadType() # la categoria di pane va ricercata nel catalog, nella teca
         self.minTemperature = self.getMinTemperatureThreshold()
         self.maxTemperature = self.getMaxTemperatureThreshold()
@@ -70,6 +71,15 @@ class CaseControl(object):
             value = json_mex["msg"]
             # the received value of humidity is saved
             self.currentCO2 = int(value)
+
+    def getCatalog(self):
+        
+        with open("config.json", 'r') as f:
+            config_dict = json.load(f)
+            catalog_port = config_dict["catalog_port"]
+            catalog_address = config_dict["catalog_address"]
+
+        return catalog_address, catalog_port
 
     def getMaxTemperatureThreshold(self):
         try:

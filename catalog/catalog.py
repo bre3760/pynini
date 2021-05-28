@@ -5,18 +5,22 @@ import time
 import datetime
 import socket
 sys.path.append(".")
-
 sys.path.insert(0, "../")
-HOST = "0.0.0.0"
-PORT = 9090
-global CATEGORY
-CATEGORY = 'White'
+
+# HOST = "0.0.0.0"
+# PORT = 9090
+# global CATEGORY
+# CATEGORY = 'White'
 
 class Catalog(object):
     exposed = True
 
     def __init__(self):
-        pass
+        with open("catalog2.json", 'r') as f:
+            configuration_for_catalog = json.load(f)
+            self.HOST = configuration_for_catalog["HOST"]
+            self.PORT = configuration_for_catalog["PORT"]
+
 
     def GET(self, *uri, **params):
         with open("catalog2.json", 'r') as f:
@@ -328,6 +332,6 @@ if __name__ == '__main__':
             }
     }
     cherrypy.tree.mount(catalog, '/', conf)
-    cherrypy.server.socket_host = HOST
-    cherrypy.server.socket_port = PORT
+    cherrypy.server.socket_host = catalog.HOST
+    cherrypy.server.socket_port = catalog.PORT
     cherrypy.engine.start()
