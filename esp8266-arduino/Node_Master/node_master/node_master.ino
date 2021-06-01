@@ -50,11 +50,6 @@ PubSubClient client(mqtt_server,1883,espClient);
 void setup() {
   
   Serial.begin(115200);
-  LightsOn(13);
-  delay(125*60);
-  LightsOff(13);
-
-  
   connectWifi();                           // Initialise wifi connection
 
   int got_topics = 0;
@@ -74,6 +69,9 @@ void loop() {
     LightsOn(13);
     delay(125*60);
     LightsOff(13);
+    LightsOn(12);
+    delay(125*60);
+    LightsOff(12);
 
 //  if (!client.connected()) {               // reconnecting to broker 
 //    reconnect();
@@ -124,34 +122,28 @@ void loop() {
 //      Arduino Uno Switch on / off
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 void LightsOn(int actuatorPin) {
-      Serial.print("Switch turn on");
+      Serial.print("Switch turn on\n");
       Wire.beginTransmission(8); /* begin with device address 8 */
-      String payload = "{";
-      payload +=  '"';
-      payload+= "gpio";
-      payload+= '"';
-      payload += ":";
-      payload+='"';
-      payload+= actuatorPin;
-      payload+='"';
-      payload+=',';
-      payload +=  '"';
-      payload+= "state";
-      payload+= '"';
-      payload += ":";
-      payload+='"';
-      payload+= 1;
-      payload+='"';
-      payload += "}";
-      //Wire.write("{\"gpio\":actuatorPin,\"state\":1}");  
-      Wire.write(payload);
+      if(actuatorPin == 13){
+        Wire.write("{\"gpio\":13,\"state\":1}");  
+      }
+      if(actuatorPin == 12){
+        Wire.write("{\"gpio\":12,\"state\":1}");  
+      }
       Wire.endTransmission();    /* stop transmitting */
 }
 
 void LightsOff(int actuatorPin) {
-    Serial.print("Switch turn off ...");
+    Serial.print("Switch turn off \n");
     Wire.beginTransmission(8); /* begin with device address 8 */
-    Wire.write("{\"gpio\":actuatorPin,\"state\":0}");  
+
+    
+    if(actuatorPin == 13){
+        Wire.write("{\"gpio\":13,\"state\":0}");  
+      }
+      if(actuatorPin == 12){
+        Wire.write("{\"gpio\":12,\"state\":0}");  
+      } 
     Wire.endTransmission();    /* stop transmitting */
 }
 
