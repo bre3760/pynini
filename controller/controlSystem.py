@@ -98,10 +98,10 @@ if __name__ == '__main__':
         control system algorithm that continually checks if the values are within the desired ranges
         """
         for obj in controllers:
-            if case_controller.isTemperatureValid():
-                case_controller.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"off"}))
+            if obj.isTemperatureValid():
+                obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"off"}))
             else:
-                case_controller.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
+                obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
 
         # if case_controller.isCO2Valid():
         #     case_controller.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "on"}))
