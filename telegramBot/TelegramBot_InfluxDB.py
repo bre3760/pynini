@@ -60,7 +60,7 @@ class TelegramBot(object):
         self._paho_mqtt.loop_start()
 
         self.chatID = update.message.chat_id
-        requests.post("http://localhost:9090/addBot", json={'ip': self.ip, 'chat_ID': self.chatID, 'last_seen': time.time()})
+        requests.post("http://localhost:9090/addBot", json={'ip': self.ip, 'chatID': self.chatID, 'last_seen': time.time()})
         print("Mi sono registrato al catalog")
 
         update.message.reply_text(
@@ -134,8 +134,6 @@ class TelegramBot(object):
         return ConversationHandler.END
 
     def home(self, update, context):
-        print("SONO IN HOME")
-
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='Choose the *ID* of the case you are interested in and type it in the chat: \
                                       \n/caseID <your caseID>',
@@ -143,7 +141,6 @@ class TelegramBot(object):
         return TYPOLOGY
 
     def getParam(self, update, context):
-
         print("Ho selezionato il case ID: %s (getParam)", self.caseID)
 
         keyboard = [[InlineKeyboardButton("Temperature", callback_data='temperature'),
@@ -163,6 +160,7 @@ class TelegramBot(object):
                                  reply_markup=reply_markup, parse_mode='HTML')
 
         params = {'caseID': self.caseID}
+
         r = requests.get("http://localhost:9090/category", params=params)
         self.category = json.loads(r.text)
 
@@ -192,6 +190,7 @@ class TelegramBot(object):
                  return res
 
              elif query.data == 'co2' or query.data == 'temperature' or query.data == 'humidity':
+                 print("IIIIIIIIIIIIIII")
                  self.selectedParam(update, context, query, keyboard_params)
 
         except Exception as e:
@@ -225,8 +224,10 @@ class TelegramBot(object):
 
         self.clientQuery = ClientQuery(param, self.category, self.caseID)
         actualValues = self.clientQuery.getData()
+        print("actualValues: ", actualValues, type(actualValues))
 
         best = self.clientQuery.getBest()
+        print("best: ", best)
 
         if actualValues != []:
             print("actualValues != []")
@@ -299,10 +300,10 @@ class TelegramBot(object):
                                  text='The new configuration of thresholds is: \
                                       \n- min Temperature: {}, \n - max Temperature: {}, \n - min Humidity: {}, \n - max Humidity: {}, \n - min CO2: {}, \n - max CO2: {}.\
                                       \nSelect the threshold you want to modify and type in the chat /<threshold> <value>: \
-                                      \ne.g. /minTemperature 34'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
+                                      \ne.g. /minTemperature 14'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
                         )
 
-        self.optionEnd(update,context)
+        self.optionEnd(update,context,first=False)
 
         return INFO
 
@@ -319,10 +320,10 @@ class TelegramBot(object):
                                  text='The new configuration of thresholds is: \
                                       \n- min Temperature: {}, \n - max Temperature: {}, \n - min Humidity: {}, \n - max Humidity: {}, \n - min CO2: {}, \n - max CO2: {}.\
                                       \nSelect the threshold you want to modify and type in the chat /<threshold> <value>: \
-                                      \ne.g. /minTemperature 34'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
+                                      \ne.g. /minTemperature 14'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
                         )
 
-        self.optionEnd(update,context)
+        self.optionEnd(update, context, first=False)
 
         return INFO
 
@@ -338,10 +339,10 @@ class TelegramBot(object):
                                  text='The new configuration of thresholds is: \
                                       \n- min Temperature: {}, \n - max Temperature: {}, \n - min Humidity: {}, \n - max Humidity: {}, \n - min CO2: {}, \n - max CO2: {}.\
                                       \nSelect the threshold you want to modify and type in the chat /<threshold> <value>: \
-                                      \ne.g. /minTemperature 34'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
+                                      \ne.g. /minTemperature 14'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
                         )
 
-        self.optionEnd(update,context)
+        self.optionEnd(update,context,first=False)
 
         return INFO
 
@@ -357,10 +358,10 @@ class TelegramBot(object):
                                  text='The new configuration of thresholds is: \
                                       \n- min Temperature: {}, \n - max Temperature: {}, \n - min Humidity: {}, \n - max Humidity: {}, \n - min CO2: {}, \n - max CO2: {}.\
                                       \nSelect the threshold you want to modify and type in the chat /<threshold> <value>: \
-                                      \ne.g. /minTemperature 34'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
+                                      \ne.g. /minTemperature 14'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
                         )
 
-        self.optionEnd(update,context)
+        self.optionEnd(update,context,first=False)
 
         return INFO
 
@@ -376,10 +377,10 @@ class TelegramBot(object):
                                  text='The new configuration of thresholds is: \
                                       \n- min Temperature: {}, \n - max Temperature: {}, \n - min Humidity: {}, \n - max Humidity: {}, \n - min CO2: {}, \n - max CO2: {}.\
                                       \nSelect the threshold you want to modify and type in the chat /<threshold> <value>: \
-                                      \ne.g. /minTemperature 34'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
+                                      \ne.g. /minTemperature 14'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
                         )
 
-        self.optionEnd(update,context)
+        self.optionEnd(update,context,first=False)
 
         return INFO
 
@@ -395,10 +396,10 @@ class TelegramBot(object):
                                  text='The new configuration of thresholds is: \
                                       \n- min Temperature: {}, \n - max Temperature: {}, \n - min Humidity: {}, \n - max Humidity: {}, \n - min CO2: {}, \n - max CO2: {}.\
                                       \nSelect the threshold you want to modify and type in the chat /<threshold> <value>: \
-                                      \ne.g. /minTemperature 34'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
+                                      \ne.g. /minTemperature 14'.format(self.actual_thresh["min_temperature_th"], self.actual_thresh["max_temperature_th"], self.actual_thresh["min_humidity_th"], self.actual_thresh["max_humidity_th"], self.actual_thresh["min_co2_th"], self.actual_thresh["max_co2_th"])
                         )
 
-        self.optionEnd(update,context)
+        self.optionEnd(update,context,first=False)
 
         return INFO
 
@@ -432,18 +433,30 @@ class TelegramBot(object):
                                  parse_mode='Markdown'
         )
 
-    def optionEnd(self, update, context):
-        print("sono in optionEnd")
-        keyboard_info = [[InlineKeyboardButton("Tell Me More", callback_data='info'),
-                          InlineKeyboardButton("Reset Thresholds", callback_data='thresholds'),
-                          InlineKeyboardButton("Main menu", callback_data='home')],
-                         [InlineKeyboardButton("Exit", callback_data='exit')]]
+    def optionEnd(self, update, context, first=True):
+
+        if first == False:
+            keyboard_info = [[InlineKeyboardButton("Tell Me More", callback_data='info'),
+                              InlineKeyboardButton("Main menu", callback_data='home')],
+                             [InlineKeyboardButton("Exit", callback_data='exit')]]
+            txt = 'If you want more information, click on <b> Tell me more </b> \
+                   \nif you want to come back to the main menu, click on <b> Main Menu </b> \
+                   \nif you want to exit, click on <b> Exit </b>'
+        else:
+            keyboard_info = [[InlineKeyboardButton("Tell Me More", callback_data='info'),
+                              InlineKeyboardButton("Reset Thresholds", callback_data='thresholds'),
+                              InlineKeyboardButton("Main menu", callback_data='home')],
+                             [InlineKeyboardButton("Exit", callback_data='exit')]]
+            txt = 'If you want to reset some thresholds, click on <b> Reset Thresholds </b>,\
+                   \nif you want more information, click on <b> Tell me more </b> \
+                   \nif you want to come back to the main menu, click on <b> Main Menu </b>\
+                   \nif you want to exit, click on <b> Exit </b>'
+
         reply_markup_info = InlineKeyboardMarkup(keyboard_info)
+
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  reply_markup=reply_markup_info,
-                                 text='If you want to reset some thresholds, click on <b> Reset Thresholds </b>,\
-                                      \nif you want more information, click on <b> Tell me more </b> \
-                                      \nif you want to come back to the main menu, click on <b> Main Menu </b>', parse_mode='HTML')
+                                 text= txt, parse_mode='HTML')
 
         return PARAM2
 
@@ -455,7 +468,7 @@ class TelegramBot(object):
         context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=reply_markup_info,
                                  text='If you want to explore other bread typologies, click on *Main menu!*',
                                  parse_mode='Markdown')
-        #return THRESHOLD
+
 
     def end(self, update, context):
 
@@ -484,7 +497,7 @@ class TelegramBot(object):
                                  text='Bye! Have a good day and come back to @Pynini soon. &#128400;',
                                  reply_markup=ReplyKeyboardRemove(), parse_mode='HTML')
         requests.post("http://localhost:9090/removeBot",
-                      json={'ip': self.ip, 'chat_ID': self.chatID, 'last_seen': time.time()})
+                      json={'ip': self.ip, 'chatID': self.chatID, 'last_seen': time.time()})
         print("Mi sono eliminato dal catalog")
         self.clientQuery.end()
         

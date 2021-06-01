@@ -65,6 +65,11 @@ class CaseControl(object):
                 indexBreadTypeChosen = int(json_mex["bread_index"])
                 self.breadTypeChosen = self.allBreadTypes[indexBreadTypeChosen]
                 print("Case " + str(self.clientID)+ " now holds " + str(self.breadTypeChosen)+' bread')
+
+                setBreadtype['breadtype'] = self.breadTypeChosen
+                setBreadtype['caseID'] = self.clientID
+                requests.post("http://" + self.catalog_address + ":" + self.port_catalog + "/setBreadtype", json=)
+
                 print('CHANING THRESHOLDS...')
                 self.minTemperature = self.getMinTemperatureThreshold()
                 self.maxTemperature = self.getMaxTemperatureThreshold()

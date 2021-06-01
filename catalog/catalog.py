@@ -266,6 +266,34 @@ class Catalog(object):
             except KeyError:
                 raise cherrypy.HTTPError(404, 'The catalog file was not found')
 
+        if len(uri) == 1 and uri[0] == 'setBreadtype':
+            try:
+                with open('catalog2.json', 'r+') as f:
+                    catalog = json.load(f)
+                    new_breadtype = json.loads(cherrypy.request.body.read())
+
+                    try:
+                        breadtype = new_breadtype['breadtype']
+                        caseID = new_breadtype['caseID']
+                        
+                    except KeyError:
+                        f.close()
+                        raise cherrypy.HTTPError(400, 'Bad request')
+
+                    print("new_breadtype", new_breadtype)
+                    for d in catalog['cases']:
+                        if d['caseID'] == caseID:
+                           d["bread_type"] = breadtype
+
+                    f.seek(0)
+                    f.write(json.dumps(catalog, indent=4, sort_keys=True))
+                    f.truncate()
+                    f.close()
+                    print(f'${new_breadtype["breadtype"]} - modify in the catalog')
+                    return 'catalog file successfully written'
+            except KeyError:
+                raise cherrypy.HTTPError(404, 'The catalog file was not found')
+
 
     def PUT(self, *uri, **params):
         if len(uri) == 1 and uri[0] == 'setThresholds':

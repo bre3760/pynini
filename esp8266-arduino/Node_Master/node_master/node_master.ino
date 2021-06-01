@@ -232,6 +232,10 @@ void callback(char* topic, byte* message, unsigned int length) {
   }
   Serial.println("after the for loop");
 
+  Serial.println("using json");
+  
+  
+
   if (String(topic) == "trigger/fan") {
     Serial.print("Changing fan output to ");
     if(messageTemp == "on"){
