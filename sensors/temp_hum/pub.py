@@ -55,7 +55,7 @@ class TemperatureHumiditySensor:
 
     def myPublish(self, topic, message):
         # publish a message with a certain topic
-        print("message to publish in myPublish", message)
+        print("message json.dumps to publish in myPublish", json.dumps(message))
         self._paho_mqtt.publish(topic, json.dumps(message), 2)
         self.influxDB.write(message)
 
@@ -77,9 +77,7 @@ class TemperatureHumiditySensor:
         print("dict_of_topics",dict_of_topics)
         self.topic_temp = dict_of_topics["topic_temp"]
         self.topic_hum = dict_of_topics["topic_hum"]
-
         self.messageBroker = json.loads(r.text)['broker_ip']
-
         print("[{}] Device Registered on Catalog".format(
             int(time.time()),
         ))

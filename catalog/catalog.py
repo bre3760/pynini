@@ -4,28 +4,18 @@ import json
 import time
 import datetime
 import socket
-sys.path.append(".")
-sys.path.insert(0, "../")
 
-# HOST = "0.0.0.0"
-# PORT = 9090
-# global CATEGORY
-# CATEGORY = 'White'
+sys.path.insert(0, "../")
 
 class Catalog(object):
     exposed = True
 
     def __init__(self):
-        with open("catalog2.json", 'r') as f:
-            configuration_for_catalog = json.load(f)
-            self.HOST = configuration_for_catalog["HOST"]
-            self.PORT = configuration_for_catalog["PORT"]
-
+        pass
 
     def GET(self, *uri, **params):
         with open("catalog2.json", 'r') as f:
             catalog = json.load(f)
-            #cc = catalog['Catalog']
         if uri[0] == "active_arduino":
             active_arduino = []
             for d in catalog['cases']:
@@ -54,8 +44,6 @@ class Catalog(object):
             return json.dumps(catalog["InfluxDB"])
         elif uri[0] == "telegramBot":
             return json.dumps(catalog["telegramBot"])
-        elif uri[0] == "freeboard":
-            return json.dumps(catalog["freeboard"])
         elif uri[0] == "thingspeak":
             return json.dumps(catalog["thingspeak"])
         elif uri[0] == "thresholds":
@@ -90,21 +78,26 @@ class Catalog(object):
                     for c in catalog['cases']:
                         if c['caseID'] == caseID:
                             found = True
-                            for d in c[dev_name]['sensors']:
-                                if d['ip'] == ip and d['name'] == sensorID:
-                                    c[dev_name]['sensors'].pop(c[dev_name]['sensors'].index(d))
+
+                            if c[dev_name]['sensors'] == []:
                                 c[dev_name]['sensors'].append(new_dev)
+                            else:
+                                for d in c[dev_name]['sensors']:
+                                    print("d", d)
+                                    if d['name'] == sensorID:
+                                        c[dev_name]['sensors'].pop(c[dev_name]['sensors'].index(d))
+                                    c[dev_name]['sensors'].append(new_dev)
 
                     if found == False:
                         new_case = {
-                                        "arduino": {
-                                            "sensors": []
-                                        },
-                                        "bread_type": "White",
-                                        "caseID": caseID,
-                                        "rpi": {
-                                            "sensors": []
-                                        }
+                                    "arduino": {
+                                        "sensors": []
+                                    },
+                                    "bread_type": "White",
+                                    "caseID": caseID,
+                                    "rpi": {
+                                        "sensors": []
+                                    }
                                     }
                         new_case[dev_name]["sensors"].append(new_dev)
                         catalog['cases'].append(new_case)
@@ -133,7 +126,7 @@ class Catalog(object):
                     with open('catalog2.json', 'r+') as f:
                         catalog = json.load(f)
                         try:
-                            chat_ID = new_bot_info['chat_ID']
+                            chatID = new_bot_info['chat_ID']
                             ip = new_bot_info['ip']
                             last_seen = new_bot_info['last_seen']
                             #dev_name = 'rpi'
@@ -141,10 +134,10 @@ class Catalog(object):
                             f.close()
                             raise cherrypy.HTTPError(400, 'Bad request')
 
-                        new_bot = {'chat_ID': chat_ID, 'ip': ip, 'last_seen': last_seen}
+                        new_bot = {'chatID': chatID, 'ip': ip, 'last_seen': last_seen}
 
                         for d in catalog['bots']:
-                            if d['chat_ID'] == chat_ID:
+                            if d['chatID'] == chatID:
                                 catalog['bots'].pop(catalog['bots'].index(d))
 
                         catalog['bots'].append(new_bot)
@@ -154,7 +147,7 @@ class Catalog(object):
                         f.write(json.dumps(catalog, indent=4, sort_keys=True))
                         f.truncate()
                         f.close()
-                        print(f'${new_bot["chat_ID"]} - added to the catalog')
+                        print(f'${new_bot["chatID"]} - added to the catalog')
 
                 except KeyError:
                     raise cherrypy.HTTPError(404, 'The catalog file was not found')
@@ -195,7 +188,6 @@ class Catalog(object):
             except KeyError:
                 raise cherrypy.HTTPError(404, 'The catalog file was not found')
 
-
         if len(uri) == 1 and uri[0] == 'removeBot':
             new_bot_info = json.loads(cherrypy.request.body.read())
             print("new_bot_info", new_bot_info)
@@ -203,16 +195,16 @@ class Catalog(object):
                 with open('catalog2.json', 'r+') as f:
                     catalog = json.load(f)
                     try:
-                        chat_ID = new_bot_info['chat_ID']
-                        print("chat_ID", chat_ID)
+                        chatID = new_bot_info['chatID']
+                        print("chatID", chatID)
                     except KeyError:
                         f.close()
                         raise cherrypy.HTTPError(400, 'Bad request')
 
                     found = False
                     for d in catalog['bots']:
-                        if d['chat_ID'] == chat_ID:
-                            print(d['chat_ID'], chat_ID)
+                        if d['chatID'] == chat_ID:
+                            print(d['chatID'], chat_ID)
                             catalog['bots'].pop(catalog['bots'].index(d))
                             found = True
 
@@ -324,6 +316,13 @@ class Catalog(object):
 
 if __name__ == '__main__':
     catalog = Catalog()
+
+    with open("catalog2.json", 'r') as f:
+        config = json.load(f)
+    HOST = config['HOST']
+    PORT = config['PORT']
+    
+
     conf = {
         '/':
             {
@@ -332,6 +331,6 @@ if __name__ == '__main__':
             }
     }
     cherrypy.tree.mount(catalog, '/', conf)
-    cherrypy.server.socket_host = catalog.HOST
-    cherrypy.server.socket_port = catalog.PORT
+    cherrypy.server.socket_host = HOST
+    cherrypy.server.socket_port = PORT
     cherrypy.engine.start()

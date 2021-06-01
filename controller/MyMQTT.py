@@ -20,8 +20,8 @@ class MyMQTT:
 		print ("Connected to %s with result code: %d" % (self.broker, rc))
 
 	def myOnMessageReceived (self, paho_mqtt, userdata, msg):
-		print(f'myOnMessageReceived, topic {msg.topic}, qos {msg.qos}, message str(msg.payload) {str(msg.payload)}')
-		self.notifier.notify(msg.topic, str(msg.payload))
+		print(f'myOnMessageReceived, topic {msg.topic}, qos {msg.qos}, message (msg.payload) {(msg.payload)}')
+		self.notifier.notify(msg.topic, msg.payload)
 
 	def myPublish (self, topic, msg):
 		print ("publishing '%s' with topic '%s'" % (msg, topic))
