@@ -68,7 +68,7 @@ if __name__ == '__main__':
     r = requests.get("http://localhost:9090/cases")
     dict_of_cases = json.loads(r.text)
 
-    list_of_cases = [x["case_ID"] for x in dict_of_cases]
+    list_of_cases = [x["caseID"] for x in dict_of_cases]
     print("Connected cases id: ", list_of_cases)
 
     controllers = [CaseControl(i, broker_ip, broker_port, catalog_address, catalog_port, topics) for i in list_of_cases]
@@ -98,10 +98,10 @@ if __name__ == '__main__':
         control system algorithm that continually checks if the values are within the desired ranges
         """
         for obj in controllers:
-            if obj.isTemperatureValid():
-                obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"off"}))
+            if case_controller.isTemperatureValid():
+                case_controller.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"off"}))
             else:
-                obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
+                case_controller.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
 
         # if case_controller.isCO2Valid():
         #     case_controller.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "on"}))
