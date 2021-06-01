@@ -159,7 +159,7 @@ class Catalog(object):
                 except KeyError:
                     raise cherrypy.HTTPError(404, 'The catalog file was not found')
 
-                if len(uri) == 1 and uri[0] == 'removeSensor':
+        if len(uri) == 1 and uri[0] == 'removeSensor':
             new_device_info = json.loads(cherrypy.request.body.read())
             print("cherrypy.request.body.read()", new_device_info)
             try:
