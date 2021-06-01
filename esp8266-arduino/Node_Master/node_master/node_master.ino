@@ -219,6 +219,8 @@ void connectWifi(){
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 //      WIRE ARDUINO CONNECTION
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+const char command[32] = "";
+
 void callback(char* topic, byte* message, unsigned int length) {
   Serial.print("Message arrived on topic: ");
   Serial.print(topic);
@@ -233,7 +235,9 @@ void callback(char* topic, byte* message, unsigned int length) {
   Serial.println("after the for loop");
 
   Serial.println("using json");
-  
+  StaticJsonDocument<256> doc;
+  deserializeJson(doc, message, length);
+  strlcpy(command, doc["message"] | "default", sizeof(command));
   
 
   if (String(topic) == "trigger/fan") {
