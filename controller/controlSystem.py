@@ -82,7 +82,7 @@ if __name__ == '__main__':
         control system algorithm that continually checks if the values are within the desired ranges
         """
 
-        if case_controller.isTemperatureValid() :
+        if case_controller.isTemperatureValid():
             case_controller.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"off"}))
         else:
             case_controller.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))

@@ -23,7 +23,7 @@
         "Wheat",
         "Glutenfree"
     ],
-    "broker_ip": "broker.emqx.io",
+    "broker_ip": "127.0.0.1",
     "broker_port": 1883,
     "cases": [
         {

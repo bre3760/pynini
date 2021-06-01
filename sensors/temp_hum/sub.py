@@ -35,15 +35,15 @@ class MySubscriber:
 		def myOnMessageReceived (self, paho_mqtt, userdata, msg):
 			# A new message is received
 			print ("Topic:'" + msg.topic+"', QoS: '"+str(msg.qos)+"' Message: '"+str(msg.payload) + "'")
-			try:
-				data=json.loads(msg.payload)
-				json_body = {
-					"time": data['time_stamp'],
-					"data_t_h":data['data_t_h']
-					}
-				print("JSONBODY IN SUB", json_body)
-			except Exception as e:
-				print(e)
+			# try:
+			# 	data=json.loads(msg.payload)
+			# 	json_body = {
+			# 		"time": data['time_stamp'],
+			# 		"data_t_h":data['data_t_h']
+			# 		}
+			# 	print("JSONBODY IN SUB", json_body)
+			# except Exception as e:
+			# 	print(e)
 
 if __name__ == "__main__":
 	test = MySubscriber('pynini')

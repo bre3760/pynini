@@ -159,15 +159,14 @@ class Catalog(object):
                 except KeyError:
                     raise cherrypy.HTTPError(404, 'The catalog file was not found')
 
-        if len(uri) == 1 and uri[0] == 'removeSensor':
+                if len(uri) == 1 and uri[0] == 'removeSensor':
             new_device_info = json.loads(cherrypy.request.body.read())
             print("cherrypy.request.body.read()", new_device_info)
             try:
                 with open('catalog2.json', 'r+') as f:
                     catalog = json.load(f)
                     try:
-                        case_ID = new_device_info['case_ID']
-                        ip = new_device_info['ip']
+                        caseID = new_device_info['caseID']
                         name = new_device_info['name']
                         dev_name = new_device_info['dev_name']
                     except KeyError:
@@ -176,9 +175,9 @@ class Catalog(object):
 
                     found = False
                     for c in catalog['cases']:
-                        if c['case_ID'] == case_ID:
+                        if c['caseID'] == caseID:
                             for d in c[dev_name]['sensors']:
-                                if d['ip'] == ip and d['name'] == name:
+                                if d['name'] == name:
                                     c[dev_name]['sensors'].pop(c[dev_name]['sensors'].index(d))
                                     print("ho trovato ed eliminato il sensore")
                                     found = True
@@ -195,6 +194,7 @@ class Catalog(object):
                     return 'catalog file successfully written'
             except KeyError:
                 raise cherrypy.HTTPError(404, 'The catalog file was not found')
+
 
         if len(uri) == 1 and uri[0] == 'removeBot':
             new_bot_info = json.loads(cherrypy.request.body.read())
