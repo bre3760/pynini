@@ -115,14 +115,14 @@ void loop() {
 //      Arduino Uno Switch on / off
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 void LightsOn(int actuatorPin) {
-    Serial.print("Switch 2 turn on ...");
+      Serial.print("Switch 2 turn on ...");
       Wire.beginTransmission(8); /* begin with device address 8 */
       Wire.write("{\"gpio\":actuatorPin,\"state\":1}");  
       Wire.endTransmission();    /* stop transmitting */
 }
 
 void LightsOff(int actuatorPin) {
-  Serial.print("Switch 2 turn off ...");
+    Serial.print("Switch 2 turn off ...");
     Wire.beginTransmission(8); /* begin with device address 8 */
     Wire.write("{\"gpio\":actuatorPin,\"state\":0}");  
     Wire.endTransmission();    /* stop transmitting */
@@ -167,6 +167,7 @@ int httpConnect(char*, char*, char*)
             Serial.print(error.c_str());
           } else {
             String payloadFromPost = docReceived["topic"].as<String>();
+            Serial.print("payloadFromPost: ");
             Serial.println(payloadFromPost);
             const char* fanTopicInside =  docReceived["topic"]["fan"].as<char*>();
             const char* lampTopicInside =  docReceived["topic"]["lamp"].as<char*>();
@@ -215,18 +216,21 @@ void connectWifi(){
   local_ip = WiFi.localIP().toString();
 }
 
-
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+//      WIRE ARDUINO CONNECTION
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 void callback(char* topic, byte* message, unsigned int length) {
   Serial.print("Message arrived on topic: ");
   Serial.print(topic);
-  Serial.print(". Message: ");
+  Serial.print(". Message: "); // {"message":"on"}
   String messageTemp;
-  
+
+  Serial.println("before the for loop");
   for (int i = 0; i < length; i++) {
     Serial.print((char)message[i]);
     messageTemp += (char)message[i];
   }
-  Serial.println();
+  Serial.println("after the for loop");
 
   if (String(topic) == "trigger/fan") {
     Serial.print("Changing fan output to ");
@@ -240,7 +244,7 @@ void callback(char* topic, byte* message, unsigned int length) {
     }
   }
   if (String(topic) == "trigger/lamp") {
-    Serial.print("Changing fan output to ");
+    Serial.print("Changing lamp output to ");
     if(messageTemp == "on"){
       Serial.println("lamp on");
       LightsOn(12);

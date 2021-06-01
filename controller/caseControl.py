@@ -60,9 +60,18 @@ class CaseControl(object):
         if topic == "breadType/":
             if msg_payload: 
                 json_mex = json.loads(msg_payload)
+                
                 print("JSSSSONNMEEEXX BREADTYPE", json_mex)
                 indexBreadTypeChosen = int(json_mex["bread_index"])
                 self.breadTypeChosen = self.allBreadTypes[indexBreadTypeChosen]
+                print("Case " + str(self.clientID)+ " now holds " + str(self.breadTypeChosen)+' bread')
+                print('CHANING THRESHOLDS...')
+                self.minTemperature = self.getMinTemperatureThreshold()
+                self.maxTemperature = self.getMaxTemperatureThreshold()
+                self.maxHumidity = self.getMaxHumidityThreshold()
+                self.minHumidity = self.getMinHumidityThreshold()
+                self.maxC02 = self.getMaxCO2Threshold()
+                # change thresholds based on breadtype
 
     def getAllBreadTypes(self):
         with open("config.json", 'r') as f:

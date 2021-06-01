@@ -126,7 +126,7 @@ class Catalog(object):
                     with open('catalog2.json', 'r+') as f:
                         catalog = json.load(f)
                         try:
-                            chatID = new_bot_info['chat_ID']
+                            chatID = new_bot_info['chatID']
                             ip = new_bot_info['ip']
                             last_seen = new_bot_info['last_seen']
                             #dev_name = 'rpi'
