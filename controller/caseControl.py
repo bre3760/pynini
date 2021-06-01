@@ -32,8 +32,7 @@ class CaseControl(object):
         self.myMqttClient.stop()
 
     def notify(self, topic, msg_payload):
-        # print(f' IN NOTIFYYYYY received {msg_payload} under topic {topic}')
-        # print("%s received '%s' under topic '%s'" % (self.clientID, msg, topic))
+        print(f' IN NOTIFYYYYY received msg_payload: {msg_payload}, under topic {topic}')
 
 
         if topic == "measure/temperature":
@@ -44,7 +43,6 @@ class CaseControl(object):
             self.currentTemperature = int(int_value)
 
         if topic == "measure/humidity":
-
             #msg = str.replace(msg_payload, "'", '"')
             json_mex = json.loads(msg_payload)
             value = json_mex["value"]
@@ -53,17 +51,18 @@ class CaseControl(object):
             self.currentHumidity = int(int_value)
 
         if topic == "measure/CO2":
-            msg = str.replace(msg_payload, "'", '"')
-            json_mex = json.loads(msg)
+            # msg = str.replace(msg_payload, "'", '"')
+            json_mex = json.loads(msg_payload)
             value = json_mex["value"]
-            # the received value of humidity is saved
+            # the received value of co2 is saved
             self.currentCO2 = int(value)
 
         if topic == "breadType/":
-            json_mex = json.loads(msg_payload)
-            print("JSSSSONNMEEEXX BREADTYPE", json_mex)
-            indexBreadTypeChosen = int(json_mex["bread_index"])
-            self.breadTypeChosen = self.allBreadTypes[indexBreadTypeChosen]
+            if msg_payload: 
+                json_mex = json.loads(msg_payload)
+                print("JSSSSONNMEEEXX BREADTYPE", json_mex)
+                indexBreadTypeChosen = int(json_mex["bread_index"])
+                self.breadTypeChosen = self.allBreadTypes[indexBreadTypeChosen]
 
     def getAllBreadTypes(self):
         with open("config.json", 'r') as f:
