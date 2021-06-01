@@ -1,6 +1,7 @@
 {
-    "catalog_address":"0.0.0.0",
-    "catalog_port":9090,
+    "caseID": "CCC2",
+    "catalog_address": "0.0.0.0",
+    "catalog_port": 9090,
     "ip": "localhost",
     "port": 9090,
     "breadCategories": [

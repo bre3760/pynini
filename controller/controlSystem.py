@@ -17,6 +17,7 @@ if __name__ == '__main__':
         config_dict = json.load(f)
         catalog_port = config_dict["catalog_port"]
         catalog_address = config_dict["catalog_address"]
+        caseID = config_dict["caseID"]
 
 
     broker_url = "http://" + catalog_address + ":" + str(catalog_port) + "/broker"
@@ -63,15 +64,30 @@ if __name__ == '__main__':
     print("topics that the controller subscribed to: \n",topics)
 
 
+    
+    r = requests.get("http://localhost:9090/cases")
+    dict_of_cases = json.loads(r.text)
+
+    list_of_cases = [x["case_ID"] for x in dict_of_cases]
+    print("Connected cases id: ", list_of_cases)
+
+    controllers = [CaseControl(i, broker_ip, broker_port, catalog_address, catalog_port, topics) for i in list_of_cases]
+
+    for obj in controllers:
+        obj.run()
+
+        for topic in topics:
+            obj.myMqttClient.mySubscribe(topic)
+
     # initiate class of CaseControl which houses all necessary functions
-    case_controller = CaseControl("Case controller", broker_ip, broker_port, catalog_address, catalog_port)
-    case_controller.run()
+    #case_controller = CaseControl("Case controller", broker_ip, broker_port, catalog_address, catalog_port, caseID)
+    #case_controller.run()
 
     # subscribe the case controller to all topics
     # no need to subscribe to trigger topics but could always be helpful to 
     # know their status
-    for topic in topics:
-        case_controller.myMqttClient.mySubscribe(topic)
+    #for topic in topics:
+    #    case_controller.myMqttClient.mySubscribe(topic)
 
     prevStateLamp = False
     prevStateFan = False
@@ -81,11 +97,11 @@ if __name__ == '__main__':
         """
         control system algorithm that continually checks if the values are within the desired ranges
         """
-
-        if case_controller.isTemperatureValid():
-            case_controller.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"off"}))
-        else:
-            case_controller.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
+        for obj in controllers:
+            if obj.isTemperatureValid():
+                obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"off"}))
+            else:
+                obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
 
         # if case_controller.isCO2Valid():
         #     case_controller.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "on"}))

@@ -4,12 +4,13 @@ from controller.MyMQTT import *
 
 
 class CaseControl(object):
-    def __init__(self, clientID, broker_ip, broker_port, catalog_address, port_catalog):
+    def __init__(self, clientID, broker_ip, broker_port, catalog_address, port_catalog, caseID):
 
         self.clientID = clientID
         self.myMqttClient = MyMQTT(self.clientID, broker_ip, broker_port, self)
         self.catalog_address = catalog_address
         self.port_catalog = str(port_catalog)
+        self.caseID = caseID
         self.allBreadTypes = self.getAllBreadTypes()
         self.breadTypeChosen = self.allBreadTypes[0]
         self.minTemperature = self.getMinTemperatureThreshold()
@@ -68,7 +69,7 @@ class CaseControl(object):
                 
                 setBreadtype = {}
                 setBreadtype['breadtype'] = self.breadTypeChosen
-                setBreadtype['caseID'] = self.clientID
+                setBreadtype['caseID'] = self.caseID
                 requests.post("http://" + self.catalog_address + ":" + self.port_catalog + "/setBreadtype", json=setBreadtype)
 
                 print('CHANGING THRESHOLDS...')

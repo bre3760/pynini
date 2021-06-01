@@ -75,9 +75,9 @@ void loop() {
   String breadData="";
   while(Wire.available()){
     char c = Wire.read();
-    Serial.print("This is c: ");
-    Serial.print(c);
-    Serial.print("\n");
+//    Serial.print("This is c: ");
+//    Serial.print(c);
+//    Serial.print("\n");
     breadData += c;
   }
 
@@ -219,7 +219,6 @@ void connectWifi(){
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 //      WIRE ARDUINO CONNECTION
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-const char command[32] = "";
 
 void callback(char* topic, byte* message, unsigned int length) {
   Serial.print("Message arrived on topic: ");
@@ -227,7 +226,6 @@ void callback(char* topic, byte* message, unsigned int length) {
   Serial.print(". Message: "); // {"message":"on"}
   String messageTemp;
 
-  Serial.println("before the for loop");
   for (int i = 0; i < length; i++) {
     Serial.print((char)message[i]);
     messageTemp += (char)message[i];
@@ -235,29 +233,40 @@ void callback(char* topic, byte* message, unsigned int length) {
   Serial.println("after the for loop");
 
   Serial.println("using json");
+  
   StaticJsonDocument<256> doc;
-  deserializeJson(doc, message, length);
-  strlcpy(command, doc["message"] | "default", sizeof(command));
+  DeserializationError error = deserializeJson(doc, message);
+
+  // Test if parsing succeeds.
+  if (error) {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error.f_str());
+    return;
+  }
+
+  Serial.print("reading the json doc[message]: ");
+  const char* messageFromMQTT = doc["message"];
+  Serial.println(messageFromMQTT);
   
 
-  if (String(topic) == "trigger/fan") {
+  if (strcmp(topic, "trigger/fan") == 0) {
     Serial.print("Changing fan output to ");
-    if(messageTemp == "on"){
-      Serial.println("on");
+    if(strcmp(messageFromMQTT, "on") == 0){
+      Serial.println("turning on the fan");
       LightsOn(13);
     }
-    else if(messageTemp == "off"){
-      Serial.println("off");
+    else if(messageFromMQTT == "off"){
+      Serial.println("turning off the fan");
       LightsOff(13);
     }
   }
   if (String(topic) == "trigger/lamp") {
     Serial.print("Changing lamp output to ");
-    if(messageTemp == "on"){
+    if(messageFromMQTT == "on"){
       Serial.println("lamp on");
       LightsOn(12);
     }
-    else if(messageTemp == "off"){
+    else if(messageFromMQTT == "off"){
       Serial.println("lamp off");
       LightsOff(12);
     }

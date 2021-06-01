@@ -35,12 +35,16 @@ class TelegramBot(object):
         # quando leggo un messaggio su una di queste topiche mando l'alert specificando la topica (= il valore fuori threshold)
         print("Topic:'" + msg.topic + "', QoS: '" + str(msg.qos) + "' Message: '" + str(msg.payload) + "'")
 
-        self.sendAlert(update, context, msg.topic)
-        print("send Alert, msg.topic: ", msg.topic)
+        self.sendAlert(update, context, msg.topic, msg.payload)
+        print("send Alert, msg.topic: ", msg.topic, msg.payload)
 
-    def sendAlert(self, update, context, topic):
+    def sendAlert(self, update, context, topic, msg):
+        if msg['message'] == 'on':
+            txt = 'ALERT! Your {} has been activate to improve the environmental conditions!'.format(topic)
+        else:
+            txt = 'ALERT! Your {} has been deactivate to improve the environmental conditions!'.format(topic)
         context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text='ALERT! Your {} threshold is over!'.format(topic), parse_mode='HTML')
+                                 text=txt, parse_mode='HTML')
 
     def start(self, update, context):
 
@@ -190,7 +194,6 @@ class TelegramBot(object):
                  return res
 
              elif query.data == 'co2' or query.data == 'temperature' or query.data == 'humidity':
-                 print("IIIIIIIIIIIIIII")
                  self.selectedParam(update, context, query, keyboard_params)
 
         except Exception as e:
