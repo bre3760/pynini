@@ -48,7 +48,13 @@ WiFiClient espClient;
 PubSubClient client(mqtt_server,1883,espClient);
 
 void setup() {
+  
   Serial.begin(115200);
+  LightsOn(13);
+  delay(125*60);
+  LightsOff(13);
+
+  
   connectWifi();                           // Initialise wifi connection
 
   int got_topics = 0;
@@ -115,14 +121,14 @@ void loop() {
 //      Arduino Uno Switch on / off
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 void LightsOn(int actuatorPin) {
-      Serial.print("Switch 2 turn on ...");
+      Serial.print("Switch turn on");
       Wire.beginTransmission(8); /* begin with device address 8 */
       Wire.write("{\"gpio\":actuatorPin,\"state\":1}");  
       Wire.endTransmission();    /* stop transmitting */
 }
 
 void LightsOff(int actuatorPin) {
-    Serial.print("Switch 2 turn off ...");
+    Serial.print("Switch turn off ...");
     Wire.beginTransmission(8); /* begin with device address 8 */
     Wire.write("{\"gpio\":actuatorPin,\"state\":0}");  
     Wire.endTransmission();    /* stop transmitting */

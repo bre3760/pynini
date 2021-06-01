@@ -13,10 +13,11 @@ import paho.mqtt.client as PahoMQTT
 TYPOLOGY, PARAM, PARAMS, PARAM2, HOME, INFO, THRESHOLD, EXIT = range(8)
 
 class TelegramBot(object):
-    def __init__(self, port, token, ip):
+    def __init__(self, port, token, ip, catalogPort):
         self.telegramPort = port
         self.token = token
-        self.ip = ip # prendi da config specifico
+        self.catalogIP = ip
+        self.catalogPort = catalogPort
 
     def stop(self):
         self._paho_mqtt.unsubscribe(self.topic)
@@ -51,9 +52,9 @@ class TelegramBot(object):
         self._paho_mqtt = PahoMQTT.Client("bot", False)
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
-        r = requests.get("http://localhost:9090/broker_ip")
+        r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/broker_ip")
         self.messageBroker = json.loads(r.text)
-        r = requests.get("http://localhost:9090/active_arduino")
+        r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/active_arduino")
         self.topics = json.loads(r.text)
         # subscribe for a topic
         for t in self.topics:
@@ -64,7 +65,7 @@ class TelegramBot(object):
         self._paho_mqtt.loop_start()
 
         self.chatID = update.message.chat_id
-        requests.post("http://localhost:9090/addBot", json={'ip': self.ip, 'chatID': self.chatID, 'last_seen': time.time()})
+        requests.post(f"http://{self.catalogIP}:{self.catalogPort}/addBot", json={'ip': self.catalogIP, 'chatID': self.chatID, 'last_seen': time.time()})
         print("Mi sono registrato al catalog")
 
         update.message.reply_text(
@@ -102,7 +103,7 @@ class TelegramBot(object):
     def checkPresence(self):
 
         allCasesID = []
-        r = requests.get("http://localhost:9090/cases")
+        r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/cases")
         allCases = json.loads(r.text)
 
         print("allCases", allCases)
@@ -165,7 +166,7 @@ class TelegramBot(object):
 
         params = {'caseID': self.caseID}
 
-        r = requests.get("http://localhost:9090/category", params=params)
+        r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/category", params=params)
         self.category = json.loads(r.text)
 
         # PROBLEMA: ESEGUE DUE VOLTE QUESTA FUNZIONE PRIMA DI FAR PARTIRE GETACTUALPARAMS
@@ -296,7 +297,7 @@ class TelegramBot(object):
         user_input = update.effective_message.text.split()
         self.actual_thresh["min_temperature_th"] = user_input[1]
 
-        requests.post("http://localhost:9090/setThresholds",
+        requests.post(f"http://{self.catalogIP}:{self.catalogPort}/setThresholds",
                      json=self.actual_thresh)
 
         context.bot.send_message(chat_id=update.effective_chat.id,
@@ -315,7 +316,7 @@ class TelegramBot(object):
         user_input = update.effective_message.text.split()
         self.actual_thresh["max_temperature_th"] = user_input[1]
 
-        requests.put("http://localhost:9090/setThresholds",
+        requests.put(f"http://{self.catalogIP}:{self.catalogPort}/setThresholds",
                       json=self.actual_thresh)
         print("new config in maxTemp", self.actual_thresh)
 
@@ -335,7 +336,7 @@ class TelegramBot(object):
         user_input = update.effective_message.text.split()
         self.actual_thresh["min_humidity_th"] = user_input[1]
 
-        requests.put("http://localhost:9090/setThresholds",
+        requests.put(f"http://{self.catalogIP}:{self.catalogPort}/setThresholds",
                      json=self.actual_thresh)
 
         context.bot.send_message(chat_id=update.effective_chat.id,
@@ -354,7 +355,7 @@ class TelegramBot(object):
         user_input = update.effective_message.text.split()
         self.actual_thresh["max_humidity_th"] = user_input[1]
 
-        requests.put("http://localhost:9090/setThresholds",
+        requests.put(f"http://{self.catalogIP}:{self.catalogPort}/setThresholds",
                      json=self.actual_thresh)
 
         context.bot.send_message(chat_id=update.effective_chat.id,
@@ -373,7 +374,7 @@ class TelegramBot(object):
         user_input = update.effective_message.text.split()
         self.actual_thresh["min_co2_th"] = user_input[1]
 
-        requests.put("http://localhost:9090/setThresholds",
+        requests.put(f"http://{self.catalogIP}:{self.catalogPort}/setThresholds",
                      json=self.actual_thresh)
 
         context.bot.send_message(chat_id=update.effective_chat.id,
@@ -392,7 +393,7 @@ class TelegramBot(object):
         user_input = update.effective_message.text.split()
         self.actual_thresh["max_co2_th"] = user_input[1]
 
-        requests.put("http://localhost:9090/setThresholds",
+        requests.put(f"http://{self.catalogIP}:{self.catalogPort}/setThresholds",
                      json=self.actual_thresh)
 
         context.bot.send_message(chat_id=update.effective_chat.id,
@@ -409,7 +410,7 @@ class TelegramBot(object):
 
     def optionThresholds(self, update, context):
 
-        res = requests.get("http://localhost:9090/thresholds")
+        res = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/thresholds")
         for elem in json.loads(res.text):
             if elem['type'] == self.category:
                 self.actual_thresh = elem
@@ -499,7 +500,7 @@ class TelegramBot(object):
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='Bye! Have a good day and come back to @Pynini soon. &#128400;',
                                  reply_markup=ReplyKeyboardRemove(), parse_mode='HTML')
-        requests.post("http://localhost:9090/removeBot",
+        requests.post(f"http://{self.catalogIP}:{self.catalogPort}/removeBot",
                       json={'ip': self.ip, 'chatID': self.chatID, 'last_seen': time.time()})
         print("Mi sono eliminato dal catalog")
         self.clientQuery.end()
@@ -562,5 +563,5 @@ if __name__=='__main__':
     ip = config['ip']
     port = config['port']
     data = requests.get(f"http://{ip}:{port}/telegramBot")
-    bot = TelegramBot(json.loads(data.text)["telegramPort"], json.loads(data.text)["token"], ip)
+    bot = TelegramBot(json.loads(data.text)["telegramPort"], json.loads(data.text)["token"], ip, port)
     bot.main()

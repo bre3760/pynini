@@ -69,7 +69,7 @@ class CaseControl(object):
                 
                 setBreadtype = {}
                 setBreadtype['breadtype'] = self.breadTypeChosen
-                setBreadtype['caseID'] = self.caseID
+                setBreadtype['caseID'] = self.clientID
                 requests.post("http://" + self.catalog_address + ":" + self.port_catalog + "/setBreadtype", json=setBreadtype)
 
                 print('CHANGING THRESHOLDS...')
