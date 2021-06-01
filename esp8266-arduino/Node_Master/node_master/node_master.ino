@@ -70,50 +70,53 @@ void setup() {
 }
 
 void loop() {
-
-
-  if (!client.connected()) {               // reconnecting to broker 
-    reconnect();
-  }
-  client.loop();
-
-  breadType = Wire.requestFrom(8,1);       // ask on line/bus 8 for 30 bits, then read while the wire gets data
-  String breadData="";
-  while(Wire.available()){
-    char c = Wire.read();
-//    Serial.print("This is c: ");
-//    Serial.print(c);
-//    Serial.print("\n");
-    breadData += c;
-  }
-
-    Serial.print("The Bread type from button is: ");
-    Serial.print(breadData);
-    Serial.print("\n");
-
-  String messageDescription = "bread_index" ;
-  String payload = "{";
-  payload +=  '"';
-  payload+= messageDescription;
-  payload+= '"';
-  payload += ":";
-  payload+='"';
-  payload+= breadData;
-  payload+='"';
-  payload += "}";
-
-  Serial.println("The payload is: ");
-  Serial.println(payload);
-  Serial.print("\n");
-
   
-  if( client.publish(breadTopic, payload.c_str()) ){
-        Serial.println("Message sent with mqtt");
-    } else {
-        Serial.print("Failed to send");
-    }
+    LightsOn(13);
+    delay(125*60);
+    LightsOff(13);
 
-  delay(125*60); // every 15 seconds
+//  if (!client.connected()) {               // reconnecting to broker 
+//    reconnect();
+//  }
+//  client.loop();
+//
+//  breadType = Wire.requestFrom(8,1);       // ask on line/bus 8 for 30 bits, then read while the wire gets data
+//  String breadData="";
+//  while(Wire.available()){
+//    char c = Wire.read();
+////    Serial.print("This is c: ");
+////    Serial.print(c);
+////    Serial.print("\n");
+//    breadData += c;
+//  }
+//
+//    Serial.print("The Bread type from button is: ");
+//    Serial.print(breadData);
+//    Serial.print("\n");
+//
+//  String messageDescription = "bread_index" ;
+//  String payload = "{";
+//  payload +=  '"';
+//  payload+= messageDescription;
+//  payload+= '"';
+//  payload += ":";
+//  payload+='"';
+//  payload+= breadData;
+//  payload+='"';
+//  payload += "}";
+//
+//  Serial.println("The payload is: ");
+//  Serial.println(payload);
+//  Serial.print("\n");
+//
+//  
+//  if( client.publish(breadTopic, payload.c_str()) ){
+//        Serial.println("Message sent with mqtt");
+//    } else {
+//        Serial.print("Failed to send");
+//    }
+//
+//  delay(125*60); // every 15 seconds
   
 }
 
@@ -123,7 +126,25 @@ void loop() {
 void LightsOn(int actuatorPin) {
       Serial.print("Switch turn on");
       Wire.beginTransmission(8); /* begin with device address 8 */
-      Wire.write("{\"gpio\":actuatorPin,\"state\":1}");  
+      String payload = "{";
+      payload +=  '"';
+      payload+= "gpio";
+      payload+= '"';
+      payload += ":";
+      payload+='"';
+      payload+= actuatorPin;
+      payload+='"';
+      payload+=',';
+      payload +=  '"';
+      payload+= "state";
+      payload+= '"';
+      payload += ":";
+      payload+='"';
+      payload+= 1;
+      payload+='"';
+      payload += "}";
+      //Wire.write("{\"gpio\":actuatorPin,\"state\":1}");  
+      Wire.write(payload);
       Wire.endTransmission();    /* stop transmitting */
 }
 

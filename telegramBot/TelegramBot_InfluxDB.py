@@ -82,8 +82,10 @@ class TelegramBot(object):
         return TYPOLOGY
 
     def selectCaseID(self, update, context):
-        # l'utente ha selezionato il case, vuole ricevere i dati relativi a tale case:
-        # devo selezionare il parametro: co2, temp, hum
+        '''
+            The user selects the case typing the caseID
+        '''
+
         user_input = update.effective_message.text.split()
         self.caseID = user_input[1]
         print("Chosen %s: ", self.caseID)
@@ -101,6 +103,9 @@ class TelegramBot(object):
 
 
     def checkPresence(self):
+        '''
+            Check if the selected caseID is present in the catalog
+        '''
 
         allCasesID = []
         r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/cases")
@@ -146,6 +151,9 @@ class TelegramBot(object):
         return TYPOLOGY
 
     def getParam(self, update, context):
+        '''
+            Once the caseID has been chosen, the user decides the parameter he wants to check (temperature, co2, humidity)
+        '''
         print("Ho selezionato il case ID: %s (getParam)", self.caseID)
 
         keyboard = [[InlineKeyboardButton("Temperature", callback_data='temperature'),
@@ -219,6 +227,9 @@ class TelegramBot(object):
 
 
     def selectedParam(self, update, context, query, keyboard_params):
+        '''
+            Data are retrieved from InfluxDB, where the measurements sent by sensors are stored 
+        '''
 
         param = query.data
 
@@ -258,6 +269,9 @@ class TelegramBot(object):
 
 
     def info(self, update, context):
+        '''
+            The user can see the actual thresholds, retrieve an info link about the bread typology or come back to the home menu
+        '''
 
         query = update.callback_query
 
@@ -409,6 +423,9 @@ class TelegramBot(object):
 
 
     def optionThresholds(self, update, context):
+        '''
+            The user can modify the thresholds
+        '''
 
         res = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/thresholds")
         for elem in json.loads(res.text):

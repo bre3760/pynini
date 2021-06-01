@@ -65,7 +65,7 @@ void loop() {
 
 void processCall(String command){
   
-      DynamicJsonDocument doc(1024);
+      DynamicJsonDocument doc(128);
       DeserializationError error =  deserializeJson(doc, command);
        if (error) {
         Serial.print("DeserializeJson() failed with code \n");

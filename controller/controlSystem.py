@@ -24,10 +24,10 @@ if __name__ == '__main__':
 
     # the broker IP and port are requested to the catalog REST service
     try:
-        r = requests.get("http://localhost:9090/broker_ip")
+        r = requests.get(f"http://{catalog_address}:{catalog_port}/broker_ip")
         print("Broker IP and port obtained from Catalog")
         broker_ip = json.loads(r.text)
-        r = requests.get("http://localhost:9090/broker_port")
+        r = requests.get(f"http://{catalog_address}:{catalog_port}/broker_port")
         broker_port = json.loads(r.text)
     except:
         print("REST service of catalog was not reachable")
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     topics = []
     try:
         # request to get all topics 
-        r = requests.get("http://localhost:9090/topics")
+        r = requests.get(f"http://{catalog_address}:{catalog_port}/topics")
         dict_of_topics = json.loads(r.text)
     except:
         print("REST service not active")
@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
 
     
-    r = requests.get("http://localhost:9090/cases")
+    r = requests.get(f"http://{catalog_address}:{catalog_port}/cases")
     dict_of_cases = json.loads(r.text)
 
     list_of_cases = [x["caseID"] for x in dict_of_cases]

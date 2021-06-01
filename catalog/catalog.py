@@ -284,8 +284,8 @@ class Catalog(object):
                     for d in catalog['cases']:
                         if d['caseID'] == caseID:
                            d["bread_type"] = breadtype
-                           print(breadtype+'AAAAAAAAAAAAAAAAAAAAAAAA')
-                    print(catalog['cases']['bread_type'])
+                           #print(breadtype+'AAAAAAAAAAAAAAAAAAAAAAAA')
+                    print([i['bread_type'] for i in catalog['cases']])
                     f.seek(0)
                     f.write(json.dumps(catalog, indent=4, sort_keys=True))
                     f.truncate()
