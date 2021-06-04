@@ -148,7 +148,7 @@ if __name__ == "__main__":
     influxDB = InfluxDB(json.loads(dataInfluxDB.text))
  
 
-    sensor = TemperatureHumiditySensor(sensor_caseID + 'TempHum', influxDB)
+    sensor = TemperatureHumiditySensor(sensor_caseID + 'TempHum', influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port )
 
     sensor.registerDevice()
     sensor.start()
