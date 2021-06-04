@@ -1,3 +1,4 @@
+#include <FS.h> //this needs to be first
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <Wire.h>
@@ -27,11 +28,11 @@ const int relayPin2 = 4;
 int breadType;
 
 // mqtt 
-const char* mqtt_server = "192.168.1.2"; // the raspberry ip
-const char* mqtt_username ="brendan";
-const char* mqtt_password = "pynini";
-const char* clientID = "esp-arduino";
-const char* topic = "breadType/";
+// const char* mqtt_server = "192.168.1.2"; // the raspberry ip
+// const char* mqtt_username ="brendan";
+// const char* mqtt_password = "pynini";
+// const char* clientID = "esp-arduino";
+// const char* topic = "breadType/";
 
 char breadTopic[10];
 char fanTopic[11];
@@ -39,15 +40,16 @@ char lampTopic[12];
 String breadTopicString;
 String fanTopicString;
 String lampTopicString;
-// http
 
-String rpi_ip = "192.168.1.2"; // the raspberry ip for http request
-String rpi_port ="9090";
+// http
+// String rpi_ip = "192.168.1.2"; // the raspberry ip for http request
+// String rpi_port ="9090";
 
 // Creation of an ESP8266WiFi object
 WiFiClient espClient;
 // Creation of a PubSubClient object
-PubSubClient client(mqtt_server,1883,espClient);
+// PubSubClient client(mqtt_server,1883,espClient);
+PubSubClient client(espClient);
 
 
 // NTP CURRENT TIME
@@ -62,9 +64,64 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 
 
+// config from file
+
+// MQTT pub/sub for the servo functions
+#define CLOUDMQTT_CONFIG  "/config.json"
+// these values are loaded from a config.json file in the data directory
+char mqtt_server[12] = "***********";
+char mqtt_username[8] = "*******";
+char mqtt_password[7] = "******";
+char clientID[12] = "***********";
+char rpi_ip[12]   = "***********";
+char rpi_port[5] = "****";
+
+char cloudmqtt_server[18] = "***.cloudmqtt.com";
+int  cloudmqtt_port       = 0;
+char cloudmqtt_user[9]    = "********";
+char cloudmqtt_pass[13]   = "************";
+
+
+
 void setup() {
   
   Serial.begin(115200);
+
+  // init values from file system
+  if (SPIFFS.begin()) {
+    Serial.println("mounted file system");
+
+    // parse json config file
+    File jsonFile = GetFile(CLOUDMQTT_CONFIG);
+    if (jsonFile) {
+      size_t size = jsonFile.size();
+      // Allocate a buffer to store contents of the file.
+      std::unique_ptr<char[]> jsonBuf(new char[size]);
+      jsonFile.readBytes(jsonBuf.get(), size);
+      DynamicJsonBuffer jsonBuffer;
+      JsonObject& json = jsonBuffer.parseObject(jsonBuf.get());
+
+      if (json.success()) {
+        strcpy(mqtt_server, json["broker_ip"]);
+        strcpy(mqtt_, json["broker_ip"]);    
+        strcpy(mqtt_username, json["mqtt_username"]);
+        strcpy(mqtt_password, json["mqtt_password"]);
+        strcpy(clientID, json["clientID"]);
+        strcpy(rpi_ip, json["rpi_ip"]);
+        strcpy(rpi_port, json["rpi_port"]);
+
+      } else {
+        Serial.println("failed to load json config");
+      }
+      jsonFile.close();
+    }
+  }
+
+
+
+
+
+
   connectWifi();                           // Initialise wifi connection
 
   int got_topics = 0;
@@ -73,7 +130,7 @@ void setup() {
   Serial.println("got_topics value: ");
   Serial.println(got_topics);
   
-  
+  client.setServer(broker_ip, broker_port);
   client.setCallback(callback);            // create callback function for mqtt
   
   Wire.begin(D1, D2);                      // join i2c bus with SDA=D1 and SCL=D2 of NodeMCU
