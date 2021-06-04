@@ -1,6 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <Wire.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
 #include <string.h>
@@ -47,6 +49,19 @@ WiFiClient espClient;
 // Creation of a PubSubClient object
 PubSubClient client(mqtt_server,1883,espClient);
 
+
+// NTP CURRENT TIME
+String currentHour = "";
+String currentMinute = "";
+const long utcOffsetInSeconds = 7200;
+
+char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+
+// Define NTP Client to get time
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
+
+
 void setup() {
   
   Serial.begin(115200);
@@ -61,60 +76,56 @@ void setup() {
   
   client.setCallback(callback);            // create callback function for mqtt
   
-  Wire.begin(D1, D2);                      // join i2c bus with SDA=D1 and SCL=D2 of NodeMCU 
+  Wire.begin(D1, D2);                      // join i2c bus with SDA=D1 and SCL=D2 of NodeMCU
+
+  
 }
 
 void loop() {
   
-    LightsOn(13);
-    delay(125*60);
-    LightsOff(13);
-    LightsOn(12);
-    delay(125*60);
-    LightsOff(12);
 
-//  if (!client.connected()) {               // reconnecting to broker 
-//    reconnect();
-//  }
-//  client.loop();
-//
-//  breadType = Wire.requestFrom(8,1);       // ask on line/bus 8 for 30 bits, then read while the wire gets data
-//  String breadData="";
-//  while(Wire.available()){
-//    char c = Wire.read();
-////    Serial.print("This is c: ");
-////    Serial.print(c);
-////    Serial.print("\n");
-//    breadData += c;
-//  }
-//
-//    Serial.print("The Bread type from button is: ");
-//    Serial.print(breadData);
+  if (!client.connected()) {               // reconnecting to broker 
+    reconnect();
+  }
+  client.loop();
+
+  breadType = Wire.requestFrom(8,1);       // ask on line/bus 8 for 30 bits, then read while the wire gets data
+  String breadData="";
+  while(Wire.available()){
+    char c = Wire.read();
+//    Serial.print("This is c: ");
+//    Serial.print(c);
 //    Serial.print("\n");
-//
-//  String messageDescription = "bread_index" ;
-//  String payload = "{";
-//  payload +=  '"';
-//  payload+= messageDescription;
-//  payload+= '"';
-//  payload += ":";
-//  payload+='"';
-//  payload+= breadData;
-//  payload+='"';
-//  payload += "}";
-//
-//  Serial.println("The payload is: ");
-//  Serial.println(payload);
-//  Serial.print("\n");
-//
-//  
-//  if( client.publish(breadTopic, payload.c_str()) ){
-//        Serial.println("Message sent with mqtt");
-//    } else {
-//        Serial.print("Failed to send");
-//    }
-//
-//  delay(125*60); // every 15 seconds
+    breadData += c;
+  }
+
+    Serial.print("The Bread type from button is: ");
+    Serial.print(breadData);
+    Serial.print("\n");
+
+  String messageDescription = "bread_index" ;
+  String payload = "{";
+  payload +=  '"';
+  payload+= messageDescription;
+  payload+= '"';
+  payload += ":";
+  payload+='"';
+  payload+= breadData;
+  payload+='"';
+  payload += "}";
+
+  Serial.println("The payload is: ");
+  Serial.println(payload);
+  Serial.print("\n");
+
+  
+  if( client.publish(breadTopic, payload.c_str()) ){
+        Serial.println("Message sent with mqtt");
+    } else {
+        Serial.print("Failed to send");
+    }
+
+  delay(125*60); // every 15 seconds
   
 }
 
@@ -137,7 +148,6 @@ void LightsOff(int actuatorPin) {
     Serial.print("Switch turn off \n");
     Wire.beginTransmission(8); /* begin with device address 8 */
 
-    
     if(actuatorPin == 13){
         Wire.write("{\"gpio\":13,\"state\":0}");  
       }
@@ -153,6 +163,13 @@ void LightsOff(int actuatorPin) {
 
 int httpConnect(char*, char*, char*)
   {
+    // NTP time
+    timeClient.begin();
+    // updating current time
+    timeClient.update();
+    currentHour = timeClient.getHours();
+    currentMinute = timeClient.getMinutes();
+    
     int postDone=0;
     if ((WiFi.status() == WL_CONNECTED)) {
       HTTPClient http; 
@@ -160,7 +177,7 @@ int httpConnect(char*, char*, char*)
       doc["name"] = "arduino";
       doc["ip"] = local_ip;
       doc["port"] = "8080";
-      doc["last_seen"] = "01:00";
+      doc["last_seen"] = currentHour + ":" + currentMinute;
       doc["dev_name"] = "arduino";
       doc["caseID"] = "CCC2";
       doc["sensorID"] = "arduino";

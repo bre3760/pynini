@@ -1,3 +1,4 @@
+from typing_extensions import Concatenate
 import paho.mqtt.client as PahoMQTT
 import time
 import json
@@ -9,25 +10,21 @@ sys.path.append("../../")
 from database.influxDB import InfluxDB
 from database.query import ClientQuery
 
-global CATALOG_ADDRESS
-global CATEGORY
-CATALOG_ADDRESS = "http://localhost:9090" # deciso che sarà una variabile globale, accessibile da tutti gli script di tutto il progetto
-CATEGORY = 'White'
 
 class TemperatureHumiditySensor:
-    def __init__(self, sensor, db):
+    def __init__(self, sensor, influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port):
         self.caseID, self.sensorID = sensor.split("-")
         self._paho_mqtt = PahoMQTT.Client(self.sensorID, False)
         self.influxDB = influxDB
-        self.sensorIP = "172.20.10.08"
-        self.sensorPort = 8080
+        self.sensorIP = sensor_ip
+        self.sensorPort = sensor_port
         self.category = "White"
 
         # register the callback
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
         self.messageBroker = ""
-        r = requests.get("http://localhost:9090/topics")
+        r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
         self.topic_temp = ""
         self.topic_hum= ""
         self.topicBreadType = json.loads(r.text)["breadType"]
@@ -72,7 +69,7 @@ class TemperatureHumiditySensor:
         sensor_dict["last_seen"] = time.time()
         sensor_dict["dev_name"] = 'rpi'
 
-        r = requests.post("http://localhost:9090/addSensor", json=sensor_dict)
+        r = requests.post(f"http://{catalog_ip}:{catalog_port}/addSensor", json=sensor_dict)
         dict_of_topics = json.loads(r.text)['topic']
         print("dict_of_topics",dict_of_topics)
         self.topic_temp = dict_of_topics["topic_temp"]
@@ -89,7 +86,7 @@ class TemperatureHumiditySensor:
         sensor_dict["name"] = self.sensorID
         sensor_dict["dev_name"] = 'rpi'
 
-        requests.post("http://localhost:9090/removeDevice", json=sensor_dict)
+        requests.post(f"http://{catalog_ip}:{catalog_port}/removeDevice", json=sensor_dict)
         print("[{}] Device Removed from Catalog".format(
             int(time.time()),
         ))
@@ -135,24 +132,23 @@ class TemperatureHumiditySensor:
 
 if __name__ == "__main__":
     
-    with open("config.json", 'r') as f:
-        config = json.load(f)
-        ip = config['ip']
-        port = config['port']
-    print("ip and port from config", ip, port)
+    with open("config.json", 'r') as sensor_f:
+        sensor_config = json.load(sensor_f)
+        sensor_ip = sensor_config['sensor_ip']
+        sensor_port = sensor_config['sensor_port']
+        sensor_caseID = sensor_config["caseID"]
+        catalog_ip = sensor_config['catalog_ip']
+        catalog_port = sensor_config['catalog_port']
+        influx_ip = sensor_config['influx_ip']
+        influx_port = sensor_config['influx_port']
 
-    dataInfluxDB = requests.get(f"http://{ip}:{port}/InfluxDB")
+
+
+
+    dataInfluxDB = requests.get(f"http://{influx_ip}:{influx_port}/InfluxDB")
     influxDB = InfluxDB(json.loads(dataInfluxDB.text))
 
-    sensor = TemperatureHumiditySensor('CCC2-TempHum', influxDB)
-    
-    with open("config.json", 'r') as f:
-        config = json.load(f)
-        ip = config['ip']
-        port = config['port']
-
-    dataInfluxDB = requests.get(f"http://{ip}:{port}/InfluxDB")
-    influxDB = InfluxDB(json.loads(dataInfluxDB.text))
+    sensor = TemperatureHumiditySensor(sensor_caseID + 'TempHum', influxDB)
 
     sensor.registerDevice()
     sensor.start()
@@ -183,3 +179,7 @@ if __name__ == "__main__":
 
     c = ClientQuery(sensor.sensorID, sensor.category)
     c.start()
+
+
+
+

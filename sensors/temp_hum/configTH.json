@@ -1,5 +1,5 @@
 {
-  "ipCatalog": "localhost",
+  "ipCatalog": "0.0.0.0",
   "catalogPort":"9090",
     "cases": [
         {

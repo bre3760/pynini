@@ -1,6 +1,8 @@
 {
     "HOST":"0.0.0.0",
     "PORT" : 9090, 
+    "catalog_ip":"0.0.0.0",
+    "catalog_port": 9090,
     "InfluxDB": {
         "bucket": "Pynini",
         "token": "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg==",
@@ -53,7 +55,7 @@
             }
         }
     ],
-    "catalog_port": 9090,
+    
     "db": {
         "host": "localhost",
         "nameDB": "mydatabase",
