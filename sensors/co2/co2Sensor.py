@@ -10,20 +10,19 @@ from database.query import ClientQuery
 from datetime import datetime
 
 class co2Sensor:
-	def __init__(self, sensor, influxDB):
-		# create an instance of pahqtt.client
+	def __init__(self, sensor, influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port):
 		self.caseID, self.sensorID = sensor.split("-")
 		self._paho_mqtt = PahoMQTT.Client(self.sensorID, False)
 		self.influxDB = influxDB
-		self.sensorIP =  "172.20.10.08"
-		self.sensorPort = 8080
+		self.sensorIP = sensor_ip
+		self.sensorPort = sensor_port
 		self.category = "White"
 
 		# register the callback
 		self._paho_mqtt.on_connect = self.myOnConnect
 		self._paho_mqtt.on_message = self.myOnMessageReceived
 		self.messageBroker = ""
-		r = requests.get("http://localhost:9090/topics")
+		r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
 		self.topic = ""
 		self.topicBreadType = json.loads(r.text)["breadType"]
 		self.message = {
@@ -86,8 +85,7 @@ class co2Sensor:
 		sensor_dict["dev_name"] = 'rpi'
 
 		print("type sensor_dict", sensor_dict, type(sensor_dict))
-
-		r = requests.post("http://localhost:9090/addSensor", json=sensor_dict)
+		r = requests.post(f"http://{catalog_ip}:{catalog_port}/addSensor", json=sensor_dict)
 		print("json.loads(r.text)", json.loads(r.text))
 		self.topic = json.loads(r.text)['topic']
 		self.messageBroker = json.loads(r.text)['broker_ip']
@@ -106,37 +104,43 @@ class co2Sensor:
 		sensor_dict["name"] = self.sensorID
 		sensor_dict["dev_name"] = 'rpi'
 
-		requests.post("http://localhost:9090/removeSensor", json=sensor_dict)
+		requests.post(f"http://{catalog_ip}:{catalog_port}/removeSensor", json=sensor_dict)
 		print("[{}] Device Removed from Catalog".format(
 			int(time.time()),
 		))
 
 if __name__ == "__main__":
 	
-	with open("config.json", 'r') as f:
-		config = json.load(f)
-		ip = config['ip']
-		port = config['port']
+	with open("config.json", 'r') as sensor_f:
+		sensor_config = json.load(sensor_f)
+		sensor_ip = sensor_config['sensor_ip']
+		sensor_port = sensor_config['sensor_port']
+		sensor_caseID = sensor_config["caseID"]
+		catalog_ip = sensor_config['catalog_ip']
+		catalog_port = sensor_config['catalog_port']
+		influx_ip = sensor_config['influx_ip']
+		influx_port = sensor_config['influx_port']
 
-	dataInfluxDB = requests.get(f"http://{ip}:{port}/InfluxDB")
+	dataInfluxDB = requests.get(f"http://{influx_ip}:{influx_port}/InfluxDB")
 	influxDB = InfluxDB(json.loads(dataInfluxDB.text))
 
-	sensor = co2Sensor('CCC2-co2', influxDB)
+	sensor = co2Sensor(sensor_caseID +'-'+ 'co2', influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port )
 	sensor.registerDevice()
 	sensor.start()
 
 	df = pd.read_csv('co2.csv', sep=',', decimal=',', index_col=0)
 	df.index = pd.to_datetime(df.index, unit='s')
+
 	for i in df.index:
 		for j in df.loc[i].items():
 			value = j[1]
 			sensor.message["measurement"] = sensor.sensorID
-			sensor.message["timestamp"]	= str(i)
-			sensor.message["value"]	= value
+			sensor.message["timestamp"] = str(i)
+			sensor.message["value"] = value
 			sensor.message["category"] = sensor.category
 			sensor.myPublish(sensor.message)
 			print('ho pubblicato:', sensor.message)
-			
+
 			time.sleep(10)
 
 	sensor.stop()
