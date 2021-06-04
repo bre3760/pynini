@@ -1,4 +1,3 @@
-from typing_extensions import Concatenate
 import paho.mqtt.client as PahoMQTT
 import time
 import json
@@ -147,6 +146,7 @@ if __name__ == "__main__":
 
     dataInfluxDB = requests.get(f"http://{influx_ip}:{influx_port}/InfluxDB")
     influxDB = InfluxDB(json.loads(dataInfluxDB.text))
+ 
 
     sensor = TemperatureHumiditySensor(sensor_caseID + 'TempHum', influxDB)
 
