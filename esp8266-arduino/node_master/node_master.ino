@@ -1,3 +1,4 @@
+#include <FS.h> //this needs to be first
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <Wire.h>
@@ -9,7 +10,6 @@
 #include <typeinfo>
 
 // function prototypes
-
 void connectWifi();
 int httpConnect(char*, char*, char*);
 void LightsOn(int actuatorPin);
@@ -17,8 +17,12 @@ void LightsOff(int actuatorPin);
 void callback(char* topic, byte* message, unsigned int length);
 
 // wifi variables and constants
-const char* ssid="McLovin";
-const char* password = "sCkjiSFb25p9rmKL";
+struct WifiConfig {
+  char ssid[8];
+  char password[17];
+};
+WifiConfig wifi_config;                         // <- global configuration object
+
 boolean wifiConnected = false;
 String local_ip;
 
@@ -28,11 +32,15 @@ const int relayPin2 = 4;
 int breadType;
 
 // mqtt 
-const char* mqtt_server = "192.168.1.2"; // the raspberry ip
-const char* mqtt_username ="brendan";
-const char* mqtt_password = "pynini";
-const char* clientID = "esp-arduino";
-const char* topic = "breadType/";
+struct MQTTConfig {
+  char mqtt_server[12];
+  int  mqtt_port;
+  char mqtt_username[8]; 
+  char mqtt_password[7]; 
+  char clientID[12]; 
+  char topic[11]; 
+};
+MQTTConfig mqtt_config;
 
 char breadTopic[10];
 char fanTopic[11];
@@ -42,20 +50,23 @@ String fanTopicString;
 String lampTopicString;
 
 // http
-String rpi_ip = "192.168.1.2"; // the raspberry ip for http request
-String rpi_port ="9090";
+struct HttpConfig {
+  char rpi_ip[12];
+  char rpi_port[5];
+};
+HttpConfig http_config;
 
 // Creation of an ESP8266WiFi object
 WiFiClient espClient;
 // Creation of a PubSubClient object
-PubSubClient client(mqtt_server,1883,espClient);
+// PubSubClient client(mqtt_server,1883,espClient);
+PubSubClient client(espClient);
 
 
 // NTP CURRENT TIME
 String currentHour = "";
 String currentMinute = "";
-const long utcOffsetInSeconds = 7200;
-
+const long utcOffsetInSeconds = 7200; // rome time zone
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 // Define NTP Client to get time
@@ -66,15 +77,91 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 void setup() {
   
   Serial.begin(115200);
+
+  // init values from file system
+  if(!SPIFFS.begin()){
+    Serial.println("An Error has occurred while mounting SPIFFS");
+    return;
+  }
+  if (SPIFFS.begin()) {
+    Serial.println("mounted file system");
+
+    File jsonFile = SPIFFS.open("/config.json", "r");
+    if(!jsonFile){
+      Serial.println("Failed to open file for reading");
+      return;
+    } else {
+      Serial.println("OPENED FILE");
+      String debugLogData;
+      while (jsonFile.available()){
+        debugLogData += char(jsonFile.read());
+      }
+      Serial.println("=====================================");
+      Serial.println("data from file");
+      Serial.println(debugLogData);
+      Serial.println("=====================================");
+
+
+      Serial.println("Proceding with value extraction");
+
+      StaticJsonDocument<1024> doc;
+
+      // Deserialize the JSON document
+      DeserializationError error = deserializeJson(doc, debugLogData);
+      if (error){
+        Serial.println("Failed to read file, using default configuration");
+      } else {
+        // Copy values from the JsonDocument to the Config
+
+        // WIFI CONFIG
+        strlcpy(wifi_config.ssid,                  
+                doc["wifi_ssid"] | "McLovin",     
+                sizeof(wifi_config.ssid));         
+        strlcpy(wifi_config.password,                           // <- destination
+                doc["wifi_password"] | "1234567890000000",      // <- source
+                sizeof(wifi_config.password));                  // <- destination's capacity
+  
+        //MQTT CONFIG
+        strlcpy(mqtt_config.mqtt_server,                  
+                doc["mqtt_server"] | "0.0.0.0",     
+                sizeof(mqtt_config.mqtt_server));
+  
+        mqtt_config.mqtt_port = doc["mqtt_port"] | 1883;      
+  
+        strlcpy(mqtt_config.mqtt_username,                  
+                doc["mqtt_username"] | "brendan",     
+                sizeof(mqtt_config.mqtt_username));
+        strlcpy(mqtt_config.mqtt_password,                  
+                doc["mqtt_password"] | "pynini",     
+                sizeof(mqtt_config.mqtt_password));
+        strlcpy(mqtt_config.clientID,                  
+                doc["clientID"] | "esp-arduino",     
+                sizeof(mqtt_config.clientID));
+  
+        //HTTP CONFIG
+        strlcpy(http_config.rpi_ip,                  
+                doc["rpi_ip"] | "192.168.1.2",     
+                sizeof(http_config.rpi_ip));
+        strlcpy(http_config.rpi_port,                  
+                doc["rpi_port"] | "9090",     
+                sizeof(http_config.rpi_port)); 
+      }
+      // Close the file (Curiously, File's destructor doesn't close the file)
+      jsonFile.close();      
+    }
+  }
+
   connectWifi();                           // Initialise wifi connection
 
   int got_topics = 0;
   got_topics = httpConnect(breadTopic,fanTopic,lampTopic);     // send post request to catalog 
+  
   delay(7000);
   Serial.println("got_topics value: ");
   Serial.println(got_topics);
   
-  
+  client.setServer(mqtt_config.mqtt_server, mqtt_config.mqtt_port);
+
   client.setCallback(callback);            // create callback function for mqtt
   
   Wire.begin(D1, D2);                      // join i2c bus with SDA=D1 and SCL=D2 of NodeMCU
@@ -84,7 +171,6 @@ void setup() {
 
 void loop() {
   
-
   if (!client.connected()) {               // reconnecting to broker 
     reconnect();
   }
@@ -94,15 +180,11 @@ void loop() {
   String breadData="";
   while(Wire.available()){
     char c = Wire.read();
-//    Serial.print("This is c: ");
-//    Serial.print(c);
-//    Serial.print("\n");
     breadData += c;
   }
-
-    Serial.print("The Bread type from button is: ");
-    Serial.print(breadData);
-    Serial.print("\n");
+  Serial.print("The Bread type from button is: ");
+  Serial.print(breadData);
+  Serial.print("\n");
 
   String messageDescription = "bread_index" ;
   String payload = "{";
@@ -164,10 +246,8 @@ void LightsOff(int actuatorPin) {
 
 int httpConnect(char*, char*, char*)
   {
-    // NTP time
-    timeClient.begin();
-    // updating current time
-    timeClient.update();
+    timeClient.begin();     // NTP time
+    timeClient.update();     // updating current time
     currentHour = timeClient.getHours();
     currentMinute = timeClient.getMinutes();
     
@@ -185,7 +265,7 @@ int httpConnect(char*, char*, char*)
       String jsonData;
       serializeJson(doc,jsonData);
       int httpCode;
-      String urlForPost = "http://" + rpi_ip + ":"+rpi_port + "/addSensor";
+      String urlForPost = "http://" + String(http_config.rpi_ip) + ":"+ String(http_config.rpi_port) + "/addSensor";
       http.useHTTP10(true);
       http.begin(espClient,urlForPost); 
       http.addHeader("Content-Type", "application/json");
@@ -195,7 +275,7 @@ int httpConnect(char*, char*, char*)
 
       if (httpCode > 0) {
         Serial.printf("[HTTP] POST... code: %d\n", httpCode);
-        if (httpCode == 200) { // status 200
+        if (httpCode == 200) {            // status 200
           postDone = 1;
           DynamicJsonDocument docReceived(1024);
           DeserializationError error =  deserializeJson(docReceived, http.getStream());
@@ -212,24 +292,15 @@ int httpConnect(char*, char*, char*)
             strncpy(fanTopic,fanTopicInside,sizeof(fanTopic));
             strncpy(lampTopic,lampTopicInside,sizeof(lampTopic));
             strncpy(breadTopic,breadTopicInside,sizeof(breadTopic));
-
-    
           }           
-//          const String& payload = http.getString();
-//          Serial.println("received payload:\n<<");
-//          Serial.println(payload);
-//          Serial.println(">>");
-            
         }
-        if (httpCode == 404) { // status 404
+        if (httpCode == 404) {            // status 404
           Serial.println("ERROR 404");
         }
-        } else {
-          Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
+      } else {
+        Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
       }
-    
-      http.end(); // closing the HTTP connection
-      
+      http.end();                         // closing the HTTP connection
       Serial.println("Done Connecting");
     }
     return postDone;
@@ -241,7 +312,7 @@ int httpConnect(char*, char*, char*)
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 void connectWifi(){
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+  WiFi.begin(wifi_config.ssid, wifi_config.password);
 
   Serial.print("Connecting ...");                // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
@@ -319,7 +390,7 @@ void reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
-    if (client.connect(clientID, mqtt_username,mqtt_password)) {
+    if (client.connect(mqtt_config.clientID, mqtt_config.mqtt_username, mqtt_config.mqtt_password)) {
       Serial.println("connected");
       // Once connected, resubscribe to desired topics
       client.subscribe("trigger/light");
