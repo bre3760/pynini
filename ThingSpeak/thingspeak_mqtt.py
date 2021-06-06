@@ -36,6 +36,7 @@ class ThingSpeakConnector:
 
     # device starting
     def start(self):
+        self.client_obj.username_pw_set(username="brendan", password="pynini")
 
         self.client_obj.connect(self.broker_address, int(self.port1), int(self.port2))
         self.client_obj.loop_start()
