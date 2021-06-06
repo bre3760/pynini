@@ -97,23 +97,18 @@ void setup() {
 
     // parse json config file
     // File jsonFile = GetFile(CLOUDMQTT_CONFIG);
-    File jsonFile = SPIFFS.open("/config.json", "r");
+    File jsonFile = SPIFFS.open("/config.txt", "r");
     if(!jsonFile){
       Serial.println("Failed to open file for reading");
       return;
     }
     if (jsonFile) {
       Serial.println("OPENED FILE");
-//      size_t size = jsonFile.size();
-//      // Allocate a buffer to store contents of the file.
-//      std::unique_ptr<char[]> jsonBuf(new char[size]);
-//      jsonFile.readBytes(jsonBuf.get(), size);
-//      DynamicJsonBuffer jsonBuffer;
-//      JsonObject& json = jsonBuffer.parseObject(jsonBuf.get());
-    String fileAsString;
-    while (f.available()){
-      fileAsString += char(f.read());
-    }
+      String fileAsString;
+      while (jsonFile.available()){
+        Serial.write(jsonFile.read());
+        fileAsString += char(jsonFile.read());
+      }
     DynamicJsonDocument doc(1024);
     DeserializationError error =  deserializeJson(doc, fileAsString);
     if (error) {
