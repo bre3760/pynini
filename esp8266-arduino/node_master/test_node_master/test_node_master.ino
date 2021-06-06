@@ -18,8 +18,8 @@ void callback(char* topic, byte* message, unsigned int length);
 
 // variables and constants
 
-const char* ssid="McLovin";
-const char* password = "sCkjiSFb25p9rmKL";
+// const char* ssid="McLovin";
+// const char* password = "sCkjiSFb25p9rmKL";
 boolean wifiConnected = false;
 String local_ip;
 
@@ -32,7 +32,7 @@ int breadType;
 // const char* mqtt_username ="brendan";
 // const char* mqtt_password = "pynini";
 // const char* clientID = "esp-arduino";
-// const char* topic = "breadType/";
+const char* topic = "breadType/";
 
 char breadTopic[10];
 char fanTopic[11];
@@ -70,16 +70,16 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 #define CLOUDMQTT_CONFIG  "/config.json"
 // these values are loaded from a config.json file in the data directory
 char mqtt_server[12] = "***********";
+char mqtt_port[5] = "****";
+char broker_ip[12] = "***********";
+int broker_port = 0;
 char mqtt_username[8] = "*******";
 char mqtt_password[7] = "******";
 char clientID[12] = "***********";
 char rpi_ip[12]   = "***********";
 char rpi_port[5] = "****";
-
-char cloudmqtt_server[18] = "***.cloudmqtt.com";
-int  cloudmqtt_port       = 0;
-char cloudmqtt_user[9]    = "********";
-char cloudmqtt_pass[13]   = "************";
+char ssid[8] = "*******";
+char password[17] = "****************";
 
 
 
@@ -88,6 +88,10 @@ void setup() {
   Serial.begin(115200);
 
   // init values from file system
+  if(!SPIFFS.begin()){
+    Serial.println("An Error has occurred while mounting SPIFFS");
+    return;
+  }
   if (SPIFFS.begin()) {
     Serial.println("mounted file system");
 
@@ -98,28 +102,32 @@ void setup() {
       // Allocate a buffer to store contents of the file.
       std::unique_ptr<char[]> jsonBuf(new char[size]);
       jsonFile.readBytes(jsonBuf.get(), size);
-      DynamicJsonBuffer jsonBuffer;
-      JsonObject& json = jsonBuffer.parseObject(jsonBuf.get());
-
-      if (json.success()) {
-        strcpy(mqtt_server, json["broker_ip"]);
-        strcpy(mqtt_, json["broker_ip"]);    
-        strcpy(mqtt_username, json["mqtt_username"]);
-        strcpy(mqtt_password, json["mqtt_password"]);
-        strcpy(clientID, json["clientID"]);
-        strcpy(rpi_ip, json["rpi_ip"]);
-        strcpy(rpi_port, json["rpi_port"]);
-
-      } else {
-        Serial.println("failed to load json config");
+//      DynamicJsonBuffer jsonBuffer;
+//      JsonObject& json = jsonBuffer.parseObject(jsonBuf.get());
+    DynamicJsonDocument doc(1024);
+    DeserializationError error =  deserializeJson(doc, jsonBuf.get());
+    if (error) {
+      Serial.print("DeserializeJson() failed with code \n");
+      Serial.print(error.c_str());
       }
-      jsonFile.close();
+    else {
+      strcpy(mqtt_server, doc["broker_ip"]);
+      strcpy(mqtt_port, doc["broker_port"]);
+      strcpy(broker_ip, doc["broker_ip"]);
+      broker_port = doc["broker_port"];
+      strcpy(mqtt_username, doc["mqtt_username"]);
+      strcpy(mqtt_password, doc["mqtt_password"]);
+      strcpy(clientID, doc["clientID"]);
+      strcpy(rpi_ip, doc["rpi_ip"]);
+      strcpy(rpi_port, doc["rpi_port"]);
+      strcpy(ssid, doc["wifi_ssid"]);
+      strcpy(password, doc["wifi_password"]);
+      
+    }
+          
+    jsonFile.close();
     }
   }
-
-
-
-
 
 
   connectWifi();                           // Initialise wifi connection
@@ -241,7 +249,7 @@ int httpConnect(char*, char*, char*)
       String jsonData;
       serializeJson(doc,jsonData);
       int httpCode;
-      String urlForPost = "http://" + rpi_ip + ":"+rpi_port + "/addSensor";
+      String urlForPost = "http://" + String(rpi_ip) + ":"+ String(rpi_port) + "/addSensor";
       http.useHTTP10(true);
       http.begin(espClient,urlForPost); 
       http.addHeader("Content-Type", "application/json");
@@ -387,4 +395,19 @@ void reconnect() {
       delay(5000); // retry in 5 seconds
     }
   }
+}
+
+
+  
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+//      READ FILE 
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+File GetFile(String fileName) {
+  File textFile;
+  if (SPIFFS.exists(fileName)) {
+    textFile = SPIFFS.open(fileName, "r");
+  }
+  return textFile;
 }

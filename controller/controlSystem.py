@@ -16,18 +16,18 @@ if __name__ == '__main__':
     with open("config.json", 'r') as f:
         config_dict = json.load(f)
         catalog_port = config_dict["catalog_port"]
-        catalog_address = config_dict["catalog_address"]
+        catalog_ip = config_dict["catalog_ip"]
         caseID = config_dict["caseID"]
 
 
-    broker_url = "http://" + catalog_address + ":" + str(catalog_port) + "/broker"
+    broker_url = "http://" + catalog_ip + ":" + str(catalog_port) + "/broker"
 
     # the broker IP and port are requested to the catalog REST service
     try:
-        r = requests.get(f"http://{catalog_address}:{catalog_port}/broker_ip")
+        r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip")
         print("Broker IP and port obtained from Catalog")
         broker_ip = json.loads(r.text)
-        r = requests.get(f"http://{catalog_address}:{catalog_port}/broker_port")
+        r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_port")
         broker_port = json.loads(r.text)
     except:
         print("REST service of catalog was not reachable")
@@ -49,29 +49,31 @@ if __name__ == '__main__':
     topics = []
     try:
         # request to get all topics 
-        r = requests.get(f"http://{catalog_address}:{catalog_port}/topics")
+        r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
         dict_of_topics = json.loads(r.text)
     except:
         print("REST service not active")
 
     for key, value in dict_of_topics.items():
         if key == "TempHum" or key == "arduino":
-            # for k, v in value.items():
-            #     topics.append(v)
-            continue
+            for k, v in value.items():
+                if v not in topics:
+                    topics.append(v)
         else:
-            topics.append(value)
+            if value not in topics:
+                topics.append(value)
+
     print("topics that the controller subscribed to: \n",topics)
 
 
     
-    r = requests.get(f"http://{catalog_address}:{catalog_port}/cases")
+    r = requests.get(f"http://{catalog_ip}:{catalog_port}/cases")
     dict_of_cases = json.loads(r.text)
 
     list_of_cases = [x["caseID"] for x in dict_of_cases]
     print("Connected cases id: ", list_of_cases)
 
-    controllers = [CaseControl(i, broker_ip, broker_port, catalog_address, catalog_port, topics) for i in list_of_cases]
+    controllers = [CaseControl(i, broker_ip, broker_port, catalog_ip, catalog_port, topics) for i in list_of_cases]
 
     for obj in controllers:
         obj.run()
@@ -80,7 +82,7 @@ if __name__ == '__main__':
             obj.myMqttClient.mySubscribe(topic)
 
     # initiate class of CaseControl which houses all necessary functions
-    #case_controller = CaseControl("Case controller", broker_ip, broker_port, catalog_address, catalog_port, caseID)
+    #case_controller = CaseControl("Case controller", broker_ip, broker_port, catalog_ip, catalog_port, caseID)
     #case_controller.run()
 
     # subscribe the case controller to all topics
@@ -102,13 +104,18 @@ if __name__ == '__main__':
                 obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"off"}))
             else:
                 obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
+            
+            if obj.isCO2Valid():
+                obj.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "on"}))
+            else:
+                obj.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "off"}))
 
-        # if case_controller.isCO2Valid():
-        #     case_controller.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "on"}))
-        #     # print("Ho acceso la lampada")
-        # else:
-        #     case_controller.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "off"}))
-        #     # print("Ho spento la lampada")
+        #  if case_controller.isCO2Valid():
+        #      case_controller.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "on"}))
+        #      # print("Ho acceso la lampada")
+        #  else:
+        #      case_controller.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "off"}))
+        #      # print("Ho spento la lampada")
 
         time.sleep(7)
         

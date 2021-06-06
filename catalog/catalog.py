@@ -30,7 +30,7 @@ class Catalog(object):
             return json.dumps(catalog["cases"])
         elif uri[0] == "catalog_port":
             return json.dumps(catalog["catalog_port"])
-        elif uri[0] == "category":
+        elif uri[0] == "category": # cat
             res = []
             for d in catalog['cases']:
                 if d['caseID'] == params['caseID']:

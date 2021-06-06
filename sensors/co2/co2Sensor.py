@@ -118,10 +118,8 @@ if __name__ == "__main__":
 		sensor_caseID = sensor_config["caseID"]
 		catalog_ip = sensor_config['catalog_ip']
 		catalog_port = sensor_config['catalog_port']
-		influx_ip = sensor_config['influx_ip']
-		influx_port = sensor_config['influx_port']
 
-	dataInfluxDB = requests.get(f"http://{influx_ip}:{influx_port}/InfluxDB")
+	dataInfluxDB = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
 	influxDB = InfluxDB(json.loads(dataInfluxDB.text))
 
 	sensor = co2Sensor(sensor_caseID +'-'+ 'co2', influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port )

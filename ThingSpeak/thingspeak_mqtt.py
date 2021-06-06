@@ -62,16 +62,7 @@ class ThingSpeakConnector:
         if (message.topic == "measure/co2"):
             print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(message.payload) + "'")
             data = json.loads(message.payload)
-            # json_body = [
-            #     {
-            #         "measurement": data['measurement'],
-            #         "time": data['time_stamp'],
-            #         "fields":
-            #             {
-            #                 "value": data['value']
-            #             }
-            #     }
-            # ]
+
             self.field1_data = data['value']
             self.timestamp = data['time_stamp']
 
@@ -79,16 +70,7 @@ class ThingSpeakConnector:
              print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(
                  message.payload) + "'")
              data = json.loads(message.payload)
-             # json_body = [
-             #     {
-             #         "measurement": data['measurement'],
-             #         "time": data['time_stamp'],
-             #         "fields":
-             #             {
-             #                 "value": data['value']
-             #             }
-             #     }
-             # ]
+
              self.field2_data = data['value']
              self.timestamp = data['time_stamp']
 
@@ -96,44 +78,34 @@ class ThingSpeakConnector:
              print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(
                  message.payload) + "'")
              data = json.loads(message.payload)
-             # json_body = [
-             #     {
-             #         "measurement": data['measurement'],
-             #         "time": data['time_stamp'],
-             #         "fields":
-             #             {
-             #                 "value": data['value']
-             #             }
-             #     }
-             # ]
+ 
              self.field3_data = data['value']
              self.timestamp = data['time_stamp']
-
-def dataAcquisition():
-    data = requests.get("http://localhost:9090/thingspeak")
-    #devices_list = requests.get("http://localhost:9090/activeDev")
-    #active_devices = []
-    #for dev in json.loads(devices_list.text):
-    #    active_devices.append(dev['name'])
-    #print(active_devices)
-    active_devices = []
-
-    return data, active_devices
 
 # main function
 if __name__ == '__main__':
 
     headers = {'Content-type': 'application/json', 'Accept': 'raw'}
-    #cnt+=1
     topics = []
-    data, active_devices = dataAcquisition()
-    r = requests.get("http://localhost:9090/topics")
-    #print(json.loads(r.text))
-    dict_of_topics = json.loads(r.text)
-    print("dict_of_topics",dict_of_topics)
-    topics.append(dict_of_topics["co2"])
-    topics.append(dict_of_topics['TempHum']["topic_temp"])
-    topics.append(dict_of_topics['TempHum']["topic_hum"])
+
+    with open("config.json", 'r') as thingspeak_f:
+        dict_config = json.load(thingspeak_f)
+        catalog_ip = dict_config['catalog_ip']
+        catalog_port = dict_config['catalog_port']
+
+    data = requests.get(f"http://{catalog_ip}:{catalog_port}/thingspeak")
+    r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
+    dict_topics = json.loads(r.text)
+
+    for key, value in dict_topics.items():
+        if key == "TempHum" or key == "arduino":
+            for k, v in value.items():
+                if v not in topics:
+                    topics.append(v)
+        else:
+            if value not in topics:
+                topics.append(value)
+
     tsa = ThingSpeakConnector(data, topics)
     tsa.start()
 
@@ -160,7 +132,6 @@ if __name__ == '__main__':
         tsa.field3_data = None
 
         time.sleep(10)  # check for updates every 30sec
-        #cnt += 1  # update the entry id
         t += 1
 
     tsa.stop()

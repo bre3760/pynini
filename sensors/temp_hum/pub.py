@@ -110,23 +110,23 @@ class TemperatureHumiditySensor:
         except Exception as e:
             print(e)
 
-    def insertDataTemp(self, data):
-        '''
-        :param data: dictionary whose keys represent the time, the value of the measurement and the type of bread
-        :return: record these data in the table related to the sensor
-        '''
-        sql = "INSERT INTO temperature (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
-        self.db.cursor.execute(sql, [data["timestamp"], data["value"], data["typology"]])
-        self.db.db.commit()
+    # def insertDataTemp(self, data):
+    #     '''
+    #     :param data: dictionary whose keys represent the time, the value of the measurement and the type of bread
+    #     :return: record these data in the table related to the sensor
+    #     '''
+    #     sql = "INSERT INTO temperature (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
+    #     self.db.cursor.execute(sql, [data["timestamp"], data["value"], data["typology"]])
+    #     self.db.db.commit()
     
-    def insertDataHum(self, data):
-        '''
-        :param data: dictionary whose keys represent the time, the value of the measurement and the type of bread
-        :return: record these data in the table related to the sensor
-        '''
-        sql = "INSERT INTO temperature (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
-        self.db.cursor.execute(sql, [data["timestamp"], data["value"], data["typology"]])
-        self.db.db.commit()
+    # def insertDataHum(self, data):
+    #     '''
+    #     :param data: dictionary whose keys represent the time, the value of the measurement and the type of bread
+    #     :return: record these data in the table related to the sensor
+    #     '''
+    #     sql = "INSERT INTO temperature (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
+    #     self.db.cursor.execute(sql, [data["timestamp"], data["value"], data["typology"]])
+    #     self.db.db.commit()
 
 
 if __name__ == "__main__":
@@ -138,13 +138,9 @@ if __name__ == "__main__":
         sensor_caseID = sensor_config["caseID"]
         catalog_ip = sensor_config['catalog_ip']
         catalog_port = sensor_config['catalog_port']
-        influx_ip = sensor_config['influx_ip']
-        influx_port = sensor_config['influx_port']
 
 
-
-
-    dataInfluxDB = requests.get(f"http://{influx_ip}:{influx_port}/InfluxDB")
+    dataInfluxDB = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
     influxDB = InfluxDB(json.loads(dataInfluxDB.text))
  
 
