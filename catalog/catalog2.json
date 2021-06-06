@@ -73,7 +73,7 @@
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
     },
     "thingspeak": {
-        "broker_ip": "broker.emqx.io",
+        "broker_ip": "127.0.0.1",
         "channel": "1327196",
         "name": "pynini",
         "port1": "1883",
