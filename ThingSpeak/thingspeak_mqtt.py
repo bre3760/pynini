@@ -65,7 +65,7 @@ class ThingSpeakConnector:
             data = json.loads(message.payload)
 
             self.field1_data = data['value']
-            self.timestamp = data['time_stamp']
+            self.timestamp = data['timestamp']
 
         elif (message.topic == "measure/temperature"):
              print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(
@@ -73,7 +73,7 @@ class ThingSpeakConnector:
              data = json.loads(message.payload)
 
              self.field2_data = data['value']
-             self.timestamp = data['time_stamp']
+             self.timestamp = data['timestamp']
 
         elif (message.topic == "measure/humidity"):
              print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(
@@ -81,7 +81,7 @@ class ThingSpeakConnector:
              data = json.loads(message.payload)
  
              self.field3_data = data['value']
-             self.timestamp = data['time_stamp']
+             self.timestamp = data['timestamp']
 
 # main function
 if __name__ == '__main__':
