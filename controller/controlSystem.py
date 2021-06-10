@@ -100,7 +100,7 @@ if __name__ == '__main__':
         control system algorithm that continually checks if the values are within the desired ranges
         """
         for obj in controllers:
-            # obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
+            obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
 
             obj.myMqttClient.myPublish("trigger/lamp", json.dumps({"message":"on"}))
 
