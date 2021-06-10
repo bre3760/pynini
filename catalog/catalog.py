@@ -131,7 +131,7 @@ class Catalog(object):
                     with open('catalog2.json', 'r+') as f:
                         catalog = json.load(f)
                         try:
-                            chatID = new_bot_info['chatID']
+                            chatID = new_bot_info['chat_ID']
                             ip = new_bot_info['ip']
                             last_seen = new_bot_info['last_seen']
                             #dev_name = 'rpi'
@@ -139,10 +139,10 @@ class Catalog(object):
                             f.close()
                             raise cherrypy.HTTPError(400, 'Bad request')
 
-                        new_bot = {'chatID': chatID, 'ip': ip, 'last_seen': last_seen}
+                        new_bot = {'chat_ID': chatID, 'ip': ip, 'last_seen': last_seen}
 
                         for d in catalog['bots']:
-                            if d['chatID'] == chatID:
+                            if d['chat_ID'] == chatID:
                                 catalog['bots'].pop(catalog['bots'].index(d))
 
                         catalog['bots'].append(new_bot)
@@ -152,7 +152,7 @@ class Catalog(object):
                         f.write(json.dumps(catalog, indent=4, sort_keys=True))
                         f.truncate()
                         f.close()
-                        print(f'${new_bot["chatID"]} - added to the catalog')
+                        print(f'${new_bot["chat_ID"]} - added to the catalog')
 
                 except KeyError:
                     raise cherrypy.HTTPError(404, 'The catalog file was not found')

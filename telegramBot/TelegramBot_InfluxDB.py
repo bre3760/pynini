@@ -65,7 +65,7 @@ class TelegramBot(object):
         self._paho_mqtt.loop_start()
 
         self.chatID = update.message.chat_id
-        requests.post(f"http://{self.catalogIP}:{self.catalogPort}/addBot", json={'ip': self.catalogIP, 'chatID': self.chatID, 'last_seen': time.time()})
+        requests.post(f"http://{self.catalogIP}:{self.catalogPort}/addBot", json={'ip': self.catalogIP, 'chat_ID': self.chatID, 'last_seen': time.time()})
         print("Mi sono registrato al catalog")
 
         update.message.reply_text(

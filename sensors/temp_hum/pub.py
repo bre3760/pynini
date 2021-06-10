@@ -126,15 +126,16 @@ if __name__ == "__main__":
         while True:
             # read temperature and humidity
             humidity, temperature = Adafruit_DHT.read_retry(11, 4)  # (sensor,pin)
+            if humidity < 100:
 
-            print('Temp: {0:0.1f} °C  Humidity: {1:0.1f} %'.format(temperature, humidity))
+                print('Temp: {0:0.1f} °C  Humidity: {1:0.1f} %'.format(temperature, humidity))
 
-            payload_temp = {"caseID":sensor.caseID, "measurement": "temperature", "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "value": str(temperature), "category": sensor.category }
-            time.sleep(1)
-            payload_hum  = {"caseID":sensor.caseID, "measurement": "humidity", "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "value": str(humidity), "category": sensor.category}
+                payload_temp = {"caseID":sensor.caseID, "measurement": "temperature", "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "value": str(temperature), "category": sensor.category }
+                time.sleep(1)
+                payload_hum  = {"caseID":sensor.caseID, "measurement": "humidity", "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "value": str(humidity), "category": sensor.category}
 
-            sensor.myPublish(sensor.topic_temp, payload_temp)
-            sensor.myPublish(sensor.topic_hum, payload_hum)
+                sensor.myPublish(sensor.topic_temp, payload_temp)
+                sensor.myPublish(sensor.topic_hum, payload_hum)
 
             
 
