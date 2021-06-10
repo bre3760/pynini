@@ -8,7 +8,7 @@ class ClientQuery():
         self.sensor = sensor
         self.caseID = caseID
         self.category = category
-        dataInfluxDB = requests.get("http://localhost:9090/InfluxDB")
+        dataInfluxDB = requests.get("http://192.168.1.2:9090/InfluxDB")
         self.url = json.loads(dataInfluxDB.text)['url']
         self.token = json.loads(dataInfluxDB.text)['token']
         self.bucket = json.loads(dataInfluxDB.text)['bucket']
@@ -87,9 +87,3 @@ class ClientQuery():
 
     def end(self):
         self.client.close()
-
-if __name__ == "__main__":
-     c = ClientQuery('humidity', 'White', 'CCC2')
-     values = c.getData()
-     print("getData CCC2", values)
-     res = c.getBest()

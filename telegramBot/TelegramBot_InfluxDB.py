@@ -1,5 +1,9 @@
 from telegram import (ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackQueryHandler)
+import sys
+sys.path.append('../')
+import os
+
 from database.query import ClientQuery
 import requests
 import logging
@@ -52,7 +56,7 @@ class TelegramBot(object):
         self._paho_mqtt = PahoMQTT.Client("bot", False)
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
-        r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/broker_ip")
+        r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/broker_ip_outside")
         self.messageBroker = json.loads(r.text)
         r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/active_arduino")
         self.topics = json.loads(r.text)
@@ -518,7 +522,7 @@ class TelegramBot(object):
                                  text='Bye! Have a good day and come back to @Pynini soon. &#128400;',
                                  reply_markup=ReplyKeyboardRemove(), parse_mode='HTML')
         requests.post(f"http://{self.catalogIP}:{self.catalogPort}/removeBot",
-                      json={'ip': self.ip, 'chatID': self.chatID, 'last_seen': time.time()})
+                      json={'ip': self.catalogIP, 'chat_ID': self.chatID, 'last_seen': time.time()})
         print("Mi sono eliminato dal catalog")
         self.clientQuery.end()
         

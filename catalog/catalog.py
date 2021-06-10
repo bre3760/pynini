@@ -200,16 +200,16 @@ class Catalog(object):
                 with open('catalog2.json', 'r+') as f:
                     catalog = json.load(f)
                     try:
-                        chatID = new_bot_info['chatID']
-                        print("chatID", chatID)
+                        chat_ID = new_bot_info['chat_ID']
+                        print("chat_ID", chat_ID)
                     except KeyError:
                         f.close()
                         raise cherrypy.HTTPError(400, 'Bad request')
 
                     found = False
                     for d in catalog['bots']:
-                        if d['chatID'] == chat_ID:
-                            print(d['chatID'], chat_ID)
+                        if d['chat_ID'] == chat_ID:
+                            print(d['chat_ID'], chat_ID)
                             catalog['bots'].pop(catalog['bots'].index(d))
                             found = True
 
