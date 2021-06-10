@@ -101,36 +101,6 @@ class TemperatureHumiditySensor:
             self.category = self.breadCategories[int(json.loads(msg.payload)['bread_index'])]
             print("bread_index", self.category)
 
-        try:
-            data = json.loads(msg.payload)
-            if msg.topic == self.topic_temp:
-                self.insertDataTemp(data)
-            elif msg.topic == self.topic_hum:
-                self.insertDataHum(data)
-
-            print("INFLUXDB", self.message)
-
-        except Exception as e:
-            print(e)
-
-    # def insertDataTemp(self, data):
-    #     '''
-    #     :param data: dictionary whose keys represent the time, the value of the measurement and the type of bread
-    #     :return: record these data in the table related to the sensor
-    #     '''
-    #     sql = "INSERT INTO temperature (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
-    #     self.db.cursor.execute(sql, [data["timestamp"], data["value"], data["typology"]])
-    #     self.db.db.commit()
-    
-    # def insertDataHum(self, data):
-    #     '''
-    #     :param data: dictionary whose keys represent the time, the value of the measurement and the type of bread
-    #     :return: record these data in the table related to the sensor
-    #     '''
-    #     sql = "INSERT INTO temperature (TIMESTAMP, VALUE, TYPE) values (%s,%s,%s)"
-    #     self.db.cursor.execute(sql, [data["timestamp"], data["value"], data["typology"]])
-    #     self.db.db.commit()
-
 
 if __name__ == "__main__":
     

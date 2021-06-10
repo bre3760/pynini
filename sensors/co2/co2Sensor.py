@@ -66,12 +66,6 @@ class co2Sensor:
 			
 			print("bread_index",self.category)
 
-		try:
-			data=json.loads(msg.payload)
-			print("INFLUXDB", self.message)
-
-		except Exception as e:
-			print(e)
 
 	def registerDevice(self):
 		'''
