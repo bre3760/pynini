@@ -358,18 +358,18 @@ void callback(char* topic, byte* message, unsigned int length) {
       Serial.println("turning on the fan");
       LightsOn(13);
     }
-    else if(messageFromMQTT == "off"){
+    else if(strcmp(messageFromMQTT, "off") == 0){
       Serial.println("turning off the fan");
       LightsOff(13);
     }
   }
-  if (String(topic) == "trigger/lamp") {
+  if (strcmp(topic, "trigger/lamp") == 0) {
     Serial.print("Changing lamp output to ");
-    if(messageFromMQTT == "on"){
-      Serial.println("lamp on");
+    if(strcmp(messageFromMQTT, "on") == 0){
+      Serial.println("turning lamp on");
       LightsOn(12);
     }
-    else if(messageFromMQTT == "off"){
+    else if(strcmp(messageFromMQTT, "off") == 0){
       Serial.println("lamp off");
       LightsOff(12);
     }
