@@ -96,7 +96,7 @@ class TemperatureHumiditySensor:
         print("Topic:'" + msg.topic + "', QoS: '" + str(msg.qos) + "' Message: '" + str(msg.payload) + "'")
 
         if msg.topic == self.topicBreadType:
-			self.category = self.breadCategories[json.loads(msg.payload)['bread_index']]
+            self.category = self.breadCategories[json.loads(msg.payload)['bread_index']]
             print("bread_index", self.category)
 
         try:
