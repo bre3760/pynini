@@ -27,34 +27,7 @@
     ],
     "broker_ip": "127.0.0.1",
     "broker_port": 1883,
-    "cases": [
-        {
-            "arduino": {
-                "sensors": [
-                   
-                ]
-            },
-            "bread_type": "White",
-            "caseID": "CCC1",
-            "rpi": {
-                "sensors": [
-                   
-                ]
-            }
-        },
-        {
-            "arduino": {
-                "sensors": []
-            },
-            "bread_type": "White",
-            "caseID": "CCC2",
-            "rpi": {
-                "sensors": [
-                    
-                ]
-            }
-        }
-    ],
+    "cases": [],
     
     "db": {
         "host": "localhost",
