@@ -82,10 +82,10 @@ class CaseControl(object):
                 # change thresholds based on breadtype
 
     def getAllBreadTypes(self):
-        with open("config.json", 'r') as f:
-           config_dict = json.load(f)
-           allBreadTypes = config_dict["breadCategories"]
-           return allBreadTypes 
+        r = requests.get(f"http://{self.catalog_address}:{self.port_catalog}/breadCategories")
+
+        allBreadTypes = json.load(r.text)["breadCategories"]
+        return allBreadTypes 
 
     def getCatalog(self):
         with open("config.json", 'r') as f:

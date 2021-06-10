@@ -22,6 +22,8 @@ class Catalog(object):
                 for s in d["arduino"]["sensors"]:
                     active_arduino.append(s["name"])
             return json.dumps(active_arduino)
+        elif uri[0] == "breadCategories":
+            return json.dumps(catalog["breadCategories"])
         elif uri[0] == "broker_ip":
             return json.dumps(catalog["broker_ip"])
         elif uri[0] == "broker_port":
