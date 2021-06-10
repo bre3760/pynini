@@ -54,6 +54,8 @@ class TemperatureHumiditySensor:
         print("message json.dumps to publish in myPublish", json.dumps(message))
         self._paho_mqtt.publish(topic, json.dumps(message), 2)
         self.influxDB.write(message)
+        print("su influx", message)
+
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print("Connected to %s with result code: %d" % (self.messageBroker, rc))
@@ -174,7 +176,7 @@ if __name__ == "__main__":
     sensor.stop()
     sensor.removeDevice()
 
-    c = ClientQuery(sensor.sensorID, sensor.category)
+    c = ClientQuery(sensor.sensorID, sensor.category,  sensor.caseID)
     c.start()
 
 
