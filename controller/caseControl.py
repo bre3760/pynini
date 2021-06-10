@@ -24,18 +24,15 @@ class CaseControl(object):
         self.currentCO2 = 0
         
     def run(self):
-
         print("running %s" % self.clientID)
         self.myMqttClient.start()
 
     def end(self):
-
         print("ending %s" % self.clientID)
         self.myMqttClient.stop()
 
     def notify(self, topic, msg_payload):
-        print(f'IN NOTIFYYYYY received msg_payload: {msg_payload}, under topic {topic}')
-
+        print(f'In Notify received msg_payload: {msg_payload}, under topic {topic}')
 
         if topic == "measure/temperature":
             #msg = str.replace(msg_payload, "'", '"')
@@ -66,13 +63,10 @@ class CaseControl(object):
                 indexBreadTypeChosen = int(json_mex["bread_index"])
                 if self.breadTypeChosen != self.allBreadTypes[indexBreadTypeChosen]:
                     print("Case " + str(self.clientID)+ " now holds " + str(self.breadTypeChosen)+' bread')
-                    
                     setBreadtype = {}
                     setBreadtype['breadtype'] = self.breadTypeChosen
                     setBreadtype['caseID'] = self.clientID
-                    
                     requests.post("http://" + self.catalog_address + ":" + self.port_catalog + "/setBreadtype", json=setBreadtype)
-
                     print('CHANGING THRESHOLDS...')
                     self.minTemperature = self.getMinTemperatureThreshold()
                     self.maxTemperature = self.getMaxTemperatureThreshold()
@@ -83,7 +77,6 @@ class CaseControl(object):
 
     def getAllBreadTypes(self):
         r = requests.get(f"http://{self.catalog_address}:{self.port_catalog}/breadCategories")
-        print("R:TEXTTTTTTTTTTTTTT",r.text)
         self.allBreadTypes = json.loads(r.text)
 
     def getCatalog(self):
@@ -94,7 +87,7 @@ class CaseControl(object):
         return catalog_address, catalog_port
 
     def getMaxTemperatureThreshold(self):
-        maxTemperature = 30
+        maxTemperature = 40
 
         try:
             threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
@@ -112,7 +105,7 @@ class CaseControl(object):
         return (maxTemperature)
 
     def getMinTemperatureThreshold(self):
-        minTemperature = 20
+        minTemperature = 10
         try:
             threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
@@ -129,7 +122,7 @@ class CaseControl(object):
         return minTemperature
 
     def getMaxHumidityThreshold(self):
-        maxHumidity = 50
+        maxHumidity = 70
         try:
             threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
@@ -161,7 +154,6 @@ class CaseControl(object):
         # if connection to the catalog fails, the min humidity allowed is set to a default value
         except requests.exceptions.RequestException as e:
             print(e)
-            
 
         return (minHumidity)
 
@@ -171,17 +163,14 @@ class CaseControl(object):
             threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
             r = requests.get(threshold_URL)
             threshold = r.text
-
             obj = json.loads(threshold) # list of the thresholds
             for th in obj:
                 if th["type"] == self.breadTypeChosen:
                     maxco2 = int(th["max_co2_th"])
-
         # if connection to the catalog fails, the max co2 allowed is set to a default value
         except requests.exceptions.RequestException as e:
             print(e)
             
-
         return (maxco2)
 
     def getMinCO2Threshold(self):
@@ -194,7 +183,6 @@ class CaseControl(object):
             for th in obj:
                 if th["type"] == self.breadTypeChosen:
                     minco2 = int(th["min_co2_th"])
-
         # if connection to the catalog fails, the max co2 allowed is set to a default value
         except requests.exceptions.RequestException as e:
             print(e)
@@ -207,10 +195,8 @@ class CaseControl(object):
             r = requests.get(threshold_URL)
             print("Bread in " + self.clientID)
             threshold = r.text
-
             obj = json.loads(threshold)
             threshold = obj["thresholds"]
-            
             name = threshold[self.breadTypeChosen]
 
         except requests.exceptions.RequestException as e:
@@ -228,12 +214,37 @@ class CaseControl(object):
         else:
             return False
 
+    def tooHot(self):
+        if self.currentTemperature > self.maxTemperature:
+            return True
+        else:
+            return False
+
+    def tooCold(self):
+        if self.currentTemperature < self.minTemperature:
+            return True
+        else:
+            return False
+
+
     def isHumidityValid(self):
         """
         method that checks if current humidity is valid: 
         if it is, the method returns True, False otherwise
         """
         if self.minHumidity < self.currentHumidity < self.maxHumidity:
+            return True
+        else:
+            return False
+    
+    def tooHumid(self):
+        if self.currentHumidity > self.maxHumidity:
+            return True
+        else:
+            return False
+
+    def tooNotHumid(self):
+        if self.currentHumidity < self.minHumidity:
             return True
         else:
             return False
@@ -247,5 +258,12 @@ class CaseControl(object):
             return True
         else:
             return False
+    
+    def tooMuchCo2(self):
+        if self.currentCO2 > self.maxC02:
+            return True
+        else:
+            return False
+
 
  

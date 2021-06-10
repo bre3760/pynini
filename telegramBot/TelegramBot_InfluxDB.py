@@ -22,6 +22,7 @@ class TelegramBot(object):
         self.token = token
         self.catalogIP = ip
         self.catalogPort = catalogPort
+        
 
     def stop(self):
         self._paho_mqtt.unsubscribe(self.topic)
@@ -524,7 +525,6 @@ class TelegramBot(object):
         requests.post(f"http://{self.catalogIP}:{self.catalogPort}/removeBot",
                       json={'ip': self.catalogIP, 'chat_ID': self.chatID, 'last_seen': time.time()})
         print("Mi sono eliminato dal catalog")
-        self.clientQuery.end()
         
         return ConversationHandler.END
 

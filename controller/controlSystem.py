@@ -91,8 +91,8 @@ if __name__ == '__main__':
     #for topic in topics:
     #    case_controller.myMqttClient.mySubscribe(topic)
 
-    prevStateLamp = False
-    prevStateFan = False
+    prevStateLamp = "off"
+    prevStateFan = "off"
     currentStateLamp = False
     currentStateFan = False
     while 1:
@@ -101,21 +101,46 @@ if __name__ == '__main__':
         """
         for obj in controllers:
             if obj.isTemperatureValid():
-                obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"off"}))
+                if prevStateFan != "off": # if fan was on turn it off
+                    obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"off"}))
+                    prevStateFan ="off"
+                if prevStateLamp != "off":
+                    obj.myMqttClient.myPublish("trigger/lamp", json.dumps({"message":"off"}))
+                    prevStateLamp = "off"
             else:
-                obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
-            
-            if obj.isCO2Valid():
-                obj.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "on"}))
-            else:
-                obj.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "off"}))
+                if obj.tooHot():
+                    if prevStateFan != "on":
+                        obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
+                        prevStateFan = "on"
+                if obj.tooCold():
+                    if prevStateLamp != "on":
+                        obj.myMqttClient.myPublish("trigger/lamp", json.dumps({"message":"on"}))
+                        prevStateLamp = "on"
 
-        #  if case_controller.isCO2Valid():
-        #      case_controller.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "on"}))
-        #      # print("Ho acceso la lampada")
-        #  else:
-        #      case_controller.myMqttClient.myPublish("trigger/lamp", json.dumps({"message": "off"}))
-        #      # print("Ho spento la lampada")
+            if obj.isHumidityValid():
+                if prevStateFan != "off": # if fan was on turn it off
+                    obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"off"}))
+                    prevStateFan ="off"
+                if prevStateLamp != "off":
+                    obj.myMqttClient.myPublish("trigger/lamp", json.dumps({"message":"off"}))
+                    prevStateLamp = "off"
+                else:
+                    if obj.tooHumid():
+                        if prevStateFan != "on":
+                            obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
+                            prevStateFan = "on"            
+
+            if obj.isCO2Valid():
+                if prevStateFan != "off": # if fan was on turn it off
+                    obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"off"}))
+                    prevStateFan ="off"
+                else:
+                    if prevStateFan != "on":
+                        obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
+                        prevStateFan = "on"
+
+            
+         
 
         time.sleep(7)
         
