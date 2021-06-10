@@ -85,7 +85,7 @@ void setup() {
   }
   if (SPIFFS.begin()) {
     Serial.println("mounted file system");
-
+    // open config file 
     File jsonFile = SPIFFS.open("/config.json", "r");
     if(!jsonFile){
       Serial.println("Failed to open file for reading");
@@ -103,16 +103,13 @@ void setup() {
 
 
       Serial.println("Proceding with value extraction");
-
       StaticJsonDocument<1024> doc;
-
       // Deserialize the JSON document
       DeserializationError error = deserializeJson(doc, debugLogData);
       if (error){
         Serial.println("Failed to read file, using default configuration");
       } else {
         // Copy values from the JsonDocument to the Config
-
         // WIFI CONFIG
         strlcpy(wifi_config.ssid,                  
                 doc["wifi_ssid"] | "McLovin",     
@@ -120,14 +117,11 @@ void setup() {
         strlcpy(wifi_config.password,                           // <- destination
                 doc["wifi_password"] | "1234567890000000",      // <- source
                 sizeof(wifi_config.password));                  // <- destination's capacity
-  
         //MQTT CONFIG
         strlcpy(mqtt_config.mqtt_server,                  
                 doc["mqtt_server"] | "0.0.0.0",     
                 sizeof(mqtt_config.mqtt_server));
-  
         mqtt_config.mqtt_port = doc["mqtt_port"] | 1883;      
-  
         strlcpy(mqtt_config.mqtt_username,                  
                 doc["mqtt_username"] | "brendan",     
                 sizeof(mqtt_config.mqtt_username));
@@ -137,7 +131,6 @@ void setup() {
         strlcpy(mqtt_config.clientID,                  
                 doc["clientID"] | "esp-arduino",     
                 sizeof(mqtt_config.clientID));
-  
         //HTTP CONFIG
         strlcpy(http_config.rpi_ip,                  
                 doc["rpi_ip"] | "192.168.1.2",     
@@ -163,6 +156,8 @@ void setup() {
   client.setServer(mqtt_config.mqtt_server, mqtt_config.mqtt_port);
 
   client.setCallback(callback);            // create callback function for mqtt
+  client.subscribe(fanTopic);
+  client.subscribe(lampTopic);
   
   Wire.begin(D1, D2);                      // join i2c bus with SDA=D1 and SCL=D2 of NodeMCU
 
@@ -201,7 +196,6 @@ void loop() {
   Serial.println(payload);
   Serial.print("\n");
 
-  
   if( client.publish(breadTopic, payload.c_str()) ){
         Serial.println("Message sent with mqtt");
     } else {
@@ -292,6 +286,7 @@ int httpConnect(char*, char*, char*)
             strncpy(fanTopic,fanTopicInside,sizeof(fanTopic));
             strncpy(lampTopic,lampTopicInside,sizeof(lampTopic));
             strncpy(breadTopic,breadTopicInside,sizeof(breadTopic));
+            
           }           
         }
         if (httpCode == 404) {            // status 404
@@ -393,7 +388,7 @@ void reconnect() {
     if (client.connect(mqtt_config.clientID, mqtt_config.mqtt_username, mqtt_config.mqtt_password)) {
       Serial.println("connected");
       // Once connected, resubscribe to desired topics
-      client.subscribe("trigger/light");
+      client.subscribe("trigger/lamp");
       client.subscribe("trigger/fan");
     } else {
       Serial.print("failed, rc=");

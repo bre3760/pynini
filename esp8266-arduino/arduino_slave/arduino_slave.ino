@@ -32,6 +32,13 @@ void setup() {
  Serial.print(testing13);
  digitalWrite(10,HIGH); // turning on default zero LED
  
+ digitalWrite(13,HIGH);
+ delay(1000);
+ digitalWrite(13,LOW);
+ digitalWrite(12,HIGH);
+ delay(1000);
+ digitalWrite(12,LOW);
+ 
 }
 
 void loop() {
