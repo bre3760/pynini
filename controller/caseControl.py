@@ -85,8 +85,7 @@ class CaseControl(object):
     def getAllBreadTypes(self):
         r = requests.get(f"http://{self.catalog_address}:{self.port_catalog}/breadCategories")
         print("R:TEXTTTTTTTTTTTTTT",r.text)
-        print("R:TEXT[BREADCATEgs]", r.text["breadCategories"])
-        self.allBreadTypes = json.loads(r.text)["breadCategories"]
+        self.allBreadTypes = json.loads(r.text)
 
     def getCatalog(self):
         with open("config.json", 'r') as f:
