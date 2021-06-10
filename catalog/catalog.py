@@ -26,6 +26,8 @@ class Catalog(object):
             return json.dumps(catalog["breadCategories"])
         elif uri[0] == "broker_ip":
             return json.dumps(catalog["broker_ip"])
+        elif uri[0] == "broker_ip_outside":
+            return json.dumps(catalog["broker_ip_outside"])
         elif uri[0] == "broker_port":
             return json.dumps(catalog["broker_port"])
         elif uri[0] == "cases":
