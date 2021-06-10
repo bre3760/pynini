@@ -17,7 +17,7 @@ class co2Sensor:
 		self.sensorIP = sensor_ip
 		self.sensorPort = sensor_port
 		self.category = "White"
-
+		self.breadCategories = []
 		# register the callback
 		self._paho_mqtt.on_connect = self.myOnConnect
 		self._paho_mqtt.on_message = self.myOnMessageReceived
@@ -62,8 +62,9 @@ class co2Sensor:
 		print ("Topic:'" + msg.topic+"', QoS: '"+str(msg.qos)+"' Message: '"+str(msg.payload) + "'")
 
 		if msg.topic == self.topicBreadType:
-			self.category = json.loads(msg.payload)['category']
-			print("category",self.category)
+			self.category = self.breadCategories[json.loads(msg.payload)['bread_index']]
+			
+			print("bread_index",self.category)
 
 		try:
 			data=json.loads(msg.payload)
@@ -89,6 +90,7 @@ class co2Sensor:
 		print("json.loads(r.text)", json.loads(r.text))
 		self.topic = json.loads(r.text)['topic']
 		self.messageBroker = json.loads(r.text)['broker_ip']
+		self.breadCategories = json.loads(r.text)['breadCategories']
 
 		print("[{}] Device Registered on Catalog".format(
 			int(time.time()),
