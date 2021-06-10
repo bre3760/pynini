@@ -11,7 +11,8 @@ class CaseControl(object):
         self.catalog_address = catalog_address
         self.port_catalog = str(port_catalog)
         self.caseID = caseID
-        self.allBreadTypes = self.getAllBreadTypes()
+        self.allBreadTypes = []
+        self.getAllBreadTypes()
         self.breadTypeChosen = self.allBreadTypes[0]
         self.minTemperature = self.getMinTemperatureThreshold()
         self.maxTemperature = self.getMaxTemperatureThreshold()
@@ -83,9 +84,9 @@ class CaseControl(object):
 
     def getAllBreadTypes(self):
         r = requests.get(f"http://{self.catalog_address}:{self.port_catalog}/breadCategories")
-
-        allBreadTypes = json.loads(r.text)["breadCategories"]
-        return allBreadTypes 
+        print("R:TEXTTTTTTTTTTTTTT",r.text)
+        print("R:TEXT[BREADCATEgs]", r.text["breadCategories"])
+        self.allBreadTypes = json.loads(r.text)["breadCategories"]
 
     def getCatalog(self):
         with open("config.json", 'r') as f:
