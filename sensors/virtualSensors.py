@@ -5,13 +5,16 @@ import requests
 import pandas as pd
 import sys
 sys.path.append("../../")
+import os
 from database.influxDB import InfluxDB
 from database.query import ClientQuery
 from datetime import datetime
 
 class co2Sensor:
 	def __init__(self, sensor, influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port):
-		self.caseID, self.sensorID = sensor.split("-")
+		# case identifiers
+		self.caseID = os.getenv("caseID")
+		self.sensorID = os.getenv("sensorID")
 		self._paho_mqtt = PahoMQTT.Client(self.sensorID, False)
 		self.influxDB = influxDB
 		self.sensorIP = sensor_ip
@@ -52,8 +55,7 @@ class co2Sensor:
 
 	def myPublish(self, message):
 		# publish a message with a certain topic
-		case_specific_topic = self.caseID + "/" +  self.topic # example CCC2/measure/co2
-		self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
+		self._paho_mqtt.publish(self.topic, json.dumps(message), 2)
 		self.influxDB.write(message)
 		print("su influx", message)
 	#	self.influxDB.clean()
@@ -64,6 +66,7 @@ class co2Sensor:
 
 		if msg.topic == self.topicBreadType:
 			self.category = self.breadCategories[int(json.loads(msg.payload)['bread_index'])]
+			
 			print("bread_index",self.category)
 
 

@@ -50,9 +50,9 @@ class TemperatureHumiditySensor:
         self._paho_mqtt.disconnect()
 
     def myPublish(self, topic, message):
-        # publish a message with a certain topic
-        print("message json.dumps to publish in myPublish", json.dumps(message))
-        self._paho_mqtt.publish(topic, json.dumps(message), 2)
+        # publish a message with a certain topic (measure/temperature or measure/humidity)
+        case_specific_topic = self.caseID + "/" + topic # example CCC2/measure/co2
+        self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
         self.influxDB.write(message)
         print("su influx", message)
 

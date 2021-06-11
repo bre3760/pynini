@@ -38,7 +38,8 @@ struct MQTTConfig {
   char mqtt_username[8]; 
   char mqtt_password[7]; 
   char clientID[12]; 
-  char topic[11]; 
+  char topic[11];
+  char caseID[5];
 };
 MQTTConfig mqtt_config;
 
@@ -53,6 +54,7 @@ String lampTopicString;
 struct HttpConfig {
   char rpi_ip[12];
   char rpi_port[5];
+  char httpCaseID[5];
 };
 HttpConfig http_config;
 
@@ -131,13 +133,19 @@ void setup() {
         strlcpy(mqtt_config.clientID,                  
                 doc["clientID"] | "esp-arduino",     
                 sizeof(mqtt_config.clientID));
+        strlcpy(mqtt_config.clientID,                  
+                doc["caseID"] | "CCC2",     
+                sizeof(mqtt_config.caseID));
         //HTTP CONFIG
         strlcpy(http_config.rpi_ip,                  
                 doc["rpi_ip"] | "192.168.1.2",     
                 sizeof(http_config.rpi_ip));
         strlcpy(http_config.rpi_port,                  
                 doc["rpi_port"] | "9090",     
-                sizeof(http_config.rpi_port)); 
+                sizeof(http_config.rpi_port));
+        strlcpy(http_config.httpCaseID,                  
+                doc["caseID"] | "CCC2",     
+                sizeof(http_config.httpCaseID));
       }
       // Close the file (Curiously, File's destructor doesn't close the file)
       jsonFile.close();      
@@ -145,7 +153,6 @@ void setup() {
   }
 
   connectWifi();                           // Initialise wifi connection
-
   int got_topics = 0;
   got_topics = httpConnect(breadTopic,fanTopic,lampTopic);     // send post request to catalog 
   
@@ -154,14 +161,11 @@ void setup() {
   Serial.println(got_topics);
   
   client.setServer(mqtt_config.mqtt_server, mqtt_config.mqtt_port);
-
   client.setCallback(callback);            // create callback function for mqtt
-  client.subscribe(fanTopic);
-  client.subscribe(lampTopic);
+  client.subscribe(String(mqtt_config.caseID) + fanTopic);
+  client.subscribe(String(mqtt_config.caseID) + lampTopic);
   
-  Wire.begin(D1, D2);                      // join i2c bus with SDA=D1 and SCL=D2 of NodeMCU
-
-  
+  Wire.begin(D1, D2);                      // join i2c bus with SDA=D1 and SCL=D2 of NodeMC  
 }
 
 void loop() {
@@ -183,6 +187,14 @@ void loop() {
 
   String messageDescription = "bread_index" ;
   String payload = "{";
+  payload +=  '"';
+  payload+= "caseID";
+  payload+= '"';
+  payload += ":";
+  payload+='"';
+  payload+= mqtt_config.caseID;
+  payload+='"';
+  payload += ",";
   payload +=  '"';
   payload+= messageDescription;
   payload+= '"';
@@ -254,7 +266,7 @@ int httpConnect(char*, char*, char*)
       doc["port"] = "8080";
       doc["last_seen"] = currentHour + ":" + currentMinute;
       doc["dev_name"] = "arduino";
-      doc["caseID"] = "CCC2";
+      doc["caseID"] = http_config.httpCaseID;
       doc["sensorID"] = "arduino";
       String jsonData;
       serializeJson(doc,jsonData);
@@ -286,7 +298,6 @@ int httpConnect(char*, char*, char*)
             strncpy(fanTopic,fanTopicInside,sizeof(fanTopic));
             strncpy(lampTopic,lampTopicInside,sizeof(lampTopic));
             strncpy(breadTopic,breadTopicInside,sizeof(breadTopic));
-            
           }           
         }
         if (httpCode == 404) {            // status 404
@@ -326,7 +337,7 @@ void connectWifi(){
 void callback(char* topic, byte* message, unsigned int length) {
   Serial.print("Message arrived on topic: ");
   Serial.print(topic);
-  Serial.print(". Message: "); // {"message":"on"}
+  Serial.print("Message: "); // {"message":"on"}
   String messageTemp;
 
   for (int i = 0; i < length; i++) {
@@ -352,7 +363,7 @@ void callback(char* topic, byte* message, unsigned int length) {
   Serial.println(messageFromMQTT);
   
 
-  if (strcmp(topic, "trigger/fan") == 0) {
+  if (strcmp(topic, String(mqtt_config.caseID) + "trigger/fan") == 0) {
     Serial.print("Changing fan output to ");
     if(strcmp(messageFromMQTT, "on") == 0){
       Serial.println("turning on the fan");
@@ -363,7 +374,7 @@ void callback(char* topic, byte* message, unsigned int length) {
       LightsOff(13);
     }
   }
-  if (strcmp(topic, "trigger/lamp") == 0) {
+  if (strcmp(topic, String(mqtt_config.caseID) + "trigger/lamp") == 0) {
     Serial.print("Changing lamp output to ");
     if(strcmp(messageFromMQTT, "on") == 0){
       Serial.println("turning lamp on");
@@ -375,8 +386,6 @@ void callback(char* topic, byte* message, unsigned int length) {
     }
   }
 }
-
-
   
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 //      MQTT RE-CONNECTION
@@ -388,8 +397,8 @@ void reconnect() {
     if (client.connect(mqtt_config.clientID, mqtt_config.mqtt_username, mqtt_config.mqtt_password)) {
       Serial.println("connected");
       // Once connected, resubscribe to desired topics
-      client.subscribe("trigger/lamp");
-      client.subscribe("trigger/fan");
+      client.subscribe(String(mqtt_config.caseID) + "trigger/lamp");
+      client.subscribe(String(mqtt_config.caseID) + "trigger/fan");
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
