@@ -162,8 +162,20 @@ void setup() {
   
   client.setServer(mqtt_config.mqtt_server, mqtt_config.mqtt_port);
   client.setCallback(callback);            // create callback function for mqtt
-  client.subscribe(String(mqtt_config.caseID) + fanTopic);
-  client.subscribe(String(mqtt_config.caseID) + lampTopic);
+  char buf_lamp[17];
+  const char *first_lamp = mqtt_config.caseID;
+  const char *second_lamp = "trigger/lamp";
+  strcpy(buf_lamp,first_lamp);
+  strcat(buf_lamp,second_lamp);
+
+  char buf_fan[17];
+  const char *first_fan = mqtt_config.caseID;
+  const char *second_fan = "trigger/lamp";
+  strcpy(buf_fan,first_fan);
+  strcat(buf_fan,second_fan);
+  
+  client.subscribe(buf_lamp);
+  client.subscribe(buf_fan);
   
   Wire.begin(D1, D2);                      // join i2c bus with SDA=D1 and SCL=D2 of NodeMC  
 }
@@ -361,9 +373,22 @@ void callback(char* topic, byte* message, unsigned int length) {
   Serial.print("reading the json doc[message]: ");
   const char* messageFromMQTT = doc["message"];
   Serial.println(messageFromMQTT);
-  
 
-  if (strcmp(topic, String(mqtt_config.caseID) + "trigger/fan") == 0) {
+
+  char buf_lamp[17];
+  const char *first_lamp = mqtt_config.caseID;
+  const char *second_lamp = "trigger/lamp";
+  strcpy(buf_lamp,first_lamp);
+  strcat(buf_lamp,second_lamp);
+
+  char buf_fan[17];
+  const char *first_fan = mqtt_config.caseID;
+  const char *second_fan = "trigger/lamp";
+  strcpy(buf_fan,first_fan);
+  strcat(buf_fan,second_fan);
+    
+
+  if (strcmp(topic, buf_fan) == 0) {
     Serial.print("Changing fan output to ");
     if(strcmp(messageFromMQTT, "on") == 0){
       Serial.println("turning on the fan");
@@ -374,7 +399,7 @@ void callback(char* topic, byte* message, unsigned int length) {
       LightsOff(13);
     }
   }
-  if (strcmp(topic, String(mqtt_config.caseID) + "trigger/lamp") == 0) {
+  if (strcmp(topic, buf_lamp) == 0) {
     Serial.print("Changing lamp output to ");
     if(strcmp(messageFromMQTT, "on") == 0){
       Serial.println("turning lamp on");
@@ -397,8 +422,20 @@ void reconnect() {
     if (client.connect(mqtt_config.clientID, mqtt_config.mqtt_username, mqtt_config.mqtt_password)) {
       Serial.println("connected");
       // Once connected, resubscribe to desired topics
-      client.subscribe(String(mqtt_config.caseID) + "trigger/lamp");
-      client.subscribe(String(mqtt_config.caseID) + "trigger/fan");
+      char buf_lamp[17];
+      const char *first_lamp = mqtt_config.caseID;
+      const char *second_lamp = "trigger/lamp";
+      strcpy(buf_lamp,first_lamp);
+      strcat(buf_lamp,second_lamp);
+
+      char buf_fan[17];
+      const char *first_fan = mqtt_config.caseID;
+      const char *second_fan = "trigger/lamp";
+      strcpy(buf_fan,first_fan);
+      strcat(buf_fan,second_fan);
+      
+      client.subscribe(buf_lamp);
+      client.subscribe(buf_fan);
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());

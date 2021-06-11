@@ -63,7 +63,7 @@ class TelegramBot(object):
         self.topics = json.loads(r.text)
         # subscribe for a topic
         for t in self.topics:
-            self._paho_mqtt.subscribe("trigger/"+t, 2)
+            self._paho_mqtt.subscribe("trigger/"+t, 2) # magari * prima di trigger per prendere per tutte le case
         print("Subscribed to: ", self.topics)
 
         self._paho_mqtt.connect(self.messageBroker, 1883)
