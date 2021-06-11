@@ -154,7 +154,13 @@ void setup() {
 
   connectWifi();                           // Initialise wifi connection
   int got_topics = 0;
-  got_topics = httpConnect(breadTopic,fanTopic,lampTopic);     // send post request to catalog 
+
+  // could add while got_topics != 1 
+  while (got_topics != 1) {
+    got_topics = httpConnect(breadTopic,fanTopic,lampTopic);     // send post request to catalog 
+ 
+    delay(7000);
+  }
   
   delay(7000);
   Serial.println("got_topics value: ");
