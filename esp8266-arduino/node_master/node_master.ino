@@ -133,7 +133,7 @@ void setup() {
         strlcpy(mqtt_config.clientID,                  
                 doc["clientID"] | "esp-arduino",     
                 sizeof(mqtt_config.clientID));
-        strlcpy(mqtt_config.clientID,                  
+        strlcpy(mqtt_config.caseID,                  
                 doc["caseID"] | "CCC2",     
                 sizeof(mqtt_config.caseID));
         //HTTP CONFIG
@@ -164,16 +164,20 @@ void setup() {
   client.setCallback(callback);            // create callback function for mqtt
   char buf_lamp[17];
   const char *first_lamp = mqtt_config.caseID;
-  const char *second_lamp = "trigger/lamp";
+  const char *second_lamp = "/trigger/lamp";
   strcpy(buf_lamp,first_lamp);
   strcat(buf_lamp,second_lamp);
 
   char buf_fan[17];
   const char *first_fan = mqtt_config.caseID;
-  const char *second_fan = "trigger/lamp";
+  const char *second_fan = "/trigger/fan";
   strcpy(buf_fan,first_fan);
   strcat(buf_fan,second_fan);
-  
+
+  Serial.println("SUBSCRIBING TO: ");
+  Serial.println(buf_lamp);
+  Serial.println(buf_fan);
+
   client.subscribe(buf_lamp);
   client.subscribe(buf_fan);
   
@@ -377,13 +381,13 @@ void callback(char* topic, byte* message, unsigned int length) {
 
   char buf_lamp[17];
   const char *first_lamp = mqtt_config.caseID;
-  const char *second_lamp = "trigger/lamp";
+  const char *second_lamp = "/trigger/lamp";
   strcpy(buf_lamp,first_lamp);
   strcat(buf_lamp,second_lamp);
 
   char buf_fan[17];
   const char *first_fan = mqtt_config.caseID;
-  const char *second_fan = "trigger/lamp";
+  const char *second_fan = "/trigger/lamp";
   strcpy(buf_fan,first_fan);
   strcat(buf_fan,second_fan);
     
@@ -424,13 +428,13 @@ void reconnect() {
       // Once connected, resubscribe to desired topics
       char buf_lamp[17];
       const char *first_lamp = mqtt_config.caseID;
-      const char *second_lamp = "trigger/lamp";
+      const char *second_lamp = "/trigger/lamp";
       strcpy(buf_lamp,first_lamp);
       strcat(buf_lamp,second_lamp);
 
       char buf_fan[17];
       const char *first_fan = mqtt_config.caseID;
-      const char *second_fan = "trigger/lamp";
+      const char *second_fan = "/trigger/lamp";
       strcpy(buf_fan,first_fan);
       strcat(buf_fan,second_fan);
       
