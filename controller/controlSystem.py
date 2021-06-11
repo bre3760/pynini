@@ -73,13 +73,13 @@ if __name__ == '__main__':
     list_of_cases = [x["caseID"] for x in dict_of_cases]
     print("Connected cases id: ", list_of_cases)
 
-    controllers = [CaseControl(i, broker_ip, broker_port, catalog_ip, catalog_port, topics) for i in list_of_cases]
+    controllers = [CaseControl(client_id, broker_ip, broker_port, catalog_ip, catalog_port, topics) for client_id in list_of_cases]
 
     for obj in controllers:
         obj.run()
-
         for topic in topics:
-            obj.myMqttClient.mySubscribe(topic)
+            case_specific_topic = obj.clientID + topic
+            obj.myMqttClient.mySubscribe(case_specific_topic)
 
     # initiate class of CaseControl which houses all necessary functions
     #case_controller = CaseControl("Case controller", broker_ip, broker_port, catalog_ip, catalog_port, caseID)
@@ -100,45 +100,43 @@ if __name__ == '__main__':
         control system algorithm that continually checks if the values are within the desired ranges
         """
         for obj in controllers:
-           
-
             if obj.isTemperatureValid():
                 if prevStateFan != "off": # if fan was on turn it off
-                    obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"off"}))
+                    obj.myMqttClient.myPublish(obj.clientID + "/" + "trigger/fan", json.dumps({"message":"off"}))
                     prevStateFan ="off"
                 if prevStateLamp != "off":
-                    obj.myMqttClient.myPublish("trigger/lamp", json.dumps({"message":"off"}))
+                    obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/lamp", json.dumps({"message":"off"}))
                     prevStateLamp = "off"
             else:
                 if obj.tooHot():
                     if prevStateFan != "on":
-                        obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
+                        obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"on"}))
                         prevStateFan = "on"
                 if obj.tooCold():
                     if prevStateLamp != "on":
-                        obj.myMqttClient.myPublish("trigger/lamp", json.dumps({"message":"on"}))
+                        obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/lamp", json.dumps({"message":"on"}))
                         prevStateLamp = "on"
 
             if obj.isHumidityValid():
                 if prevStateFan != "off": # if fan was on turn it off
-                    obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"off"}))
+                    obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"off"}))
                     prevStateFan ="off"
                 if prevStateLamp != "off":
-                    obj.myMqttClient.myPublish("trigger/lamp", json.dumps({"message":"off"}))
+                    obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/lamp", json.dumps({"message":"off"}))
                     prevStateLamp = "off"
                 else:
                     if obj.tooHumid():
                         if prevStateFan != "on":
-                            obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
+                            obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"on"}))
                             prevStateFan = "on"            
 
             if obj.isCO2Valid():
                 if prevStateFan != "off": # if fan was on turn it off
-                    obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"off"}))
+                    obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"off"}))
                     prevStateFan ="off"
                 else:
                     if prevStateFan != "on":
-                        obj.myMqttClient.myPublish("trigger/fan", json.dumps({"message":"on"}))
+                        obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"on"}))
                         prevStateFan = "on"
 
             
