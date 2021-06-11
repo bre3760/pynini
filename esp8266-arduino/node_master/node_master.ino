@@ -224,7 +224,15 @@ void loop() {
   Serial.println(payload);
   Serial.print("\n");
 
-  if( client.publish(breadTopic, payload.c_str()) ){
+  char buf_bread[15];
+  const char *first_bread = mqtt_config.caseID;
+  const char *forwardslash = "/";
+  const char *second_bread = breadTopic;
+  strcpy(buf_bread,first_bread);
+  strcat(buf_bread,forwardslash);
+  strcat(buf_bread,second_bread);
+
+  if( client.publish(buf_bread, payload.c_str()) ){
         Serial.println("Message sent with mqtt");
     } else {
         Serial.print("Failed to send");

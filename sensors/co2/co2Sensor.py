@@ -24,7 +24,7 @@ class co2Sensor:
 		self.messageBroker = ""
 		r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
 		self.topic = ""
-		self.topicBreadType = json.loads(r.text)["breadType"]
+		self.topicBreadType = self.caseID + "/" + json.loads(r.text)["breadType"]
 		self.message = {
 			'measurement': self.sensorID,
 			'caseID': self.caseID,

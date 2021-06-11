@@ -26,7 +26,7 @@ class TemperatureHumiditySensor:
         r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
         self.topic_temp = ""
         self.topic_hum= ""
-        self.topicBreadType = json.loads(r.text)["breadType"]
+        self.topicBreadType = self.caseID + "/" +json.loads(r.text)["breadType"]
         self.message = {
             'measurement': self.sensorID,
             'caseID': self.caseID,
