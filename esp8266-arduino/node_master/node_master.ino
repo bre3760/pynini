@@ -347,7 +347,7 @@ void connectWifi(){
 }
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-//      WIRE ARDUINO CONNECTION
+//     mqtt CONNECTION
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 void callback(char* topic, byte* message, unsigned int length) {
@@ -438,7 +438,7 @@ void reconnect() {
 
       char buf_fan[17];
       const char *first_fan = mqtt_config.caseID;
-      const char *second_fan = "/trigger/lamp";
+      const char *second_fan = "/trigger/fan";
       strcpy(buf_fan,first_fan);
       strcat(buf_fan,second_fan);
       

@@ -78,7 +78,7 @@ if __name__ == '__main__':
     for obj in controllers:
         obj.run()
         for topic in topics:
-            case_specific_topic = obj.clientID + topic
+            case_specific_topic = obj.clientID +"/"+ topic
             obj.myMqttClient.mySubscribe(case_specific_topic)
 
     # initiate class of CaseControl which houses all necessary functions
