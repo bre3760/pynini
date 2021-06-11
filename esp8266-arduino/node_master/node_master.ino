@@ -387,11 +387,15 @@ void callback(char* topic, byte* message, unsigned int length) {
 
   char buf_fan[17];
   const char *first_fan = mqtt_config.caseID;
-  const char *second_fan = "/trigger/lamp";
+  const char *second_fan = "/trigger/fan";
   strcpy(buf_fan,first_fan);
   strcat(buf_fan,second_fan);
-    
 
+  Serial.println("buf_fan and buf_lamp");
+  Serial.println(buf_fan);
+  Serial.println(buf_lamp);
+    
+  Serial.println("IN CALLBACK BEFORE COMPARISON");
   if (strcmp(topic, buf_fan) == 0) {
     Serial.print("Changing fan output to ");
     if(strcmp(messageFromMQTT, "on") == 0){
