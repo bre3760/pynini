@@ -353,8 +353,8 @@ if __name__ == '__main__':
 
     with open("catalog2.json", 'r') as f:
         config = json.load(f)
-    HOST = config['HOST']
-    PORT = config['PORT']
+    catalog_ip = config['catalog_ip']
+    catalog_port = config['catalog_port']
     
 
     conf = {
@@ -365,6 +365,6 @@ if __name__ == '__main__':
             }
     }
     cherrypy.tree.mount(catalog, '/', conf)
-    cherrypy.server.socket_host = HOST
-    cherrypy.server.socket_port = PORT
+    cherrypy.server.socket_host = catalog_ip
+    cherrypy.server.socket_port = catalog_port
     cherrypy.engine.start()
