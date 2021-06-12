@@ -8,7 +8,14 @@ class ClientQuery():
         self.sensor = sensor
         self.caseID = caseID
         self.category = category
-        dataInfluxDB = requests.get("http://192.168.1.2:9090/InfluxDB")
+
+        with open("config.json", 'r') as sensor_f:
+            influx_config = json.load(sensor_f)
+            catalog_ip = influx_config['catalog_ip']
+            catalog_port = influx_config['catalog_port']
+
+        dataInfluxDB = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
+
         self.url = json.loads(dataInfluxDB.text)['url']
         self.token = json.loads(dataInfluxDB.text)['token']
         self.bucket = json.loads(dataInfluxDB.text)['bucket']

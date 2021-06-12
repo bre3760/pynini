@@ -56,7 +56,6 @@ class TemperatureHumiditySensor:
         self.influxDB.write(message)
         print("su influx", message)
 
-
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print("Connected to %s with result code: %d" % (self.messageBroker, rc))
 
@@ -67,7 +66,7 @@ class TemperatureHumiditySensor:
         sensor_dict["port"] = self.sensorPort
         sensor_dict["caseID"] = self.caseID
         sensor_dict["name"] = self.sensorID
-        sensor_dict["last_seen"] = time.time()
+        sensor_dict["last_seen"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         sensor_dict["dev_name"] = 'rpi'
 
         r = requests.post(f"http://{catalog_ip}:{catalog_port}/addSensor", json=sensor_dict)
@@ -77,9 +76,7 @@ class TemperatureHumiditySensor:
         self.topic_hum = dict_of_topics["topic_hum"]
         self.messageBroker = json.loads(r.text)['broker_ip']
         self.breadCategories = json.loads(r.text)["breadCategories"]
-        print("[{}] Device Registered on Catalog".format(
-            int(time.time()),
-        ))
+        print( f"Device Registered on Catalog {sensor_dict['last_seen']}")
 
     def removeDevice(self):
         sensor_dict = {}
@@ -89,9 +86,9 @@ class TemperatureHumiditySensor:
         sensor_dict["dev_name"] = 'rpi'
 
         requests.post(f"http://{catalog_ip}:{catalog_port}/removeDevice", json=sensor_dict)
-        print("[{}] Device Removed from Catalog".format(
-            int(time.time()),
-        ))
+        removalTime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        print( f"Device Removed on Catalog {removalTime}")
+
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
         # A new message is received
@@ -118,8 +115,7 @@ if __name__ == "__main__":
     influxDB = InfluxDB(json.loads(dataInfluxDB.text))
  
 
-    sensor = TemperatureHumiditySensor(sensor_caseID +'-'+  'TempHum', influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port )
-
+    sensor = TemperatureHumiditySensor(sensor_caseID +'-'+  'TempHum', influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port)
     sensor.registerDevice()
     sensor.start()
 
@@ -131,9 +127,19 @@ if __name__ == "__main__":
 
                 print('Temp: {0:0.1f} °C  Humidity: {1:0.1f} %'.format(temperature, humidity))
 
-                payload_temp = {"caseID":sensor.caseID, "measurement": "temperature", "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "value": str(temperature), "category": sensor.category }
+                payload_temp = {"caseID":sensor.caseID, 
+                                "measurement": "temperature", 
+                                "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), 
+                                "value": str(temperature), 
+                                "category": sensor.category,
+                                "unit_of_measurement": "Celsius" }
                 time.sleep(1)
-                payload_hum  = {"caseID":sensor.caseID, "measurement": "humidity", "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "value": str(humidity), "category": sensor.category}
+                payload_hum  = {"caseID":sensor.caseID, 
+                                "measurement": "humidity", 
+                                "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), 
+                                "value": str(humidity), 
+                                "category": sensor.category,
+                                "unit_of_measurement":"Relative Humidity"}
 
                 sensor.myPublish(sensor.topic_temp, payload_temp)
                 sensor.myPublish(sensor.topic_hum, payload_hum)

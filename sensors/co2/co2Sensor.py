@@ -124,19 +124,18 @@ if __name__ == "__main__":
 	sensor.start()
 
 	df = pd.read_csv('co2.csv', sep=',', decimal=',', index_col=0)
-	df.index = pd.to_datetime(df.index, unit='s')
 
-	for i in df.index:
-		for j in df.loc[i].items():
-			value = j[1]
-			sensor.message["measurement"] = sensor.sensorID
-			sensor.message["timestamp"] = str(i)
-			sensor.message["value"] = value
-			sensor.message["category"] = sensor.category
-			sensor.myPublish(sensor.message)
-			print('ho pubblicato:', sensor.message)
+	for row in df.iterrows():
+		value = row[1]['value']
+		sensor.message["measurement"] = sensor.sensorID
+		sensor.message["timestamp"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+		sensor.message["value"] = value
+		sensor.message["category"] = sensor.category
+		sensor.message["unit_of_measurement"] = "ppm"
+		sensor.myPublish(sensor.message)
+		print('ho pubblicato:', sensor.message)
 
-			time.sleep(10)
+		time.sleep(10)
 
 	sensor.stop()
 	sensor.removeDevice()

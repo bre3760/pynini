@@ -1,12 +1,12 @@
 {
-    "HOST":"0.0.0.0",
+    "HOST":"localhost",
     "PORT" : 9090, 
     "catalog_ip":"0.0.0.0",
     "catalog_port": 9090,
-    "InfluxDB": {
-        "bucket": "Pynini",
-        "token": "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg==",
-        "url": "https://eu-central-1-1.aws.cloud2.influxdata.com"
+    "InfluxDB": {        
+            "token" : "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg==",
+            "bucket" : "Pynini",
+            "url" : "https://eu-central-1-1.aws.cloud2.influxdata.com"
     },
     "bots": [
         {
@@ -56,28 +56,28 @@
     },
     "thresholds": [
         {
-            "max_co2_th": "10",
+            "max_co2_th": "5",
             "max_humidity_th": "50",
             "max_temperature_th": "100",
-            "min_co2_th": "10",
+            "min_co2_th": "1",
             "min_humidity_th": "50",
             "min_temperature_th": "12",
             "type": "Wheat"
         },
         {
-            "max_co2_th": "10",
+            "max_co2_th": "6",
             "max_humidity_th": "50",
             "max_temperature_th": "100",
-            "min_co2_th": "10",
+            "min_co2_th": "0.5",
             "min_humidity_th": "50",
             "min_temperature_th": "12",
             "type": "Glutenfree"
         },
         {
-            "max_co2_th": "10",
+            "max_co2_th": "5.5",
             "max_humidity_th": "50",
             "max_temperature_th": "22",
-            "min_co2_th": "1",
+            "min_co2_th": "0.5",
             "min_humidity_th": "50",
             "min_temperature_th": "10",
             "type": "White"

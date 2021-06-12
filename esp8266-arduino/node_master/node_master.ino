@@ -68,7 +68,12 @@ PubSubClient client(espClient);
 // NTP CURRENT TIME
 String currentHour = "";
 String currentMinute = "";
-const long utcOffsetInSeconds = 7200; // rome time zone
+String currentSeconds = "";
+String currentDate = "";
+String currentYear = "";
+String currentMonth = "";
+String monthDay = "";
+const long utcOffsetInSeconds = 0; // rome time zone
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 // Define NTP Client to get time
@@ -286,7 +291,9 @@ int httpConnect(char*, char*, char*)
     timeClient.update();     // updating current time
     currentHour = timeClient.getHours();
     currentMinute = timeClient.getMinutes();
-    
+    currentSeconds = timeClient.getSeconds();
+    currentDay = daysOfTheWeek[timeClient.getDay()];
+    currentDayFull = timeClient.getDay();
     int postDone=0;
     if ((WiFi.status() == WL_CONNECTED)) {
       HTTPClient http; 
@@ -294,7 +301,7 @@ int httpConnect(char*, char*, char*)
       doc["name"] = "arduino";
       doc["ip"] = local_ip;
       doc["port"] = "8080";
-      doc["last_seen"] = currentHour + ":" + currentMinute;
+      doc["last_seen"] =  + " " + currentHour + ":" + currentMinute + ":" + currentSeconds;
       doc["dev_name"] = "arduino";
       doc["caseID"] = http_config.httpCaseID;
       doc["sensorID"] = "arduino";

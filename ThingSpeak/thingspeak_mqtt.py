@@ -2,9 +2,6 @@ import paho.mqtt.client as mqtt
 import json, time, datetime
 import requests
 
-# devo collegarmi alle topiche solo dei sensori attivi:
-# interrogo il catalog per capire quali sono i sensori attivi
-
 class ThingSpeakConnector:
 
     def __init__(self, r, topics):
@@ -114,10 +111,7 @@ if __name__ == '__main__':
     while t < 500:
         data_upload_json = json.dumps({"api_key": tsa.write_key,
                                        "channel_id": tsa.channel,
-                                       #"created_at": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
-                                       #"entry_id": cnt,
-                                       #"created_at": tsa.timestamp,
-                                       "field1": tsa.field1_data, #,
+                                       "field1": tsa.field1_data, 
                                        "field2": tsa.field2_data,
                                        "field3": tsa.field3_data
                                        })

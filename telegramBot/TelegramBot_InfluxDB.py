@@ -12,8 +12,6 @@ import time
 import numpy as np
 import paho.mqtt.client as PahoMQTT
 
-#TODO: CHECK IF SENDALERT WORKS!!!!!!!!
-
 TYPOLOGY, PARAM, PARAMS, PARAM2, HOME, INFO, THRESHOLD, EXIT = range(8)
 
 class TelegramBot(object):
@@ -63,7 +61,7 @@ class TelegramBot(object):
         self.topics = json.loads(r.text)
         # subscribe for a topic
         for t in self.topics:
-            self._paho_mqtt.subscribe("trigger/"+t, 2) # magari * prima di trigger per prendere per tutte le case
+            self._paho_mqtt.subscribe("trigger/"+t, 2) # magari prima di trigger per prendere per tutte le case
         print("Subscribed to: ", self.topics)
 
         self._paho_mqtt.connect(self.messageBroker, 1883)

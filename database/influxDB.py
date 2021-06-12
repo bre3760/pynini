@@ -5,11 +5,7 @@ import requests
 import json
 import pandas as pd
 
-token = "m--UwwUcp-7FJffZeWJO2XbJ84XfIKjg1kSzgHPsPF92ffajo4ipGR9bSVeDfKZrG9Pwl158FFqC9V42baUxGw=="
-tokenPynini = "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg=="
-bucket = "Pynini"
-url = "https://eu-central-1-1.aws.cloud2.influxdata.com"
-#hi
+
 class InfluxDB():
     def __init__(self, data):
         self.url = data['url']
@@ -26,13 +22,6 @@ class InfluxDB():
         )
 
     def best(self):
-        # devo inserire nel db i best value di co2, temp e hum per ciascuna categoria ed il link Google
-        # bestdf = pd.DataFrame({'category': ["White", "Wheat", "Gluten-free", "Cereals"],
-        #                       'co2': [2.35, 2.75, 3.10, 1.80],
-        #                        'temperature': [28, 30, 27, 32],
-        #                        'humidity': [32, 33, 31, 34]})
-        # bestdf.set_index('category', inplace=True)
-        # print("BESTDF", bestdf)
 
         write_api = self.client.write_api(write_options=SYNCHRONOUS)
         white = Point("best").tag("category", "White").field("co2", 2.01).field("temperature", 28).field("humidity", 33).field("info", "https://www.allrecipes.com/recipe/20066/traditional-white-bread/")
@@ -55,10 +44,7 @@ class InfluxDB():
     def write(self, data):
         self.counter += 1
         write_api = self.client.write_api(write_options=SYNCHRONOUS)
-        # p = Point(data["measurement"]).tag("category", data["category"]).field("value", data["value"]).field("uniq", self.counter).time(datetime.utcnow(), WritePrecision.NS)
-        # da provare quando più sensori inseriscono dati in influxdb contemporaneamente -> in teoria dovrebbe incazzarsi e volere il campo uniq
-        # avendo più field, la funzione get_field() ritorna per ogni entry tutti i fields
-        #print(type(data["measurement"]))
+        
         print(type( data["caseID"]))
         print(type( data["category"]))
         print(type( data["value"]))
@@ -67,4 +53,4 @@ class InfluxDB():
         write_api.write(self.bucket, self.org, record=p)
 
         write_api.close()
-        #tag are indexed while field are not
+        
