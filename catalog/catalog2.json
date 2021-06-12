@@ -1,5 +1,5 @@
 {
-    "HOST":"localhost",
+    "HOST":"0.0.0.0",
     "PORT" : 9090, 
     "catalog_ip":"0.0.0.0",
     "catalog_port": 9090,
@@ -29,12 +29,6 @@
     "broker_ip_outside":"192.168.1.2",
     "broker_port": 1883,
     "cases": [],
-    "db": {
-        "host": "localhost",
-        "nameDB": "mydatabase",
-        "password": "pynini",
-        "user": "root"
-    },
     "freeboard": {
         "freeboard_host": "127.0.0.1",
         "freeboard_port": "8080"
