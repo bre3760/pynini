@@ -126,8 +126,8 @@ if __name__ == "__main__":
 	df = pd.read_csv('co2.csv', sep=',', decimal=',', index_col=0)
 
 	for row in df.iterrows():
-		print("row", row)
-		value = row[1]['value']
+		print("row", type(row), row)
+		value = row[0]
 		sensor.message["measurement"] = sensor.sensorID
 		sensor.message["timestamp"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 		sensor.message["value"] = value
