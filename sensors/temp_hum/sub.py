@@ -11,7 +11,7 @@ class MySubscriber:
 			# register the callback
 			self._paho_mqtt.on_connect = self.myOnConnect
 			self._paho_mqtt.on_message = self.myOnMessageReceived
-			self.topic = "breadType/"  #'measure/temperature'
+			self.topic = "CCC2/breadType/"  #'measure/temperature'
 			self.messageBroker = '127.0.0.1'
 
 

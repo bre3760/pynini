@@ -59,6 +59,7 @@ class Catalog(object):
     def POST(self, *uri, **params):
         res = {}
         if len(uri) == 1 and uri[0] == 'addSensor':
+            # add new sensor to the catalog
             new_device_info = json.loads(cherrypy.request.body.read())
             print("cherrypy.request.body.read()", new_device_info)
             try:
@@ -79,6 +80,8 @@ class Catalog(object):
                                'last_seen': last_seen}
 
                     found = False
+                    # check if in the catalog there is already a sensor in the same caseID with the same name: 
+                    # in this case the old one is removed and the new one is stored, updating the field called "last updated"
                     for c in catalog['cases']:
                         if c['caseID'] == caseID:
                             found = True
@@ -112,19 +115,28 @@ class Catalog(object):
                     f.truncate()
                     f.close()
                     print(f'${new_dev["name"]} - added to the catalog')
-                    print("catalog['topics'][name]",catalog['topics'][sensorID])
-                    res["topic"] = catalog['topics'][sensorID]
-                    res["broker_ip"] = catalog["broker_ip"]
-                    res["breadCategories"] = catalog["breadCategories"]
 
-                    print("res[topic]", res['topic'])
+                    try: 
 
-                    return json.dumps(res)
+                        print("catalog['topics'][name]",catalog['topics'][sensorID])
+                        res["topic"] = catalog['topics'][sensorID]
+                        res["broker_ip"] = catalog["broker_ip"]
+                        res["breadCategories"] = catalog["breadCategories"]
+
+                        print("res[topic]", res['topic'])
+
+                        return json.dumps(res)
+                    except:
+                        print('No topic found for this sensor')
+                        raise cherrypy.HTTPError(404, 'No topic found for this sensor')
+
+
 
             except KeyError:
                 raise cherrypy.HTTPError(404, 'The catalog file was not found')
 
         if len(uri) == 1 and uri[0] == 'addBot':
+                # add TelegramBot to the catalog
                 new_bot_info = json.loads(cherrypy.request.body.read())
                 print("cherrypy.request.body.read()", new_bot_info)
                 try:
@@ -158,6 +170,7 @@ class Catalog(object):
                     raise cherrypy.HTTPError(404, 'The catalog file was not found')
 
         if len(uri) == 1 and uri[0] == 'removeSensor':
+            # remove the sensor from the catalog
             new_device_info = json.loads(cherrypy.request.body.read())
             print("cherrypy.request.body.read()", new_device_info)
             try:
@@ -194,6 +207,7 @@ class Catalog(object):
                 raise cherrypy.HTTPError(404, 'The catalog file was not found')
 
         if len(uri) == 1 and uri[0] == 'removeBot':
+            # remove the Telegram Bot from the catalog
             new_bot_info = json.loads(cherrypy.request.body.read())
             print("new_bot_info", new_bot_info)
             try:
@@ -227,6 +241,7 @@ class Catalog(object):
                 raise cherrypy.HTTPError(404, 'The catalog file was not found')
 
         if len(uri) == 1 and uri[0] == 'setThresholds':
+            # to modify the thresholds of the different bread typology 
             try:
                 with open('catalog2.json', 'r+') as f:
                     catalog = json.load(f)
@@ -272,6 +287,7 @@ class Catalog(object):
                 raise cherrypy.HTTPError(404, 'The catalog file was not found')
 
         if len(uri) == 1 and uri[0] == 'setBreadtype':
+            # to set the bread typology
             try:
                 with open('catalog2.json', 'r+') as f:
                     catalog = json.load(f)
@@ -289,7 +305,6 @@ class Catalog(object):
                     for d in catalog['cases']:
                         if d['caseID'] == caseID:
                            d["bread_type"] = breadtype
-                           #print(breadtype+'AAAAAAAAAAAAAAAAAAAAAAAA')
                     print([i['bread_type'] for i in catalog['cases']])
                     f.seek(0)
                     f.write(json.dumps(catalog, indent=4, sort_keys=True))

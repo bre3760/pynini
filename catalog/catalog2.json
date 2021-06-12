@@ -1,10 +1,8 @@
 {
-    "catalog_ip":"0.0.0.0",
-    "catalog_port": 9090,
-    "InfluxDB": {        
-            "token" : "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg==",
-            "bucket" : "Pynini",
-            "url" : "https://eu-central-1-1.aws.cloud2.influxdata.com"
+    "InfluxDB": {
+        "bucket": "Pynini",
+        "token": "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg==",
+        "url": "https://eu-central-1-1.aws.cloud2.influxdata.com"
     },
     "bots": [
         {
@@ -24,15 +22,35 @@
         "Glutenfree"
     ],
     "broker_ip": "127.0.0.1",
-    "broker_ip_outside":"192.168.1.2",
+    "broker_ip_outside": "192.168.1.2",
     "broker_port": 1883,
-    "cases": [],
+    "cases": [
+        {
+            "arduino": {
+                "sensors": []
+            },
+            "bread_type": "White",
+            "caseID": "CCC4",
+            "rpi": {
+                "sensors": [
+                    {
+                        "ip": "172.10.20.5",
+                        "last_seen": "12312",
+                        "name": "gigi",
+                        "port": "9090"
+                    }
+                ]
+            }
+        }
+    ],
+    "catalog_ip": "0.0.0.0",
+    "catalog_port": 9090,
     "freeboard": {
         "freeboard_host": "127.0.0.1",
         "freeboard_port": "8080"
     },
     "ip_address": "172.20.10.11",
-    "last_updated": 1622196299.9331405,
+    "last_updated": 1623490398.116403,
     "telegramBot": {
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"

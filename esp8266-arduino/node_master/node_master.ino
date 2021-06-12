@@ -11,7 +11,7 @@
 
 // function prototypes
 void connectWifi();
-int httpConnect(char*, char*, char*);
+int  httpConnect(char*, char*, char*);
 void LightsOn(int actuatorPin);
 void LightsOff(int actuatorPin);
 void callback(char* topic, byte* message, unsigned int length);
@@ -27,11 +27,11 @@ boolean wifiConnected = false;
 String local_ip;
 
 // Wire connection
-const int relayPin1 = 5;    //I am using ESP8266 EPS-12F GPIO5 and GPIO4
+const int relayPin1 = 5;                        //I am using ESP8266 EPS-12F GPIO5 and GPIO4
 const int relayPin2 = 4;
 int breadType;
 
-// mqtt 
+// mqtt configuration 
 struct MQTTConfig {
   char mqtt_server[12];
   int  mqtt_port;
@@ -41,16 +41,14 @@ struct MQTTConfig {
   char topic[11];
   char caseID[5];
 };
-MQTTConfig mqtt_config;
+MQTTConfig mqtt_config;                          // <- global configuration object
 
-char breadTopic[10];
+char breadTopic[10];                             // initialization for topics 
 char fanTopic[11];
 char lampTopic[12];
-String breadTopicString;
-String fanTopicString;
-String lampTopicString;
 
-// http
+
+// http config
 struct HttpConfig {
   char rpi_ip[12];
   char rpi_port[5];
@@ -61,18 +59,16 @@ HttpConfig http_config;
 // Creation of an ESP8266WiFi object
 WiFiClient espClient;
 // Creation of a PubSubClient object
-// PubSubClient client(mqtt_server,1883,espClient);
 PubSubClient client(espClient);
-
 
 // NTP CURRENT TIME
 String currentHour = "";
 String currentMinute = "";
 String currentSeconds = "";
 String currentDate = "";
-String currentYear = "";
-String currentMonth = "";
-String monthDay = "";
+int currentYear;
+int currentMonth;
+int monthDay;
 const long utcOffsetInSeconds = 0; // rome time zone
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
@@ -212,8 +208,29 @@ void loop() {
   Serial.print(breadData);
   Serial.print("\n");
 
+  timeClient.update();     // updating current time
+  unsigned long epochTime = timeClient.getEpochTime();
+  struct tm *ptm = gmtime ((time_t *)&epochTime);
+  currentHour = timeClient.getHours();
+  currentMinute = timeClient.getMinutes();
+  currentSeconds = timeClient.getSeconds();
+  monthDay = ptm->tm_mday;
+  currentMonth =ptm->tm_mon+1;
+  currentYear = ptm->tm_year+1900;
+  currentDate = String(currentYear) + "-" + String(currentMonth) + "-" + String(monthDay);
+  String currentTime = currentHour + ":" + currentMinute + ":" + currentSeconds;
+  String currentDateTime = currentDate + " " + currentTime;
+
   String messageDescription = "bread_index" ;
   String payload = "{";
+  payload +=  '"';
+  payload+= "timestamp";
+  payload+= '"';
+  payload += ":";
+  payload+='"';
+  payload+= currentDateTime;
+  payload+='"';
+  payload += ",";
   payload +=  '"';
   payload+= "caseID";
   payload+= '"';
@@ -289,11 +306,16 @@ int httpConnect(char*, char*, char*)
   {
     timeClient.begin();     // NTP time
     timeClient.update();     // updating current time
+    unsigned long epochTime = timeClient.getEpochTime();
+    struct tm *ptm = gmtime ((time_t *)&epochTime);
     currentHour = timeClient.getHours();
     currentMinute = timeClient.getMinutes();
     currentSeconds = timeClient.getSeconds();
-    currentDay = daysOfTheWeek[timeClient.getDay()];
-    currentDayFull = timeClient.getDay();
+    
+    monthDay = ptm->tm_mday;
+    currentMonth =ptm->tm_mon+1;
+    currentYear = ptm->tm_year+1900;
+    currentDate = String(currentYear) + "-" + String(currentMonth) + "-" + String(monthDay);
     int postDone=0;
     if ((WiFi.status() == WL_CONNECTED)) {
       HTTPClient http; 
@@ -301,7 +323,7 @@ int httpConnect(char*, char*, char*)
       doc["name"] = "arduino";
       doc["ip"] = local_ip;
       doc["port"] = "8080";
-      doc["last_seen"] =  + " " + currentHour + ":" + currentMinute + ":" + currentSeconds;
+      doc["last_seen"] = currentDate  + " " + currentHour + ":" + currentMinute + ":" + currentSeconds;
       doc["dev_name"] = "arduino";
       doc["caseID"] = http_config.httpCaseID;
       doc["sensorID"] = "arduino";

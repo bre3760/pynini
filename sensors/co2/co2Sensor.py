@@ -18,6 +18,7 @@ class co2Sensor:
 		self.sensorPort = sensor_port
 		self.category = "White"
 		self.breadCategories = []
+
 		# register the callback
 		self._paho_mqtt.on_connect = self.myOnConnect
 		self._paho_mqtt.on_message = self.myOnMessageReceived
@@ -30,11 +31,15 @@ class co2Sensor:
 			'caseID': self.caseID,
 			'timestamp': '',
 			'value': '',
+			'unit_of_measurement' : "ppm",
 			'category': self.category
 		}
 
 	def start (self):
-		#manage connection to broker
+		''' manage connection to broker
+			subscription to the topic related to the bread category: if the user changes it through the button,
+			the sensor will receive a message on that topic to update its data
+		'''
 		self._paho_mqtt.username_pw_set(username="brendan", password="pynini")
 		self._paho_mqtt.connect(self.messageBroker, 1883)
 		self._paho_mqtt.loop_start()
@@ -51,7 +56,9 @@ class co2Sensor:
 		print ("Connected to %s with result code: %d" % (self.messageBroker, rc))
 
 	def myPublish(self, message):
-		# publish a message with a certain topic
+		'''
+			sensor publishes on its topic (caseID/measure/sensor) the measurements and write data into influxDB
+		'''
 		case_specific_topic = self.caseID + "/" +  self.topic # example CCC2/measure/co2
 		self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
 		self.influxDB.write(message)
@@ -59,7 +66,11 @@ class co2Sensor:
 	#	self.influxDB.clean()
 
 	def myOnMessageReceived (self, paho_mqtt , userdata, msg):
-		# A new message is received
+		'''
+			when a message is received on the topic "topicBreadType", it means that the bread category of the case is changed:
+			the sensor has to be aware of this change in order to correctly store the measurements into InfluxDB.
+			(Each bread category has its own thresholds)
+		'''
 		print ("Topic:'" + msg.topic+"', QoS: '"+str(msg.qos)+"' Message: '"+str(msg.payload) + "'")
 
 		if msg.topic == self.topicBreadType:
@@ -70,7 +81,7 @@ class co2Sensor:
 
 	def registerDevice(self):
 		'''
-		register the device on the Room Catalog by sending a post request to it
+			register the device on the Catalog by sending a post request to it
 		'''
 		sensor_dict = {}
 		sensor_dict["sensorID"] = self.sensorID
@@ -80,7 +91,8 @@ class co2Sensor:
 		sensor_dict["last_seen"] = time.time()
 		sensor_dict["dev_name"] = 'rpi'
 
-		print("type sensor_dict", sensor_dict, type(sensor_dict))
+		print("sensor_dict", sensor_dict)
+
 		r = requests.post(f"http://{catalog_ip}:{catalog_port}/addSensor", json=sensor_dict)
 		print("json.loads(r.text)", json.loads(r.text))
 		self.topic = json.loads(r.text)['topic']
@@ -92,6 +104,9 @@ class co2Sensor:
 		))
 
 	def removeDevice(self):
+		'''
+			remove the sensor from the list of active sensors in the catalog
+		'''
 
 		sensor_dict = {}
 		sensor_dict['sensorID'] = self.sensorID
@@ -107,7 +122,8 @@ class co2Sensor:
 		))
 
 if __name__ == "__main__":
-	
+
+	# read the configuration from the specific config file
 	with open("config.json", 'r') as sensor_f:
 		sensor_config = json.load(sensor_f)
 		sensor_ip = sensor_config['sensor_ip']
@@ -116,17 +132,19 @@ if __name__ == "__main__":
 		catalog_ip = sensor_config['catalog_ip']
 		catalog_port = sensor_config['catalog_port']
 
+	# retrieve data needed to access InfluxDB
 	dataInfluxDB = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
 	influxDB = InfluxDB(json.loads(dataInfluxDB.text))
 
 	sensor = co2Sensor(sensor_caseID +'-'+ 'co2', influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port )
+	
+	# sensor registers itself to the catalog and starts publishing
 	sensor.registerDevice()
 	sensor.start()
 
 	df = pd.read_csv('co2.csv', sep=',', decimal=',', index_col=0)
 
 	for row in df.iterrows():
-		print("row", type(row), row)
 		value = row[0]
 		sensor.message["measurement"] = sensor.sensorID
 		sensor.message["timestamp"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -141,5 +159,6 @@ if __name__ == "__main__":
 	sensor.stop()
 	sensor.removeDevice()
 
+	#
 	c = ClientQuery(sensor.sensorID, sensor.category, sensor.caseID)
 	c.start()
