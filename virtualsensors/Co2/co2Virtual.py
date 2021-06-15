@@ -5,8 +5,7 @@ import requests
 import pandas as pd
 import sys
 sys.path.append("../../")
-from database.influxDB import InfluxDB
-from database.query import ClientQuery
+from influxDB import InfluxDB
 from datetime import datetime
 
 class co2Sensor:
@@ -96,7 +95,7 @@ class co2Sensor:
 		r = requests.post(f"http://{catalog_ip}:{catalog_port}/addSensor", json=sensor_dict)
 		print("json.loads(r.text)", json.loads(r.text))
 		self.topic = json.loads(r.text)['topic']
-		self.messageBroker = json.loads(r.text)['broker_ip']
+		self.messageBroker = json.loads(r.text)['broker_ip_outside']
 		self.breadCategories = json.loads(r.text)['breadCategories']
 
 		print("[{}] Device Registered on Catalog".format(

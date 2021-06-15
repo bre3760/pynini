@@ -4,18 +4,7 @@
         "token": "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg==",
         "url": "https://eu-central-1-1.aws.cloud2.influxdata.com"
     },
-    "bots": [
-        {
-            "chat_ID": 960700473,
-            "ip": "localhost",
-            "last_seen": 1619772628.5529668
-        },
-        {
-            "chat_ID": 490068659,
-            "ip": "localhost",
-            "last_seen": 1620827447.4237807
-        }
-    ],
+    "bots": [],
     "breadCategories": [
         "White",
         "Wheat",
@@ -30,14 +19,20 @@
                 "sensors": []
             },
             "bread_type": "White",
-            "caseID": "CCC4",
+            "caseID": "CCC2",
             "rpi": {
                 "sensors": [
                     {
-                        "ip": "172.10.20.5",
-                        "last_seen": "12312",
-                        "name": "gigi",
-                        "port": "9090"
+                        "ip": "172.10.20.1",
+                        "last_seen": 1623770335.3138678,
+                        "name": "co2",
+                        "port": 9090
+                    },
+                    {
+                        "ip": "172.10.20.2",
+                        "last_seen": "2021-06-15 15:18:55",
+                        "name": "TempHum",
+                        "port": 9090
                     }
                 ]
             }
@@ -50,7 +45,7 @@
         "freeboard_port": "8080"
     },
     "ip_address": "172.20.10.11",
-    "last_updated": 1623490398.116403,
+    "last_updated": 1623770335.3409004,
     "telegramBot": {
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
@@ -99,11 +94,11 @@
             "topic_temp": "measure/temperature"
         },
         "arduino": {
-            "breadType": "breadType/",
+            "breadType": "breadType",
             "fan": "trigger/fan",
             "lamp": "trigger/lamp"
         },
-        "breadType": "breadType/",
+        "breadType": "breadType",
         "co2": "measure/co2"
     }
 }

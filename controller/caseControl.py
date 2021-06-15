@@ -166,7 +166,7 @@ class CaseControl(object):
             obj = json.loads(threshold) # list of the thresholds
             for th in obj:
                 if th["type"] == self.breadTypeChosen:
-                    maxco2 = int(th["max_co2_th"])
+                    maxco2 = float(th["max_co2_th"]) 
         # if connection to the catalog fails, the max co2 allowed is set to a default value
         except requests.exceptions.RequestException as e:
             print(e)

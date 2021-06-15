@@ -3,11 +3,11 @@ import time
 import json
 import requests
 from datetime import datetime
-import Adafruit_DHT
+# import Adafruit_DHT only for real sensor
 import sys
 sys.path.append("../../")
-from database.influxDB import InfluxDB
-from database.query import ClientQuery
+from influxDB import InfluxDB
+import random
 
 
 class TemperatureHumiditySensor:
@@ -74,7 +74,7 @@ class TemperatureHumiditySensor:
         print("dict_of_topics",dict_of_topics)
         self.topic_temp = dict_of_topics["topic_temp"]
         self.topic_hum = dict_of_topics["topic_hum"]
-        self.messageBroker = json.loads(r.text)['broker_ip']
+        self.messageBroker = json.loads(r.text)['broker_ip_outside']
         self.breadCategories = json.loads(r.text)["breadCategories"]
         print( f"Device Registered on Catalog {sensor_dict['last_seen']}")
 
@@ -122,7 +122,9 @@ if __name__ == "__main__":
     try:
         while True:
             # read temperature and humidity
-            humidity, temperature = Adafruit_DHT.read_retry(11, 4)  # (sensor,pin)
+            # humidity, temperature = Adafruit_DHT.read_retry(11, 4)  # (sensor,pin)
+            humidity = random.randint(30,40)
+            temperature = random.randint(23,27)
             if humidity < 100:
 
                 print('Temp: {0:0.1f} °C  Humidity: {1:0.1f} %'.format(temperature, humidity))
@@ -142,6 +144,7 @@ if __name__ == "__main__":
                                 "unit_of_measurement":"Relative Humidity"}
 
                 sensor.myPublish(sensor.topic_temp, payload_temp)
+                time.sleep(1)
                 sensor.myPublish(sensor.topic_hum, payload_hum)
 
             
@@ -153,10 +156,6 @@ if __name__ == "__main__":
 
     sensor.stop()
     sensor.removeDevice()
-
-    #c = ClientQuery(sensor.sensorID, sensor.category,  sensor.caseID)
-    #c.start()
-
 
 
 

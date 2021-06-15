@@ -2,14 +2,15 @@
 
 FROM python:3.8-slim-buster
 
-WORKDIR /pynini/sensors
-
+WORKDIR /pynini
+ADD influxDB.py /
+ADD query.py /
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
 COPY . .
 
-CMD [ "python3", "sensors/virtualSensors.py"]
+CMD [ "python3", "-u", "co2Virtual.py"]
 
 
 

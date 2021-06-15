@@ -4,6 +4,6 @@
     "caseID":"CCC2",
     "influx_ip":"0.0.0.0",
     "influx_port":9090,
-    "catalog_ip":"0.0.0.0",
+    "catalog_ip":"catalog",
     "catalog_port":9090
   }

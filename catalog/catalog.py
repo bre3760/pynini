@@ -121,6 +121,8 @@ class Catalog(object):
                         print("catalog['topics'][name]",catalog['topics'][sensorID])
                         res["topic"] = catalog['topics'][sensorID]
                         res["broker_ip"] = catalog["broker_ip"]
+                        res["broker_ip_outside"] = catalog["broker_ip_outside"]
+
                         res["breadCategories"] = catalog["breadCategories"]
 
                         print("res[topic]", res['topic'])

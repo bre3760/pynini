@@ -7,8 +7,8 @@ import os
 import time
 
 
-cur_path = os.path.dirname(__file__)
-catalog_path = os.path.join(cur_path, '..', 'catalog', 'catalog2.json')
+# cur_path = os.path.dirname(__file__)
+# catalog_path = os.path.join(cur_path, '..', 'catalog', 'catalog2.json')
 
 if __name__ == '__main__':
 
@@ -20,11 +20,11 @@ if __name__ == '__main__':
         caseID = config_dict["caseID"]
 
 
-    broker_url = "http://" + catalog_ip + ":" + str(catalog_port) + "/broker"
-
+    broker_url = "http://" + catalog_ip + ":" + str(catalog_port) + "/broker_ip"
+    print(broker_url)
     # the broker IP and port are requested to the catalog REST service
     try:
-        r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip")
+        r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip_outside")
         print("Broker IP and port obtained from Catalog")
         broker_ip = json.loads(r.text)
         r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_port")

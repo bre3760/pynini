@@ -49,7 +49,7 @@ class InfluxDB():
         print(type( data["category"]))
         print(type( data["value"]))
     
-        p = Point(data["measurement"]).tag("caseID", data["caseID"]).tag("category", data["category"]).tag("unit_of_measurement", data["unit_of_measurement"]).field("value", data["value"]).time(datetime.utcnow(), WritePrecision.NS) #.field("uniq", self.counter)
+        p = Point(data["measurement"]).tag("caseID", data["caseID"]).tag("category", data["category"]).field("value", data["value"]).field("uniq", self.counter).time(datetime.utcnow(), WritePrecision.NS)
         write_api.write(self.bucket, self.org, record=p)
 
         write_api.close()

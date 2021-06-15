@@ -2,16 +2,15 @@
 
 FROM python:3.8-slim-buster
 
-WORKDIR /controller
-
-ADD MyMQTT.py /
-ADD caseControl.py /
-ADD config.json /
-
+WORKDIR /pynini
+ADD influxDB.py /
+ADD query.py /
 COPY requirements.txt requirements.txt
-
 RUN pip3 install -r requirements.txt
 
 COPY . .
 
-CMD [ "python3", "-u", "controlSystem.py"]
+CMD [ "python3", "-u", "temphum.py"]
+
+
+
