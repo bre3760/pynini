@@ -123,23 +123,22 @@ if __name__ == "__main__":
         while True:
             # read temperature and humidity
             # humidity, temperature = Adafruit_DHT.read_retry(11, 4)  # (sensor,pin)
-            humidity = random.randint(30,40)
-            temperature = random.randint(23,27)
-            if humidity < 100:
-
+            humidity = round(random.uniform(30, 40),2)
+            temperature = round(random.uniform(23, 30),2)
+            if humidity < 100: #used when the real sensor is used, sometimes it gives bad values :(
                 print('Temp: {0:0.1f} °C  Humidity: {1:0.1f} %'.format(temperature, humidity))
 
                 payload_temp = {"caseID":sensor.caseID, 
                                 "measurement": "temperature", 
                                 "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), 
-                                "value": str(temperature), 
+                                "value": temperature, 
                                 "category": sensor.category,
                                 "unit_of_measurement": "Celsius" }
                 time.sleep(1)
                 payload_hum  = {"caseID":sensor.caseID, 
                                 "measurement": "humidity", 
                                 "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), 
-                                "value": str(humidity), 
+                                "value": humidity, 
                                 "category": sensor.category,
                                 "unit_of_measurement":"Relative Humidity"}
 

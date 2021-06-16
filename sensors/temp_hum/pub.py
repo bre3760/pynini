@@ -7,7 +7,7 @@ import Adafruit_DHT
 import sys
 sys.path.append("../../")
 from database.influxDB import InfluxDB
-from database.query import ClientQuery
+# from database.query import ClientQuery
 
 
 class TemperatureHumiditySensor:

@@ -157,7 +157,3 @@ if __name__ == "__main__":
 
 	sensor.stop()
 	sensor.removeDevice()
-
-	#
-	#c = ClientQuery(sensor.sensorID, sensor.category, sensor.caseID)
-	#c.start()

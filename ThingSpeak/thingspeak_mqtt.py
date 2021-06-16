@@ -5,7 +5,6 @@ import requests
 class ThingSpeakConnector:
 
     def __init__(self, r, topics):
-
         self.pynini = json.loads(r.text)["name"]
         self.channel = json.loads(r.text)["channel"]
         self.write_key = json.loads(r.text)["write_key"]
@@ -15,13 +14,10 @@ class ThingSpeakConnector:
         self.port2 = json.loads(r.text)["port2"]
         self.broker_address = json.loads(r.text)["broker_ip"]
         self.url = json.loads(r.text)["url"]
-
         self.topics = topics
         self.client_obj = mqtt.Client(self.ID)
-
         self.isSubscriber = True
         self.isPublisher = False
-
         self.field1_data = None  # co2
         self.timestamp = None
         self.field2_data = None  # temperature
@@ -34,7 +30,6 @@ class ThingSpeakConnector:
     # device starting
     def start(self):
         self.client_obj.username_pw_set(username="brendan", password="pynini")
-
         self.client_obj.connect(self.broker_address, int(self.port1), int(self.port2))
         self.client_obj.loop_start()
 

@@ -6,7 +6,7 @@ import pandas as pd
 import sys
 sys.path.append("../../")
 from database.influxDB import InfluxDB
-from database.query import ClientQuery
+# from database.query import ClientQuery
 from datetime import datetime
 
 class co2Sensor:

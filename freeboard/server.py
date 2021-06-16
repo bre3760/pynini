@@ -6,9 +6,6 @@ import sys
 import pathlib
 
 #import cherrypy_cors
-
-WD = pathlib.Path(__file__).parent.absolute()
-
 #cherrypy_cors.install()
 
 
@@ -54,23 +51,23 @@ if __name__ == '__main__':
 		},
 	'/css':{
 		'tools.staticdir.on': True,
-		'tools.staticdir.dir': WD / 'freeboard/css'
+		'tools.staticdir.dir':  './freeboard/css'
 		},
 	'/examples':{
 		'tools.staticdir.on': True,
-		'tools.staticdir.dir':  WD / 'freeboard/examples'
+		'tools.staticdir.dir':   './freeboard/examples'
 		},
 	'/img':{
 		'tools.staticdir.on': True,
-		'tools.staticdir.dir':  WD / 'freeboard/img'
+		'tools.staticdir.dir':   './freeboard/img'
 		},
 	'/js':{
 		'tools.staticdir.on': True,
-		'tools.staticdir.dir':  WD / 'freeboard/js'
+		'tools.staticdir.dir':   './freeboard/js'
 		},
 	'/plugins':{
 		'tools.staticdir.on': True,
-		'tools.staticdir.dir':  WD / 'freeboard/plugins'
+		'tools.staticdir.dir':   './freeboard/plugins'
 		}
 	}
 	cherrypy.config.update({
