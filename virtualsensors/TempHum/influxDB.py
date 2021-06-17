@@ -40,7 +40,12 @@ class InfluxDB():
         self.counter += 1
         write_api = self.client.write_api(write_options=SYNCHRONOUS)
         
-        p = Point(data["measurement"]).tag("caseID", data["caseID"]).tag("category", data["category"]).tag("unit_of_measurement", data["unit_of_measurement"]).field("value", data["value"]).time(data["timestamp"], WritePrecision.NS) #.field("uniq", self.counter)
+        p = Point(data["measurement"])\
+            .tag("caseID", data["caseID"])\
+            .tag("category", data["category"])\
+            .tag("unit_of_measurement", data["unit_of_measurement"])\
+            .field("value", data["value"])\
+            .time(data["timestamp"], WritePrecision.NS) #.field("uniq", self.counter)
         write_api.write(self.bucket, self.org, record=p)
 
         write_api.close()

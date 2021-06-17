@@ -5,6 +5,7 @@ from influxDB import InfluxDB
 import requests
 import json
 from datetime import timedelta
+import time
 """
 script that creates the history of purchases for different bread types
 the dataframe has the following structure
@@ -20,15 +21,19 @@ price_white = []
 price_wheat = []
 price_glutenfree = []
 
-startTime = "2020-01-01 0:0:0"
-for i in range(0,365):
+startTime = "2021-06-17 00:00:00"
+for i in range(0,7):
     if i == 0:
-       time = datetime.strptime(startTime, "%Y-%m-%d %H:%M:%S")
+        time_dt = datetime.strptime(startTime, "%Y-%m-%d %H:%M:%S")  
+        print("START TIME IS: ", time_dt, type(time_dt))
     else:
-        time = days[-1] + timedelta(days=1)
-        # cerca quanto vale un giorno in unixtime
-        # datetime + timedelta(1)
-    days.append(time)
+        time_dt = datetime.strptime(days[-1] , "%Y-%m-%d %H:%M:%S") + timedelta(minutes=1)
+        print("START AFTER ZERO TIME IS: ", time_dt, type(time_dt))
+
+    print("BEFORE ADDING TO DAYS: ",  time_dt, type(time_dt))
+    print("WHAT IS ADDED TO DAYS: ", time_dt.strftime("%Y-%m-%d %H:%M:%S") , type(time_dt.strftime("%Y-%m-%d %H:%M:%S")))
+
+    days.append(time_dt.strftime("%Y-%m-%d %H:%M:%S"))
     white.append(random.uniform(100, 250))
     wheat.append(random.uniform(50, 150))
     glutenfree.append(random.uniform(20, 100))
@@ -39,7 +44,9 @@ for i in range(0,365):
 
 
 purchaseDF = pd.DataFrame()
+# purchaseDF["..."] = "..." # ti riempie la colonna per intero se il dataframe ha già una struttura
 purchaseDF["date"] = days
+
 purchaseDF["qnt_sold_white"] = white 
 purchaseDF["qnt_sold_wheat"] = wheat
 purchaseDF["qnt_sold_glutenfree"] = glutenfree
@@ -61,7 +68,7 @@ influxDB = InfluxDB(json.loads(dataInfluxDB.text))
 # create a dict in which collect day, quantity of bread sold and price of each typology
 data = {}
 for index, row in purchaseDF.iterrows():
-    data['statistics'] = 'statistics'
+    data['measurement'] = 'statistics'
     data['date'] = row['date']
     data['qnt_sold_white'] = row['qnt_sold_white']
     data['qnt_sold_wheat'] = row['qnt_sold_wheat']
@@ -70,4 +77,6 @@ for index, row in purchaseDF.iterrows():
     data['price_wheat'] = row['price_wheat']
     data['price_glutenfree'] = row['price_glutenfree']
     # store data into InfluxDB
+
+
     influxDB.write(data)
