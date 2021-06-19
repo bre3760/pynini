@@ -34,7 +34,7 @@ class ClientREST(object):
 			#print(type(json_file))  #json_file is a dict so must convert to json
 			#Pretty Printing
 			#print(json.dumps(json_file, indent=4, sort_keys=True)) must rewrite the file with this
-			with open('./examples/final_dashboard.json', 'w') as old_dash:
+			with open('./freeboard/examples/final_dashboard.json', 'w') as old_dash:
 				old_dash.seek(0)  # rewind
 				old_dash.write(json.dumps(new_dash, indent=4, sort_keys=True))  #must put write() cause it's a txtIOwrapper obj
 				old_dash.truncate()

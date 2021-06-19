@@ -250,8 +250,8 @@ class TelegramBot(object):
         if actualValues != []:
             print("actualValues != []")
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text='The optimal {} value for the {} typology is: {}. \n The actual minimum is: {}, \n the actual maximum is: {}, \n the actual mean is: {}.'.format(
-                                         param, self.category, best, min(actualValues), max(actualValues), round(np.mean(actualValues), 2)))
+                                     text='The optimal {} value for the {} typology is: {}. \n The actual is: {}.'.format(
+                                         param, self.category, best, actualValues))
             time.sleep(2)
 
         elif actualValues == []:

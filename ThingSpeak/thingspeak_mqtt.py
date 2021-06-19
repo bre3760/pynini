@@ -112,7 +112,7 @@ if __name__ == '__main__':
                                        })
 
         print(tsa.field1_data, tsa.field2_data, tsa.field3_data)
-        # if (tsa.field1_data != None):
+
         if (tsa.field1_data != None or tsa.field2_data != None or tsa.field3_data != None):
             print("Publishing on TS:", data_upload_json)
             requests.post(url=tsa.url, data=data_upload_json, headers=headers)
