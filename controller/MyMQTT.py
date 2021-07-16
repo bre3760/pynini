@@ -9,7 +9,6 @@ class MyMQTT:
 		self.clientID = clientID
 		self._isSubscriber = False
 		self._topic = []
-		# print(self.topic)
 		# create an instance of paho.mqtt.client
 		self._paho_mqtt = PahoMQTT.Client(clientID, False)
 		# register the callback
