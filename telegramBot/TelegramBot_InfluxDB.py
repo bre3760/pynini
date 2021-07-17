@@ -35,8 +35,7 @@ class TelegramBot(object):
         self._paho_mqtt.publish(self.topic, json.dumps(message), 2)
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg, update, context):
-        # A new message is received: non mi interessa distinguere le topiche perchè sono sottoscritto solo a quelle relative agli allarmi,
-        # quando leggo un messaggio su una di queste topiche mando l'alert specificando la topica (= il valore fuori threshold)
+        # A new message is received: an alert is sent to the Telegram Bot
         print("Topic:'" + msg.topic + "', QoS: '" + str(msg.qos) + "' Message: '" + str(msg.payload) + "'")
 
         self.sendAlert(update, context, msg.topic, msg.payload)
@@ -69,7 +68,7 @@ class TelegramBot(object):
 
         self.chatID = update.message.chat_id
         requests.post(f"http://{self.catalogIP}:{self.catalogPort}/addBot", json={'ip': self.catalogIP, 'chat_ID': self.chatID, 'last_seen': time.time()})
-        print("Mi sono registrato al catalog")
+        print("I'm registered to the catalog")
 
         update.message.reply_text(
             text = ' <b> Hi {}! &#128522; Welcome to @Pynini! &#128523 </b> \
@@ -114,7 +113,6 @@ class TelegramBot(object):
         r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/cases")
         allCases = json.loads(r.text)
 
-        print("allCases", allCases)
         for c in allCases:
             allCasesID.append(c['caseID'])
 
@@ -157,7 +155,6 @@ class TelegramBot(object):
         '''
             Once the caseID has been chosen, the user decides the parameter he wants to check (temperature, co2, humidity)
         '''
-        print("Ho selezionato il case ID: %s (getParam)", self.caseID)
 
         keyboard = [[InlineKeyboardButton("Temperature", callback_data='temperature'),
                      InlineKeyboardButton("Humidity", callback_data='humidity'),
@@ -180,13 +177,11 @@ class TelegramBot(object):
         r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/category", params=params)
         self.category = json.loads(r.text)
 
-        # PROBLEMA: ESEGUE DUE VOLTE QUESTA FUNZIONE PRIMA DI FAR PARTIRE GETACTUALPARAMS
         return PARAM
 
     def getActualParams(self, update, context):
 
         query = update.callback_query
-        print("query.data in getActualParams", query.data)
 
         keyboard_params = [[InlineKeyboardButton("Temperature", callback_data='temperature'),
                             InlineKeyboardButton("Humidity", callback_data='humidity'),
@@ -195,7 +190,6 @@ class TelegramBot(object):
                             ],
                             [InlineKeyboardButton("Exit", callback_data='exit')]]
 
-         # tramite get accedo al db per ritornare i parametri (ottimali e reali) richiesti dall'utente
         try:
              if query.data == 'home':
                  TYPOLOGY = self.home(update, context)
@@ -242,13 +236,10 @@ class TelegramBot(object):
 
         self.clientQuery = ClientQuery(param, self.category, self.caseID)
         actualValues = self.clientQuery.getData()
-        print("actualValues: ", actualValues, type(actualValues))
 
         best = self.clientQuery.getBest()
-        print("best: ", best)
 
         if actualValues != []:
-            print("actualValues != []")
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='The optimal {} value for the {} typology is: {}. \n The actual is: {}.'.format(
                                          param, self.category, best, actualValues))
@@ -256,7 +247,6 @@ class TelegramBot(object):
 
         elif actualValues == []:
             self.error(update, context)
-            print("No data avaiable")
             reply_markup = InlineKeyboardMarkup(keyboard_params)
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='Hey, an error occoured. Wait a little bit, try again. \nTo try again, push one of the buttons below!',
@@ -335,7 +325,6 @@ class TelegramBot(object):
 
         requests.put(f"http://{self.catalogIP}:{self.catalogPort}/setThresholds",
                       json=self.actual_thresh)
-        print("new config in maxTemp", self.actual_thresh)
 
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='The new configuration of thresholds is: \
@@ -434,7 +423,6 @@ class TelegramBot(object):
         for elem in json.loads(res.text):
             if elem['type'] == self.category:
                 self.actual_thresh = elem
-        print("sono in optionThresh", self.actual_thresh)
 
         minTemp = self.actual_thresh["min_temperature_th"]
         maxTemp = self.actual_thresh["max_temperature_th"]
@@ -520,7 +508,7 @@ class TelegramBot(object):
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='Bye! Have a good day and come back to @Pynini soon. &#128400;',
                                  reply_markup=ReplyKeyboardRemove(), parse_mode='HTML')
-        requests.post(f"http://{self.catalogIP}:{self.catalogPort}/removeBot",
+        requests.delete(f"http://{self.catalogIP}:{self.catalogPort}/removeBot",
                       json={'ip': self.catalogIP, 'chat_ID': self.chatID, 'last_seen': time.time()})
         print("Mi sono eliminato dal catalog")
         

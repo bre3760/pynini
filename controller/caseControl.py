@@ -35,18 +35,15 @@ class CaseControl(object):
         print(f'In Notify received msg_payload: {msg_payload}, under topic {topic}')
 
         if topic == "measure/temperature":
-            #msg = str.replace(msg_payload, "'", '"')
             json_mex = json.loads(msg_payload)
             self.currentTemperature = json_mex["value"]
 
         if topic == "measure/humidity":
-            #msg = str.replace(msg_payload, "'", '"')
             json_mex = json.loads(msg_payload)
             # the received value of humidity is saved
             self.currentHumidity = json_mex["value"]
 
         if topic == "measure/CO2":
-            # msg = str.replace(msg_payload, "'", '"')
             json_mex = json.loads(msg_payload)
             # the received value of co2 is saved
             self.currentCO2 = json_mex["value"]

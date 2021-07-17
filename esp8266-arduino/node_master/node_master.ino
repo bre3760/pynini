@@ -52,6 +52,8 @@ char lampTopic[12];
 struct HttpConfig {
   char rpi_ip[12];
   char rpi_port[5];
+  char dockerCatalogIp[13];
+  char dockerCatalogPort[5];
   char httpCaseID[5];
 };
 HttpConfig http_config;
@@ -144,6 +146,12 @@ void setup() {
         strlcpy(http_config.rpi_port,                  
                 doc["rpi_port"] | "9090",     
                 sizeof(http_config.rpi_port));
+        strlcpy(http_config.dockerCatalogIp,                  
+                doc["catalog_ip"] | "192.168.1.14",     
+                sizeof(http_config.dockerCatalogIp));
+        strlcpy(http_config.dockerCatalogPort,                  
+                doc["catalog_port"] | "9090",     
+                sizeof(http_config.dockerCatalogPort));
         strlcpy(http_config.httpCaseID,                  
                 doc["caseID"] | "CCC2",     
                 sizeof(http_config.httpCaseID));
@@ -330,7 +338,9 @@ int httpConnect(char*, char*, char*)
       String jsonData;
       serializeJson(doc,jsonData);
       int httpCode;
-      String urlForPost = "http://" + String(http_config.rpi_ip) + ":"+ String(http_config.rpi_port) + "/addSensor";
+      String urlForPost = "http://" + String(http_config.dockerCatalogIp) + ":"+ String(http_config.dockerCatalogPort) + "/addSensor";
+      Serial.println("urlForPost used is: ");
+      Serial.println(urlForPost);
       http.useHTTP10(true);
       http.begin(espClient,urlForPost); 
       http.addHeader("Content-Type", "application/json");

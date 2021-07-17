@@ -69,6 +69,8 @@ class TemperatureHumiditySensor:
         sensor_dict["last_seen"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         sensor_dict["dev_name"] = 'rpi'
 
+        print("sensor_dict", sensor_dict)
+
         r = requests.post(f"http://{catalog_ip}:{catalog_port}/addSensor", json=sensor_dict)
         dict_of_topics = json.loads(r.text)['topic']
         print("dict_of_topics",dict_of_topics)
@@ -80,12 +82,14 @@ class TemperatureHumiditySensor:
 
     def removeDevice(self):
         sensor_dict = {}
+        sensor_dict['sensorID'] = self.sensorID
+        sensor_dict["caseID"] = self.caseID
         sensor_dict["ip"] = self.sensorIP
         sensor_dict["port"] = self.sensorPort
         sensor_dict["name"] = self.sensorID
         sensor_dict["dev_name"] = 'rpi'
 
-        requests.post(f"http://{catalog_ip}:{catalog_port}/removeDevice", json=sensor_dict)
+        requests.delete(f"http://{catalog_ip}:{catalog_port}/removeDevice", json=sensor_dict)
         removalTime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         print( f"Device Removed on Catalog {removalTime}")
 
@@ -154,9 +158,6 @@ if __name__ == "__main__":
     sensor.stop()
     sensor.removeDevice()
 
-    #c = ClientQuery(sensor.sensorID, sensor.category,  sensor.caseID)
-    #c.start()
-
-
+ 
 
 

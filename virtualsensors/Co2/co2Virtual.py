@@ -23,7 +23,7 @@ class co2Sensor:
 		self._paho_mqtt.on_message = self.myOnMessageReceived
 		self.messageBroker = ""
 		r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
-		self.topic = ""
+		self.topic = self.caseID + "/" + json.loads(r.text)["co2"]
 		self.topicBreadType = self.caseID + "/" + json.loads(r.text)["breadType"]
 		self.message = {
 			'measurement': self.sensorID,
@@ -46,7 +46,7 @@ class co2Sensor:
 		self._paho_mqtt.subscribe(self.topicBreadType, 2)
 		print("Subscribed to: ", self.topicBreadType)
 
-	def stop (self):
+	def stop(self):
 		self._paho_mqtt.unsubscribe(self.topic)
 		self._paho_mqtt.loop_stop()
 		self._paho_mqtt.disconnect()
@@ -62,7 +62,7 @@ class co2Sensor:
 		self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
 		self.influxDB.write(message)
 		print("su influx", message)
-	#	self.influxDB.clean()
+
 
 	def myOnMessageReceived (self, paho_mqtt , userdata, msg):
 		'''
@@ -87,15 +87,16 @@ class co2Sensor:
 		sensor_dict["caseID"] = self.caseID
 		sensor_dict["ip"] = self.sensorIP
 		sensor_dict["port"] = self.sensorPort
-		sensor_dict["last_seen"] = time.time()
+		sensor_dict["last_seen"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 		sensor_dict["dev_name"] = 'rpi'
 
 		print("sensor_dict", sensor_dict)
 
 		r = requests.post(f"http://{catalog_ip}:{catalog_port}/addSensor", json=sensor_dict)
-		print("json.loads(r.text)", json.loads(r.text))
+		dict_of_topics = json.loads(r.text)['topic']
+		print("dict_of_topics",dict_of_topics)
 		self.topic = json.loads(r.text)['topic']
-		self.messageBroker = json.loads(r.text)['broker_ip_outside']
+		self.messageBroker = json.loads(r.text)['broker_ip_outside'] # outside since it is dockerized
 		self.breadCategories = json.loads(r.text)['breadCategories']
 
 		print("[{}] Device Registered on Catalog".format(
@@ -115,7 +116,7 @@ class co2Sensor:
 		sensor_dict["name"] = self.sensorID
 		sensor_dict["dev_name"] = 'rpi'
 
-		requests.post(f"http://{catalog_ip}:{catalog_port}/removeSensor", json=sensor_dict)
+		requests.delete(f"http://{catalog_ip}:{catalog_port}/removeSensor", json=sensor_dict)
 		print("[{}] Device Removed from Catalog".format(
 			int(time.time()),
 		))
@@ -132,7 +133,9 @@ if __name__ == "__main__":
 		catalog_port = sensor_config['catalog_port']
 
 	# retrieve data needed to access InfluxDB
+	print(f"catalog ip {catalog_ip}, catalog port {catalog_port}")
 	dataInfluxDB = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
+	print("INFLUXDB INFORMATION FROM CATALOG")
 	influxDB = InfluxDB(json.loads(dataInfluxDB.text))
 
 	sensor = co2Sensor(sensor_caseID +'-'+ 'co2', influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port )
@@ -142,18 +145,20 @@ if __name__ == "__main__":
 	sensor.start()
 
 	df = pd.read_csv('co2.csv', sep=',', decimal=',', index_col=0)
+	try:
+		for row in df.iterrows():
+			value = row[0]
+			sensor.message["measurement"] = sensor.sensorID
+			sensor.message["timestamp"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+			sensor.message["value"] = value
+			sensor.message["category"] = sensor.category
+			sensor.message["unit_of_measurement"] = "ppm"
+			sensor.myPublish(sensor.message)
+			print('ho pubblicato:', sensor.message)
 
-	for row in df.iterrows():
-		value = row[0]
-		sensor.message["measurement"] = sensor.sensorID
-		sensor.message["timestamp"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-		sensor.message["value"] = value
-		sensor.message["category"] = sensor.category
-		sensor.message["unit_of_measurement"] = "ppm"
-		sensor.myPublish(sensor.message)
-		print('ho pubblicato:', sensor.message)
-
-		time.sleep(10)
+			time.sleep(10)
+	except KeyboardInterrupt:
+		pass
 
 	sensor.stop()
 	sensor.removeDevice()
