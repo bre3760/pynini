@@ -7,6 +7,7 @@ import sys
 sys.path.append("../../")
 from influxDB import InfluxDB
 from datetime import datetime
+import os
 
 class co2Sensor:
 	def __init__(self, sensor, influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port):
@@ -116,7 +117,7 @@ class co2Sensor:
 		sensor_dict["name"] = self.sensorID
 		sensor_dict["dev_name"] = 'rpi'
 
-		requests.delete(f"http://{catalog_ip}:{catalog_port}/removeSensor", json=sensor_dict)
+		requests.post(f"http://{catalog_ip}:{catalog_port}/removeSensor", json=sensor_dict)
 		print("[{}] Device Removed from Catalog".format(
 			int(time.time()),
 		))
@@ -128,7 +129,9 @@ if __name__ == "__main__":
 		sensor_config = json.load(sensor_f)
 		sensor_ip = sensor_config['sensor_ip']
 		sensor_port = sensor_config['sensor_port']
-		sensor_caseID = sensor_config["caseID"]
+		# sensor_caseID = sensor_config["caseID"] # or os.getenv("caseID")
+		sensor_caseID =  os.getenv("caseID")
+
 		catalog_ip = sensor_config['catalog_ip']
 		catalog_port = sensor_config['catalog_port']
 

@@ -89,16 +89,16 @@ class TemperatureHumiditySensor:
         sensor_dict["name"] = self.sensorID
         sensor_dict["dev_name"] = 'rpi'
 
-        requests.delete(f"http://{catalog_ip}:{catalog_port}/removeDevice", json=sensor_dict)
+        requests.post(f"http://{catalog_ip}:{catalog_port}/removeDevice", json=sensor_dict)
         removalTime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         print( f"Device Removed on Catalog {removalTime}")
 
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
         # A new message is received
-        print("Topic:'" + msg.topic + "', QoS: '" + str(msg.qos) + "' Message: '" + str(msg.payload) + "'")
-
         if msg.topic == self.topicBreadType:
+            print("Topic:'" + msg.topic + "', QoS: '" + str(msg.qos) + "' Message: '" + str(msg.payload) + "'")
+
             if json.loads(msg.payload)['bread_index'] != '':
                 self.category = self.breadCategories[int(json.loads(msg.payload)['bread_index'])]
                 print("bread_index", self.category)
@@ -146,6 +146,7 @@ if __name__ == "__main__":
                                 "unit_of_measurement":"Relative Humidity"}
 
                 sensor.myPublish(sensor.topic_temp, payload_temp)
+                time.sleep(1)
                 sensor.myPublish(sensor.topic_hum, payload_hum)
 
             

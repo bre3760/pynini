@@ -8,7 +8,7 @@ import sys
 sys.path.append("../../")
 from influxDB import InfluxDB
 import random
-
+import os
 
 class TemperatureHumiditySensor:
     def __init__(self, sensor, influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port):
@@ -26,7 +26,8 @@ class TemperatureHumiditySensor:
         r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
         self.topic_temp = ""
         self.topic_hum= ""
-        self.topicBreadType = self.caseID + "/" +json.loads(r.text)["breadType"]
+        self.topicBreadType = self.caseID + "/" + json.loads(r.text)["breadType"]
+
         self.message = {
             'measurement': self.sensorID,
             'caseID': self.caseID,
@@ -34,13 +35,13 @@ class TemperatureHumiditySensor:
             'value': '',
             'category': self.category
         }
-        
 
     def start(self):
         # manage connection to broker
         self._paho_mqtt.username_pw_set(username="brendan", password="pynini")
         self._paho_mqtt.connect(self.messageBroker, 1883)
         self._paho_mqtt.loop_start()
+        print(f"Subscribing on start to {self.topicBreadType}")
         self._paho_mqtt.subscribe(self.topicBreadType, 2)
 
     def stop(self):
@@ -52,9 +53,10 @@ class TemperatureHumiditySensor:
     def myPublish(self, topic, message):
         # publish a message with a certain topic (measure/temperature or measure/humidity)
         case_specific_topic = self.caseID + "/" + topic # example CCC2/measure/co2
+        print(f"Publishing to: {self.topicBreadType}")
         self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
         self.influxDB.write(message)
-        print("su influx", message)
+        print("Sending data to influx", message)
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print("Connected to %s with result code: %d" % (self.messageBroker, rc))
@@ -80,21 +82,23 @@ class TemperatureHumiditySensor:
 
     def removeDevice(self):
         sensor_dict = {}
+        sensor_dict['sensorID'] = self.sensorID
+        sensor_dict["caseID"] = self.caseID
         sensor_dict["ip"] = self.sensorIP
         sensor_dict["port"] = self.sensorPort
         sensor_dict["name"] = self.sensorID
         sensor_dict["dev_name"] = 'rpi'
 
-        requests.delete(f"http://{catalog_ip}:{catalog_port}/removeDevice", json=sensor_dict)
+        requests.post(f"http://{catalog_ip}:{catalog_port}/removeSensor", json=sensor_dict)
         removalTime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-        print( f"Device Removed on Catalog {removalTime}")
+        print(f"Device Removed on Catalog {removalTime}")
 
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
         # A new message is received
-        print("Topic:'" + msg.topic + "', QoS: '" + str(msg.qos) + "' Message: '" + str(msg.payload) + "'")
-
         if msg.topic == self.topicBreadType:
+            print("Topic:'" + msg.topic + "', QoS: '" + str(msg.qos) + "' Message: '" + str(msg.payload) + "'")
+
             if json.loads(msg.payload)['bread_index'] != '':
                 self.category = self.breadCategories[int(json.loads(msg.payload)['bread_index'])]
                 print("bread_index", self.category)
@@ -106,7 +110,8 @@ if __name__ == "__main__":
         sensor_config = json.load(sensor_f)
         sensor_ip = sensor_config['sensor_ip']
         sensor_port = sensor_config['sensor_port']
-        sensor_caseID = sensor_config["caseID"]
+        # sensor_caseID = sensor_config["caseID"] # for local use
+        sensor_caseID =  os.getenv("caseID") # when dockerized (could be moved out of file reading)
         catalog_ip = sensor_config['catalog_ip']
         catalog_port = sensor_config['catalog_port']
 
@@ -122,10 +127,10 @@ if __name__ == "__main__":
     try:
         while True:
             # read temperature and humidity
-            # humidity, temperature = Adafruit_DHT.read_retry(11, 4)  # (sensor,pin)
+            # humidity, temperature = Adafruit_DHT.read_retry(11, 4)  # (sensor,pin) # for real sensor
             humidity = round(random.uniform(30, 40),2)
             temperature = round(random.uniform(23, 30),2)
-            if humidity < 100: #used when the real sensor is used, sometimes it gives bad values :(
+            if humidity < 100: # used when the real sensor is used, sometimes it gives bad values :(
                 print('Temp: {0:0.1f} °C  Humidity: {1:0.1f} %'.format(temperature, humidity))
 
                 payload_temp = {"caseID":sensor.caseID, 
