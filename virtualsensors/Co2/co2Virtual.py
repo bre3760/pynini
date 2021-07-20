@@ -5,9 +5,9 @@ import requests
 import pandas as pd
 import sys
 sys.path.append("../../")
-from database.influxDB import InfluxDB
-# from database.query import ClientQuery
+from influxDB import InfluxDB
 from datetime import datetime
+import os
 
 class co2Sensor:
 	def __init__(self, sensor, influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port):
@@ -24,7 +24,6 @@ class co2Sensor:
 		self._paho_mqtt.on_message = self.myOnMessageReceived
 		self.messageBroker = ""
 		r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
-		print("response from request", r.text)
 		self.topic = self.caseID + "/" + json.loads(r.text)["co2"]
 		self.topicBreadType = self.caseID + "/" + json.loads(r.text)["breadType"]
 		self.message = {
@@ -63,6 +62,7 @@ class co2Sensor:
 		case_specific_topic = self.caseID + "/" +  self.topic # example CCC2/measure/co2
 		self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
 		self.influxDB.write(message)
+		print("su influx", message)
 
 
 	def myOnMessageReceived (self, paho_mqtt , userdata, msg):
@@ -97,8 +97,7 @@ class co2Sensor:
 		dict_of_topics = json.loads(r.text)['topic']
 		print("dict_of_topics",dict_of_topics)
 		self.topic = json.loads(r.text)['topic']
-
-		self.messageBroker = json.loads(r.text)['broker_ip']
+		self.messageBroker = json.loads(r.text)['broker_ip_outside'] # outside since it is dockerized
 		self.breadCategories = json.loads(r.text)['breadCategories']
 
 		print("[{}] Device Registered on Catalog".format(
@@ -109,6 +108,7 @@ class co2Sensor:
 		'''
 			remove the sensor from the list of active sensors in the catalog
 		'''
+
 		sensor_dict = {}
 		sensor_dict['sensorID'] = self.sensorID
 		sensor_dict["caseID"] = self.caseID
@@ -117,9 +117,10 @@ class co2Sensor:
 		sensor_dict["name"] = self.sensorID
 		sensor_dict["dev_name"] = 'rpi'
 
-		requests.delete(f"http://{catalog_ip}:{catalog_port}/removeSensor", json=sensor_dict)
-		removalTime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-		print( f"Device Removed on Catalog {removalTime}")
+		requests.post(f"http://{catalog_ip}:{catalog_port}/removeSensor", json=sensor_dict)
+		print("[{}] Device Removed from Catalog".format(
+			int(time.time()),
+		))
 
 if __name__ == "__main__":
 
@@ -128,12 +129,16 @@ if __name__ == "__main__":
 		sensor_config = json.load(sensor_f)
 		sensor_ip = sensor_config['sensor_ip']
 		sensor_port = sensor_config['sensor_port']
-		sensor_caseID = sensor_config["caseID"]
+		# sensor_caseID = sensor_config["caseID"] # or os.getenv("caseID")
+		sensor_caseID =  os.getenv("caseID")
+
 		catalog_ip = sensor_config['catalog_ip']
 		catalog_port = sensor_config['catalog_port']
 
 	# retrieve data needed to access InfluxDB
+	print(f"catalog ip {catalog_ip}, catalog port {catalog_port}")
 	dataInfluxDB = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
+	print("INFLUXDB INFORMATION FROM CATALOG")
 	influxDB = InfluxDB(json.loads(dataInfluxDB.text))
 
 	sensor = co2Sensor(sensor_caseID +'-'+ 'co2', influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port )
@@ -154,10 +159,9 @@ if __name__ == "__main__":
 			sensor.myPublish(sensor.message)
 			print('ho pubblicato:', sensor.message)
 
-			time.sleep(15)
+			time.sleep(10)
 	except KeyboardInterrupt:
 		pass
 
 	sensor.stop()
 	sensor.removeDevice()
-

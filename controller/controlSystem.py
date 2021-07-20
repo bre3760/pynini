@@ -1,62 +1,125 @@
+import sys
+sys.path.append('../')
 from controller.caseControl import CaseControl
 import requests
 import json
 import os
+import time
 
-global CATALOG_ADDRESS
-CATALOG_ADDRESS = "172.20.10.11"
+if __name__ == '__main__':
 
-cur_path = os.path.dirname(__file__)
-catalog_path = os.path.join(cur_path, '..', 'catalog', 'catalog2.json')
-
-with open(catalog_path, 'r') as f:
-    config_dict = json.load(f)
-    catalog_port = config_dict["catalog_port"]
-
-broker_url = "http://" + CATALOG_ADDRESS + ":" + str(catalog_port) + "/broker"
-
-# print(broker_url)
-# the broker IP and port are requested to the room catalog
-r = requests.get("http://localhost:9090/broker_ip")
-print("Broker IP and port obtained from Catalog")
-broker_IP = json.loads(r.text)
-r = requests.get("http://localhost:9090/broker_port")
-broker_port = json.loads(r.text)
+    # open config file in controller folder
+    with open("config.json", 'r') as f:
+        config_dict = json.load(f)
+        catalog_port = config_dict["catalog_port"]
+        catalog_ip = config_dict["catalog_ip"]
+        caseID = config_dict["caseID"]
 
 
-print("IP and PORT", broker_IP, broker_port)
-# Case Controller: init, start and subscription of measurment topics
-topics = []
-r = requests.get("http://localhost:9090/topics")
-dict_of_topics = json.loads(r.text)
+    broker_url = "http://" + catalog_ip + ":" + str(catalog_port) + "/broker_ip"
+    print(broker_url)
+    # the broker IP and port are requested to the catalog REST service
+    try:
+        r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip_outside")
+        print("Broker IP and port obtained from Catalog")
+        broker_ip = json.loads(r.text)
+        r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_port")
+        broker_port = json.loads(r.text)
+    except:
+        print("REST service of catalog was not reachable")
 
-for key, value in dict_of_topics.items():
-    if key == "TempHum":
-        for k, v in value.items():
-            topics.append(v)
-    else:
-        topics.append(value)
-print("topics",topics)
 
-case_controller = CaseControl("Case controller", broker_IP, broker_port, CATALOG_ADDRESS, catalog_port, topics)
-case_controller.run()
+    print("IP and PORT", broker_ip, broker_port)
+    # Case Controller: init, start and subscription of measurment topics
+    """
+    The case controller needs to subscribe to:
+        - temperature topic
+        - humidity topic
+        - bread type topic
+    This will allow the control system to check if the values measured 
+    are within the limits of the current configuration and if not be able 
+    to activate the actuators to bring the setting back to normal values. 
 
-for topic in topics:
-    case_controller.myMqttClient.mySubscribe(topic, qos=1)
+    """
 
-# multithreading: ciascun thread si occupa di una teca (caseID) e cotrolla che le funzioni isValid diano true, altrimenti attiva gli attuatori
+    topics = []
+    try:
+        # request to get all topics 
+        r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
+        dict_of_topics = json.loads(r.text)
+    except:
+        print("REST service not active")
 
-while 1:
-    if not case_controller.isTemperatureValid():
-        case_controller.myMqttClient.myPublish("trigger/fan",json.dumps({"message":"on"}))
-        print("Ho accceso la ventola")
+    for key, value in dict_of_topics.items():
+        if key == "TempHum" or key == "arduino":
+            for k, v in value.items():
+                if v not in topics:
+                    topics.append(v)
+        else:
+            if value not in topics:
+                topics.append(value)
 
-    if not case_controller.isCO2Valid():
-        case_controller.myMqttClient.myPublish("trigger/", json.dumps({"message": "on"}))
-        print("Ho acceso la lampada")
+    print("topics that the controller subscribed to: \n",topics)
+
+    
+    r = requests.get(f"http://{catalog_ip}:{catalog_port}/cases")
+    dict_of_cases = json.loads(r.text)
+
+    list_of_cases = [x["caseID"] for x in dict_of_cases]
+    print("Connected cases id: ", list_of_cases)
+
+    controllers = [CaseControl(client_id, broker_ip, broker_port, catalog_ip, catalog_port, topics) for client_id in list_of_cases]
+
+    for obj in controllers:
+        obj.run()
+        for topic in topics:
+            case_specific_topic = obj.clientID +"/"+ topic
+            obj.myMqttClient.mySubscribe(case_specific_topic)
+
+
+    prevStateLamp = "off"
+    prevStateFan = "off"
+    currentStateLamp = False
+    currentStateFan = False
+    while 1:
+        """
+        control system algorithm that continually checks if the values are within the desired ranges
+        """
+        for obj in controllers:
+            if not obj.isTemperatureValid() and not obj.isHumidityValid():
+                if prevStateFan != "off": # if fan was on turn it off
+                    obj.myMqttClient.myPublish(obj.clientID + "/" + "trigger/fan", json.dumps({"message":"off"}))
+                    prevStateFan ="off"
+                if prevStateLamp != "off":
+                    obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/lamp", json.dumps({"message":"off"}))
+                    prevStateLamp = "off"
+            else:
+                if obj.tooHot() and obj.tooHumid():
+                    if prevStateFan != "on":
+                        obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"on"}))
+                        prevStateFan = "on"
+                if obj.tooCold() and obj.tooNotHumid():
+                    if prevStateLamp != "on":
+                        obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/lamp", json.dumps({"message":"on"}))
+                        prevStateLamp = "on"
+            
+            if obj.isCO2Valid():
+                 if prevStateFan != "off": # if fan was on turn it off
+                     obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"off"}))
+                     prevStateFan ="off"
+                 else:
+                     if prevStateFan != "on":
+                         obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"on"}))
+                         prevStateFan = "on"
+
+            
+         
+
+        time.sleep(7)
         
-    
-    
-    
-    
-    
+            
+        
+        
+        
+        
+        

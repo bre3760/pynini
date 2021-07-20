@@ -1,123 +1,33 @@
 {
-    "bots": [
-        {
-            "chat_ID": 490068659,
-            "ip": "127.0.0.0",
-            "last_seen": 1618041922.6127255
-        }
+    "InfluxDB": {
+        "bucket": "Pynini",
+        "token": "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg==",
+        "url": "https://eu-central-1-1.aws.cloud2.influxdata.com"
+    },
+    "bots": [],
+    "breadCategories": [
+        "White",
+        "Wheat",
+        "Glutenfree"
     ],
-    "broker_ip": "broker.emqx.io",
+    "broker_ip": "127.0.0.1",
+    "broker_ip_outside": "192.168.1.2",
     "broker_port": 1883,
-    "cases": [
-        {
-            "arduino": {
-                "sensors": [
-                    {
-                        "ip": "192.168.178.200",
-                        "last_seen": 0,
-                        "name": "pluto",
-                        "port": 8080
-                    }
-                ]
-            },
-            "bread_type": "White",
-            "case_ID": "CCC1",
-            "rpi": {
-                "sensors": [
-                    {
-                        "ip": "192.168.178.200",
-                        "last_seen": 0,
-                        "name": "temperature",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.11",
-                        "last_seen": 1617781249.4628403,
-                        "name": "co2",
-                        "port": 8080
-                    }
-                ]
-            }
-        },
-        {
-            "arduino": {
-            "sensors": []
-            },
-            "bread_type": "White",
-            "case_ID": "CCC2",
-            "rpi": {
-                "sensors": [
-                    {
-                        "ip": "172.20.10.11",
-                        "last_seen": 1617982702.9100754,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.10",
-                        "last_seen": 1617983269.8532972,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1618042908.238661,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1618042908.238661,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1618043489.5457613,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1618043489.5457613,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1618043489.5457613,
-                        "name": "co2",
-                        "port": 8080
-                    },
-                    {
-                        "ip": "172.20.10.08",
-                        "last_seen": 1618043489.5457613,
-                        "name": "co2",
-                        "port": 8080
-                    }
-                ]
-            }
-        }
-    ],
+    "cases": [],
+    "catalog_ip": "0.0.0.0",
     "catalog_port": 9090,
-    "db": {
-        "host": "localhost",
-        "nameDB": "mydatabase",
-        "password": "pynini",
-        "user": "root"
+    "freeboard": {
+        "freeboard_host": "127.0.0.1",
+        "freeboard_port": "8080"
     },
     "ip_address": "172.20.10.11",
-    "last_updated": 1618043491.5849493,
+    "last_updated": 1626429603.749941,
     "telegramBot": {
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
     },
-    "freeboard": {
-        "freeboard_port":"8080",
-        "freeboard_host": "127.0.0.1"
-    },
     "thingspeak": {
-        "broker_ip": "broker.emqx.io",
+        "broker_ip": "127.0.0.1",
         "channel": "1327196",
         "name": "pynini",
         "port1": "1883",
@@ -127,30 +37,30 @@
     },
     "thresholds": [
         {
-            "max_co2_th": "10",
+            "max_co2_th": "5",
             "max_humidity_th": "50",
             "max_temperature_th": "100",
-            "min_co2_th": "10",
+            "min_co2_th": "1",
             "min_humidity_th": "50",
             "min_temperature_th": "12",
             "type": "Wheat"
         },
         {
-            "max_co2_th": "10",
+            "max_co2_th": "6",
             "max_humidity_th": "50",
             "max_temperature_th": "100",
-            "min_co2_th": "10",
+            "min_co2_th": "0.5",
             "min_humidity_th": "50",
             "min_temperature_th": "12",
             "type": "Glutenfree"
         },
         {
-            "max_co2_th": "10",
+            "max_co2_th": "5.5",
             "max_humidity_th": "50",
-            "max_temperature_th": "34",
-            "min_co2_th": "10",
+            "max_temperature_th": "22",
+            "min_co2_th": "0.5",
             "min_humidity_th": "50",
-            "min_temperature_th": "9",
+            "min_temperature_th": "10",
             "type": "White"
         }
     ],
@@ -159,10 +69,12 @@
             "topic_hum": "measure/humidity",
             "topic_temp": "measure/temperature"
         },
-        "co2": "measure/co2",
-        "breadType": "breadType/",
-        "fan": "trigger/fan",
-        "lamp": "trigger/lamp"
-    },
-    "breadCategories": ["White", "Wheat", "Glutenfree"]
+        "arduino": {
+            "breadType": "breadType",
+            "fan": "trigger/fan",
+            "lamp": "trigger/lamp"
+        },
+        "breadType": "breadType",
+        "co2": "measure/co2"
+    }
 }

@@ -11,8 +11,9 @@ class MySubscriber:
 			# register the callback
 			self._paho_mqtt.on_connect = self.myOnConnect
 			self._paho_mqtt.on_message = self.myOnMessageReceived
-			self.topic = "breadType/"  #'measure/temperature'
+			self.topic = "CCC2/breadType/"  #'measure/temperature'
 			self.messageBroker = '127.0.0.1'
+
 
 		def start (self):
 			self._paho_mqtt.username_pw_set(username="brendan", password="pynini")
@@ -34,14 +35,15 @@ class MySubscriber:
 		def myOnMessageReceived (self, paho_mqtt, userdata, msg):
 			# A new message is received
 			print ("Topic:'" + msg.topic+"', QoS: '"+str(msg.qos)+"' Message: '"+str(msg.payload) + "'")
-			try:
-				data=json.loads(msg.payload)
-				json_body = {
-					"time": data['time_stamp'],
-					"data_t_h":data['data_t_h']
-					}
-			except Exception as e:
-				print(e)
+			# try:
+			# 	data=json.loads(msg.payload)
+			# 	json_body = {
+			# 		"time": data['time_stamp'],
+			# 		"data_t_h":data['data_t_h']
+			# 		}
+			# 	print("JSONBODY IN SUB", json_body)
+			# except Exception as e:
+			# 	print(e)
 
 if __name__ == "__main__":
 	test = MySubscriber('pynini')

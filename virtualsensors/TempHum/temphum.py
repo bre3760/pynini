@@ -3,12 +3,12 @@ import time
 import json
 import requests
 from datetime import datetime
-import Adafruit_DHT
+# import Adafruit_DHT only for real sensor
 import sys
 sys.path.append("../../")
-from database.influxDB import InfluxDB
-# from database.query import ClientQuery
-
+from influxDB import InfluxDB
+import random
+import os
 
 class TemperatureHumiditySensor:
     def __init__(self, sensor, influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port):
@@ -26,7 +26,8 @@ class TemperatureHumiditySensor:
         r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
         self.topic_temp = ""
         self.topic_hum= ""
-        self.topicBreadType = self.caseID + "/" +json.loads(r.text)["breadType"]
+        self.topicBreadType = self.caseID + "/" + json.loads(r.text)["breadType"]
+
         self.message = {
             'measurement': self.sensorID,
             'caseID': self.caseID,
@@ -34,13 +35,13 @@ class TemperatureHumiditySensor:
             'value': '',
             'category': self.category
         }
-        
 
     def start(self):
         # manage connection to broker
         self._paho_mqtt.username_pw_set(username="brendan", password="pynini")
         self._paho_mqtt.connect(self.messageBroker, 1883)
         self._paho_mqtt.loop_start()
+        print(f"Subscribing on start to {self.topicBreadType}")
         self._paho_mqtt.subscribe(self.topicBreadType, 2)
 
     def stop(self):
@@ -52,9 +53,10 @@ class TemperatureHumiditySensor:
     def myPublish(self, topic, message):
         # publish a message with a certain topic (measure/temperature or measure/humidity)
         case_specific_topic = self.caseID + "/" + topic # example CCC2/measure/co2
+        print(f"Publishing to: {self.topicBreadType}")
         self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
         self.influxDB.write(message)
-        print("su influx", message)
+        print("Sending data to influx", message)
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print("Connected to %s with result code: %d" % (self.messageBroker, rc))
@@ -69,14 +71,12 @@ class TemperatureHumiditySensor:
         sensor_dict["last_seen"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         sensor_dict["dev_name"] = 'rpi'
 
-        print("sensor_dict", sensor_dict)
-
         r = requests.post(f"http://{catalog_ip}:{catalog_port}/addSensor", json=sensor_dict)
         dict_of_topics = json.loads(r.text)['topic']
         print("dict_of_topics",dict_of_topics)
         self.topic_temp = dict_of_topics["topic_temp"]
         self.topic_hum = dict_of_topics["topic_hum"]
-        self.messageBroker = json.loads(r.text)['broker_ip']
+        self.messageBroker = json.loads(r.text)['broker_ip_outside']
         self.breadCategories = json.loads(r.text)["breadCategories"]
         print( f"Device Registered on Catalog {sensor_dict['last_seen']}")
 
@@ -89,9 +89,9 @@ class TemperatureHumiditySensor:
         sensor_dict["name"] = self.sensorID
         sensor_dict["dev_name"] = 'rpi'
 
-        requests.post(f"http://{catalog_ip}:{catalog_port}/removeDevice", json=sensor_dict)
+        requests.post(f"http://{catalog_ip}:{catalog_port}/removeSensor", json=sensor_dict)
         removalTime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-        print( f"Device Removed on Catalog {removalTime}")
+        print(f"Device Removed on Catalog {removalTime}")
 
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
@@ -110,7 +110,8 @@ if __name__ == "__main__":
         sensor_config = json.load(sensor_f)
         sensor_ip = sensor_config['sensor_ip']
         sensor_port = sensor_config['sensor_port']
-        sensor_caseID = sensor_config["caseID"]
+        # sensor_caseID = sensor_config["caseID"] # for local use
+        sensor_caseID =  os.getenv("caseID") # when dockerized (could be moved out of file reading)
         catalog_ip = sensor_config['catalog_ip']
         catalog_port = sensor_config['catalog_port']
 
@@ -126,22 +127,23 @@ if __name__ == "__main__":
     try:
         while True:
             # read temperature and humidity
-            humidity, temperature = Adafruit_DHT.read_retry(11, 4)  # (sensor,pin)
-            if humidity < 100:
-
+            # humidity, temperature = Adafruit_DHT.read_retry(11, 4)  # (sensor,pin) # for real sensor
+            humidity = round(random.uniform(30, 40),2)
+            temperature = round(random.uniform(23, 30),2)
+            if humidity < 100: # used when the real sensor is used, sometimes it gives bad values :(
                 print('Temp: {0:0.1f} °C  Humidity: {1:0.1f} %'.format(temperature, humidity))
 
                 payload_temp = {"caseID":sensor.caseID, 
                                 "measurement": "temperature", 
                                 "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), 
-                                "value": str(temperature), 
+                                "value": temperature, 
                                 "category": sensor.category,
                                 "unit_of_measurement": "Celsius" }
                 time.sleep(1)
                 payload_hum  = {"caseID":sensor.caseID, 
                                 "measurement": "humidity", 
                                 "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), 
-                                "value": str(humidity), 
+                                "value": humidity, 
                                 "category": sensor.category,
                                 "unit_of_measurement":"Relative Humidity"}
 
@@ -159,6 +161,5 @@ if __name__ == "__main__":
     sensor.stop()
     sensor.removeDevice()
 
- 
 
 
