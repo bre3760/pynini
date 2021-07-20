@@ -2,9 +2,10 @@ import cherrypy
 import json
 import requests
 import os
+import sys
+import pathlib
+
 #import cherrypy_cors
-
-
 #cherrypy_cors.install()
 
 
@@ -15,8 +16,7 @@ class ClientREST(object):
 			pass
 	def GET(self,*uri,**params):
 		if len(uri) == 0:
-			return open('index.html')
-
+			return open(os.path.join(sys.path[0], "index.html"), "r").read()
 
 
 			#r sarà il testo su chrome
@@ -28,19 +28,14 @@ class ClientREST(object):
 	def POST(self, *uri, **params):
 
 		if uri[0] == 'saveDashboard':
-			#print(params) #params return dictionary where corresponding to json string there's pyniny json dashboard
+
 			new_dash = json.loads(params['json_string'])
-			#print("json_file: ", json.loads(params['json_string'])) #this return just the json conf dal local host (post modifiche)7
-			#print(type(json_file))  #json_file is a dict so must convert to json
-			#Pretty Printing
-			#print(json.dumps(json_file, indent=4, sort_keys=True)) must rewrite the file with this
-			with open('./examples/final_dashboard.json', 'w') as old_dash:
+			with open('./freeboard/examples/final_dashboard.json', 'w') as old_dash:
 				old_dash.seek(0)  # rewind
-				old_dash.write(json.dumps(new_dash, indent=4, sort_keys=True))  #must put write() cause it's a txtIOwrapper obj
+				old_dash.write(json.dumps(new_dash, indent=4, sort_keys=True))
 				old_dash.truncate()
 				old_dash.close()
-			#print("file that must be written: ", new_dash)
-			#print("rewritten file: ", old_dash)
+
 
 if __name__ == '__main__':
 	conf = {
@@ -51,29 +46,30 @@ if __name__ == '__main__':
 		},
 	'/css':{
 		'tools.staticdir.on': True,
-		'tools.staticdir.dir':'./css'
+		'tools.staticdir.dir':  './freeboard/css'
 		},
 	'/examples':{
 		'tools.staticdir.on': True,
-		'tools.staticdir.dir':'./examples'
+		'tools.staticdir.dir':   './freeboard/examples'
 		},
 	'/img':{
 		'tools.staticdir.on': True,
-		'tools.staticdir.dir':'./img'
+		'tools.staticdir.dir':   './freeboard/img'
 		},
 	'/js':{
 		'tools.staticdir.on': True,
-		'tools.staticdir.dir':'./js'
+		'tools.staticdir.dir':   './freeboard/js'
 		},
 	'/plugins':{
 		'tools.staticdir.on': True,
-		'tools.staticdir.dir':'./plugins'
+		'tools.staticdir.dir':   './freeboard/plugins'
 		}
 	}
 	cherrypy.config.update({
 		"server.socket_port": 8080,
 		})
 	cherrypy.tree.mount(ClientREST(),'/',conf)
+	#bisogna connetterlo al catalog
 	# ClientREST() IP and port assignment
 	cherrypy.server.socket_host = "127.0.0.1"
 	cherrypy.server.socket_port = 8080

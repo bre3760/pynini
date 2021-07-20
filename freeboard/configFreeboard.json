@@ -1,7 +1,6 @@
 {
-
-    "ipCatalog": "localhost",
-    "broker_ip": "broker.emqx.io",
+    "ipCatalog": "0.0.0.0",
+    "broker_ip": "127.0.0.1",
     "broker_port": 1883,
     "catalog_port": 9090,
     "db": {
@@ -10,7 +9,7 @@
         "password": "pynini",
         "user": "root"
     },
-    "ip_address": "172.20.10.11",
+    "ip_address": "172.10.20.3",
     "last_updated": 1618043491.5849493,
     "freeboard": {
         "freeboard_port":"8080",
