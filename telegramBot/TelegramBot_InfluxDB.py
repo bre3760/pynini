@@ -52,6 +52,8 @@ class TelegramBot(object):
     def start(self, update, context):
 
         self._paho_mqtt = PahoMQTT.Client("bot", False)
+        self._paho_mqtt.username_pw_set(username="brendan", password="pynini")
+
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
         r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/broker_ip_outside")

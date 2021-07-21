@@ -19,7 +19,8 @@ class CaseControl(object):
         self.maxHumidity = self.getMaxHumidityThreshold()
         self.minHumidity = self.getMinHumidityThreshold()
         self.maxC02 = self.getMaxCO2Threshold()
-        self.currentTemperature = 0
+        self.default_value = -69 # default out of range values for initialization
+        self.currentTemperature = 0 
         self.currentHumidity = 0
         self.currentCO2 = 0
         
@@ -108,7 +109,7 @@ class CaseControl(object):
         except requests.exceptions.RequestException as e:
             print(e)
             # if connection to the catalog fails, the minimum humidity allowed is set to a default value
-
+        print(f"Minimum temperature from threshold {minTemperature}, {type(minTemperature)}")
         return minTemperature
 
     def getMaxHumidityThreshold(self):
@@ -199,22 +200,32 @@ class CaseControl(object):
         method that checks if current temperature is valid: 
         if it is, the method returns True, False otherwise
         """
-        if self.minTemperature < self.currentTemperature < self.maxTemperature:
-            return True
+        if self.currentTemperature != self.default_value:
+            if self.minTemperature < self.currentTemperature < self.maxTemperature:
+                return True
+            else:
+                return False
         else:
-            return False
+            pass
 
     def tooHot(self):
-        if self.currentTemperature > self.maxTemperature:
-            return True
+        if self.currentTemperature != self.default_value:
+            if self.currentTemperature > self.maxTemperature:
+                return True
+            else:
+                return False
         else:
-            return False
+            pass
 
     def tooCold(self):
-        if self.currentTemperature < self.minTemperature:
-            return True
+        if self.currentTemperature != self.default_value:
+
+            if self.currentTemperature < self.minTemperature:
+                return True
+            else:
+                return False
         else:
-            return False
+            pass
 
 
     def isHumidityValid(self):
@@ -222,38 +233,58 @@ class CaseControl(object):
         method that checks if current humidity is valid: 
         if it is, the method returns True, False otherwise
         """
-        if self.minHumidity < self.currentHumidity < self.maxHumidity:
-            return True
+        if self.currentHumidity != self.default_value:
+
+            if self.minHumidity < self.currentHumidity < self.maxHumidity:
+                return True
+            else:
+                return False
         else:
-            return False
+            pass
     
     def tooHumid(self):
-        if self.currentHumidity > self.maxHumidity:
-            return True
+        if self.currentHumidity != self.default_value:
+
+            if self.currentHumidity > self.maxHumidity:
+                return True
+            else:
+                return False
         else:
-            return False
+            pass
 
     def tooNotHumid(self):
-        if self.currentHumidity < self.minHumidity:
-            return True
+        if self.currentHumidity != self.default_value:
+
+            if self.currentHumidity < self.minHumidity:
+                return True
+            else:
+                return False
         else:
-            return False
+            pass
 
     def isCO2Valid(self):
         """
         method that checks if current humidity is valid: 
         if it is, the method returns True, False otherwise
         """
-        if self.currentCO2 < self.maxC02:
-            return True
+        if self.currentCO2 != self.default_value:
+
+            if self.currentCO2 < self.maxC02:
+                return True
+            else:
+                return False
         else:
-            return False
-    
+            pass
+        
     def tooMuchCo2(self):
-        if self.currentCO2 > self.maxC02:
-            return True
+        if self.currentCO2 != self.default_value:
+
+            if self.currentCO2 > self.maxC02:
+                return True
+            else:
+                return False
         else:
-            return False
+            pass
 
 
  

@@ -28,14 +28,19 @@ class ClientREST(object):
 	def POST(self, *uri, **params):
 
 		if uri[0] == 'saveDashboard':
-
+			#print(params) #params return dictionary where corresponding to json string there's pyniny json dashboard
 			new_dash = json.loads(params['json_string'])
+			#print("json_file: ", json.loads(params['json_string'])) #this return just the json conf dal local host (post modifiche)7
+			#print(type(json_file))  #json_file is a dict so must convert to json
+			#Pretty Printing
+			#print(json.dumps(json_file, indent=4, sort_keys=True)) must rewrite the file with this
 			with open('./freeboard/examples/final_dashboard.json', 'w') as old_dash:
 				old_dash.seek(0)  # rewind
-				old_dash.write(json.dumps(new_dash, indent=4, sort_keys=True))
+				old_dash.write(json.dumps(new_dash, indent=4, sort_keys=True))  #must put write() cause it's a txtIOwrapper obj
 				old_dash.truncate()
 				old_dash.close()
-
+			#print("file that must be written: ", new_dash)
+			#print("rewritten file: ", old_dash)
 
 if __name__ == '__main__':
 	conf = {

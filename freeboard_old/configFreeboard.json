@@ -1,0 +1,19 @@
+{
+    "ipCatalog": "0.0.0.0",
+    "broker_ip": "127.0.0.1",
+    "broker_port": 1883,
+    "catalog_port": 9090,
+    "db": {
+        "host": "localhost",
+        "nameDB": "mydatabase",
+        "password": "pynini",
+        "user": "root"
+    },
+    "ip_address": "172.10.20.3",
+    "last_updated": 1618043491.5849493,
+    "freeboard": {
+        "freeboard_port":"8080",
+        "freeboard_host": "127.0.0.1"
+    },
+    "breadCategories": ["White", "Wheat", "Glutenfree"]
+}
