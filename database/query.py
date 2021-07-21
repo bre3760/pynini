@@ -5,17 +5,20 @@ import json
 
 class ClientQuery():
     def __init__(self, sensor, category, caseID):
+        print(f"In query INIT with sensor {sensor}, category {category} and caseID {caseID}")
         self.sensor = sensor
         self.caseID = caseID
         self.category = category
 
         with open("config.json", 'r') as sensor_f:
+            print(f"reading config from file")
             influx_config = json.load(sensor_f)
             catalog_ip = influx_config['catalog_ip']
             catalog_port = influx_config['catalog_port']
-
+            
+        print(f"after file read")
         dataInfluxDB = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
-
+        print(f"getting data for influx {dataInfluxDB}")
         self.url = json.loads(dataInfluxDB.text)['url']
         self.token = json.loads(dataInfluxDB.text)['token']
         self.bucket = json.loads(dataInfluxDB.text)['bucket']
@@ -30,7 +33,9 @@ class ClientQuery():
         )
 
     def getData(self):
+        print("In get Data")
         query = f'from(bucket: "Pynini")|> range(start: -3d)|> filter(fn: (r) => r.caseID == "{self.caseID}") |> filter(fn: (r) => r["_measurement"] == "{self.sensor}") |> filter(fn: (r) => r.category == "{self.category}")'
+        print("query is {query}")
         result = self.client.query_api().query(org=self.org, query=query)
         results = []
         values = []

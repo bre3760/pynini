@@ -177,6 +177,7 @@ class TelegramBot(object):
         params = {'caseID': self.caseID}
 
         r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/category", params=params)
+        print("Response from getPARAM: ",json.loads(r.text))
         self.category = json.loads(r.text)
 
         return PARAM
@@ -191,7 +192,7 @@ class TelegramBot(object):
                             InlineKeyboardButton("Back", callback_data='home')
                             ],
                             [InlineKeyboardButton("Exit", callback_data='exit')]]
-
+        print("in getActualParams query data: ", query.data)
         try:
              if query.data == 'home':
                  TYPOLOGY = self.home(update, context)
@@ -231,23 +232,28 @@ class TelegramBot(object):
         '''
 
         param = query.data
+        print(f"In selected param, with param {query.data}")
 
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='You have chosen the <b> {} </b> parameter.'.format(param),
                                  parse_mode='HTML')
 
-        self.clientQuery = ClientQuery(param, self.category, self.caseID)
+        print(f"Before ClientQUery INIT")
+        self.clientQuery = ClientQuery(sensor = param, category = self.category, caseID = self.caseID)
         actualValues = self.clientQuery.getData()
-
+        print(f"actualValues in selectedParam {actualValues}")
         best = self.clientQuery.getBest()
 
         if actualValues != []:
+            print(f"actualValues in selectedParam is not an empty list {actualValues}")
+
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='The optimal {} value for the {} typology is: {}. \n The actual is: {}.'.format(
                                          param, self.category, best, actualValues))
             time.sleep(2)
 
         elif actualValues == []:
+            print(f"actualValues in selectedParam is an empty list {actualValues}")
             self.error(update, context)
             reply_markup = InlineKeyboardMarkup(keyboard_params)
             context.bot.send_message(chat_id=update.effective_chat.id,
@@ -255,6 +261,7 @@ class TelegramBot(object):
                                      reply_markup=reply_markup, parse_mode='Markdown')
 
         else:
+            
             self.error(update, context)
             print("Error: something went wrong with your request. Try again!")
             reply_markup = InlineKeyboardMarkup(keyboard_params)
@@ -510,7 +517,7 @@ class TelegramBot(object):
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='Bye! Have a good day and come back to @Pynini soon. &#128400;',
                                  reply_markup=ReplyKeyboardRemove(), parse_mode='HTML')
-        requests.delete(f"http://{self.catalogIP}:{self.catalogPort}/removeBot",
+        requests.post(f"http://{self.catalogIP}:{self.catalogPort}/removeBot",
                       json={'ip': self.catalogIP, 'chat_ID': self.chatID, 'last_seen': time.time()})
         print("Mi sono eliminato dal catalog")
         
