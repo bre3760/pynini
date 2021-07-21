@@ -62,7 +62,7 @@ class co2Sensor:
 		case_specific_topic = self.caseID + "/" +  self.topic # example CCC2/measure/co2
 		self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
 		self.influxDB.write(message)
-		print("su influx", message)
+		
 
 
 	def myOnMessageReceived (self, paho_mqtt , userdata, msg):
@@ -76,7 +76,7 @@ class co2Sensor:
 		if msg.topic == self.topicBreadType:
 			if json.loads(msg.payload)['bread_index'] != '':
 				self.category = self.breadCategories[int(json.loads(msg.payload)['bread_index'])]
-				print("bread_index",self.category)
+				
 
 
 	def registerDevice(self):

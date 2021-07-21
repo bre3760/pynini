@@ -83,7 +83,7 @@ if __name__ == '__main__':
     currentStateFan = False
     while 1:
         """
-        control system algorithm that continually checks if the values are within the desired ranges
+        control system algorithm that continually checks if the values are within the desired ranges. 
         """
         for obj in controllers:
             if not obj.isTemperatureValid() and not obj.isHumidityValid():

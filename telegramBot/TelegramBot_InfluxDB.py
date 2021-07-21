@@ -249,7 +249,7 @@ class TelegramBot(object):
 
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='The optimal {} value for the {} typology is: {}. \n The actual is: {}.'.format(
-                                         param, self.category, best, actualValues))
+                                         param, self.category, best, actualValues[0]))
             time.sleep(2)
 
         elif actualValues == []:
