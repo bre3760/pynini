@@ -47,9 +47,3 @@ class InfluxDB():
 
         write_api.close()
         
-if __name__ =="__main__":
-
-    i = InfluxDB(data = { "bucket": "Pynini",
-        "token": "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg==",
-        "url": "https://eu-central-1-1.aws.cloud2.influxdata.com"})
-    i.best()
