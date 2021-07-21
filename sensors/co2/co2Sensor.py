@@ -117,7 +117,7 @@ class co2Sensor:
 		sensor_dict["name"] = self.sensorID
 		sensor_dict["dev_name"] = 'rpi'
 
-		requests.delete(f"http://{catalog_ip}:{catalog_port}/removeSensor", json=sensor_dict)
+		requests.post(f"http://{catalog_ip}:{catalog_port}/removeSensor", json=sensor_dict)
 		removalTime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 		print( f"Device Removed on Catalog {removalTime}")
 

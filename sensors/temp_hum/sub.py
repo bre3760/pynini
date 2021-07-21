@@ -1,7 +1,9 @@
 import paho.mqtt.client as PahoMQTT
 import time
 import json
-
+"""
+Simple subscriber used to check different topics, not used in the project
+"""
 class MySubscriber:
 		def __init__(self, clientID):
 			self.clientID = clientID
