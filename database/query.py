@@ -12,9 +12,11 @@ class ClientQuery():
 
         with open("config.json", 'r') as sensor_f:
             print(f"reading config from file")
-            influx_config = json.load(sensor_f)
-            catalog_ip = influx_config['catalog_ip']
-            catalog_port = influx_config['catalog_port']
+            queryinfluxconfig = json.load(sensor_f)
+            print("Influx config: ",queryinfluxconfig)
+            catalog_ip = queryinfluxconfig['ip']
+            catalog_port = queryinfluxconfig['port']
+            print(f"Read data from file {catalog_ip}:{catalog_port}")
             
         print(f"after file read")
         dataInfluxDB = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
@@ -55,8 +57,10 @@ class ClientQuery():
 
 
     def getBest(self):
+        print(f"IN GET BEST")
         query = f'from(bucket: "Pynini")|> range(start: -3d)|> filter(fn: (r) => r["_measurement"] == "best") |> filter(fn: (r) => r.category == "{self.category}")'
         result = self.client.query_api().query(org=self.org, query=query)
+        print(f"AFTER RESULT IN GET BEST with result: {result}")
         results = []
         for table in result:
             for record in table.records:

@@ -155,7 +155,7 @@ class TelegramBot(object):
 
     def getParam(self, update, context):
         '''
-            Once the caseID has been chosen, the user decides the parameter he wants to check (temperature, co2, humidity)
+            Once the caseID has been chosen, the user decides the parameter he/she wants to check (temperature, co2, humidity)
         '''
 
         keyboard = [[InlineKeyboardButton("Temperature", callback_data='temperature'),
@@ -194,16 +194,17 @@ class TelegramBot(object):
                             [InlineKeyboardButton("Exit", callback_data='exit')]]
         print("in getActualParams query data: ", query.data)
         try:
-             if query.data == 'home':
-                 TYPOLOGY = self.home(update, context)
-                 return TYPOLOGY
+            print("in TRY IN getActualParams")
+            if query.data == 'home':
+                TYPOLOGY = self.home(update, context)
+                return TYPOLOGY
 
-             elif query.data == 'exit':
-                 res = self.exit(update, context)
-                 return res
+            elif query.data == 'exit':
+                res = self.exit(update, context)
+                return res
 
-             elif query.data == 'co2' or query.data == 'temperature' or query.data == 'humidity':
-                 self.selectedParam(update, context, query, keyboard_params)
+            elif query.data == 'co2' or query.data == 'temperature' or query.data == 'humidity':
+                self.selectedParam(update, context, query, keyboard_params)
 
         except Exception as e:
             try:
@@ -249,7 +250,7 @@ class TelegramBot(object):
 
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='The optimal {} value for the {} typology is: {}. \n The actual is: {}.'.format(
-                                         param, self.category, best, actualValues))
+                                         param, self.category, best, actualValues[0]))
             time.sleep(2)
 
         elif actualValues == []:

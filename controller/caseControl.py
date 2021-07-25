@@ -59,7 +59,6 @@ class CaseControl(object):
                     setBreadtype['breadtype'] = self.breadTypeChosen
                     setBreadtype['caseID'] = self.clientID
                     requests.post("http://" + self.catalog_address + ":" + self.port_catalog + "/setBreadtype", json=setBreadtype)
-                    print('CHANGING THRESHOLDS...')
                     self.minTemperature = self.getMinTemperatureThreshold()
                     self.maxTemperature = self.getMaxTemperatureThreshold()
                     self.maxHumidity = self.getMaxHumidityThreshold()
@@ -68,10 +67,16 @@ class CaseControl(object):
                     # change thresholds based on breadtype
 
     def getAllBreadTypes(self):
+        """
+        method that gets the possible bread categories from the catalog
+        """
         r = requests.get(f"http://{self.catalog_address}:{self.port_catalog}/breadCategories")
         self.allBreadTypes = json.loads(r.text)
 
     def getCatalog(self):
+        """
+        method that gets the catalog address and the port from the configuration JSON file
+        """
         with open("config.json", 'r') as f:
             config_dict = json.load(f)
             catalog_port = config_dict["catalog_port"]
@@ -79,6 +84,9 @@ class CaseControl(object):
         return catalog_address, catalog_port
 
     def getMaxTemperatureThreshold(self):
+        """
+        method that gets the upper bound for temperature value for specified bread type.        
+        """
         maxTemperature = 40
         try:
             threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
@@ -96,6 +104,9 @@ class CaseControl(object):
         return (maxTemperature)
 
     def getMinTemperatureThreshold(self):
+        """
+        method that gets the lower bound for temperature value for specified bread type.        
+        """
         minTemperature = 10
         try:
             threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
@@ -113,6 +124,9 @@ class CaseControl(object):
         return minTemperature
 
     def getMaxHumidityThreshold(self):
+        """
+        method that gets the upper bound for humidity value for specified bread type.        
+        """
         maxHumidity = 70
         try:
             threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
@@ -131,6 +145,9 @@ class CaseControl(object):
         return int(maxHumidity)
 
     def getMinHumidityThreshold(self):
+        """
+        method that gets the lower bound for humidity value for specified bread type.        
+        """
         minHumidity = 0
         try:
             threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
@@ -149,6 +166,9 @@ class CaseControl(object):
         return (minHumidity)
 
     def getMaxCO2Threshold(self):
+        """
+        method that gets the upper bound for co2 value for specified bread type.        
+        """
         maxco2 = 6
         try:
             threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
@@ -165,6 +185,9 @@ class CaseControl(object):
         return (maxco2)
 
     def getMinCO2Threshold(self):
+        """
+        method that gets the lower bound for co2 value for specified bread type.        
+        """
         minco2 = 0.5
         try:
             threshold_URL = "http://" + self.catalog_address + ":" + self.port_catalog + "/thresholds"
@@ -180,21 +203,6 @@ class CaseControl(object):
 
         return (minco2)
 
-    def getBreadTypeThresholds(self):
-        try:
-            threshold_URL = "http://" + str(self.catalog_address) + ":" + str(self.port_catalog) + "/thresholds"
-            r = requests.get(threshold_URL)
-            print("Bread in " + self.clientID)
-            threshold = r.text
-            obj = json.loads(threshold)
-            threshold = obj["thresholds"]
-            name = threshold[self.breadTypeChosen]
-
-        except requests.exceptions.RequestException as e:
-            print(e)
-
-        return name
-
     def isTemperatureValid(self):
         """
         method that checks if current temperature is valid: 
@@ -209,6 +217,10 @@ class CaseControl(object):
             pass
 
     def tooHot(self):
+        """
+        method that checks if the case temperature exceeds its upper bound
+         if it is, the method returns True, False otherwise   
+        """
         if self.currentTemperature != self.default_value:
             if self.currentTemperature > self.maxTemperature:
                 return True
@@ -218,6 +230,10 @@ class CaseControl(object):
             pass
 
     def tooCold(self):
+        """
+        method that checks if the case temperature in under the lower bound
+         if it is, the method returns True, False otherwise
+        """
         if self.currentTemperature != self.default_value:
 
             if self.currentTemperature < self.minTemperature:
@@ -243,6 +259,10 @@ class CaseControl(object):
             pass
     
     def tooHumid(self):
+        """
+        method that checks if current humidity is higher then the max threshold: 
+        if it is, the method returns True, False otherwise
+        """
         if self.currentHumidity != self.default_value:
 
             if self.currentHumidity > self.maxHumidity:
@@ -253,6 +273,10 @@ class CaseControl(object):
             pass
 
     def tooNotHumid(self):
+        """
+        method that checks if current humidity is lower then the min threshold: 
+        if it is, the method returns True, False otherwise
+        """
         if self.currentHumidity != self.default_value:
 
             if self.currentHumidity < self.minHumidity:
@@ -277,6 +301,10 @@ class CaseControl(object):
             pass
         
     def tooMuchCo2(self):
+        """
+        method that checks if current co2 level is higher then the max threshold: 
+        if it is, the method returns True, False otherwise
+        """
         if self.currentCO2 != self.default_value:
 
             if self.currentCO2 > self.maxC02:

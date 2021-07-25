@@ -5,8 +5,6 @@ import os
 import sys
 import pathlib
 
-#import cherrypy_cors
-#cherrypy_cors.install()
 
 
 class ClientREST(object):
@@ -19,21 +17,17 @@ class ClientREST(object):
 			return open(os.path.join(sys.path[0], "index.html"), "r").read()
 
 
-			#r sarà il testo su chrome
-			#prendo elementi da lista feeds
-		#alla fine devo ritornare dizionario json.dumps() non lista!
-
 
 
 	def POST(self, *uri, **params):
-
+	    #POST method to save modifications to dashboard
 		if uri[0] == 'saveDashboard':
 
 			new_dash = json.loads(params['json_string'])
 			with open('./freeboard/examples/final_dashboard.json', 'w') as old_dash:
-				old_dash.seek(0)  # rewind
-				old_dash.write(json.dumps(new_dash, indent=4, sort_keys=True))
-				old_dash.truncate()
+				old_dash.seek(0)  # to move the cursor back to the beginning of the file  
+				old_dash.write(json.dumps(new_dash, indent=4, sort_keys=True)) #start writing
+				old_dash.truncate() #to deal with the case where the new data is smaller than the previous
 				old_dash.close()
 
 
@@ -41,7 +35,7 @@ if __name__ == '__main__':
 	conf = {
 	'/':{
 		'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-		'tools.staticdir.root': os.path.abspath(os.getcwd()),	#command taken from slides
+		'tools.staticdir.root': os.path.abspath(os.getcwd()),	
 		'cors.expose.on': True,
 		},
 	'/css':{
@@ -69,8 +63,6 @@ if __name__ == '__main__':
 		"server.socket_port": 8080,
 		})
 	cherrypy.tree.mount(ClientREST(),'/',conf)
-	#bisogna connetterlo al catalog
-	# ClientREST() IP and port assignment
 	cherrypy.server.socket_host = "127.0.0.1"
 	cherrypy.server.socket_port = 8080
 	cherrypy.engine.start()

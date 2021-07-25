@@ -101,7 +101,7 @@ class TemperatureHumiditySensor:
 
             if json.loads(msg.payload)['bread_index'] != '':
                 self.category = self.breadCategories[int(json.loads(msg.payload)['bread_index'])]
-                print("bread_index", self.category)
+                
 
 
 if __name__ == "__main__":

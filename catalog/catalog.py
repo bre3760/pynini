@@ -117,7 +117,6 @@ class Catalog(object):
                     print(f'${new_dev["name"]} - added to the catalog')
 
                     try: 
-
                         print("catalog['topics'][name]",catalog['topics'][sensorID])
                         res["topic"] = catalog['topics'][sensorID]
                         res["broker_ip"] = catalog["broker_ip"]
@@ -131,8 +130,6 @@ class Catalog(object):
                     except:
                         print('No topic found for this sensor')
                         raise cherrypy.HTTPError(404, 'No topic found for this sensor')
-
-
 
             except KeyError:
                 raise cherrypy.HTTPError(404, 'The catalog file was not found')
@@ -160,7 +157,6 @@ class Catalog(object):
                                 catalog['bots'].pop(catalog['bots'].index(d))
 
                         catalog['bots'].append(new_bot)
-                        print("sono dentro ciclo for, ho aggiunto")
                         catalog['last_updated'] = time.time()
                         f.seek(0)
                         f.write(json.dumps(catalog, indent=4, sort_keys=True))
@@ -268,7 +264,7 @@ class Catalog(object):
                             for d in c[dev_name]['sensors']:
                                 if d['name'] == name:
                                     c[dev_name]['sensors'].pop(c[dev_name]['sensors'].index(d))
-                                    print("ho trovato ed eliminato il sensore")
+                                    print("Sensor deleted successfully")
                                     found = True
 
                     if found is False:
