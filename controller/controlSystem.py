@@ -13,7 +13,6 @@ if __name__ == '__main__':
         config_dict = json.load(f)
         catalog_port = config_dict["catalog_port"]
         catalog_ip = config_dict["catalog_ip"]
-        caseID = config_dict["caseID"]
 
 
     broker_url = "http://" + catalog_ip + ":" + str(catalog_port) + "/broker_ip"
