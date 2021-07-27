@@ -363,10 +363,8 @@ if __name__ == '__main__':
     cherrypy.server.socket_port = catalog_port
     cherrypy.engine.start()
     cherrypy.engine.block()
-    print("CLOSING THE CATALOG AND SAVING TO FILE uasdyfgasdfgaidflaidfa")
+    print("CLOSING THE CATALOG AND SAVING TO FILE")
     with open("catalog2.json", 'w') as f:
         f.seek(0)
         f.write(json.dumps(catalog.catalog, indent=4, sort_keys=True))
         f.truncate()
-    print("AFTER SAVING asdfouahdfladfpaudfh")
-
