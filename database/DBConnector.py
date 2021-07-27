@@ -202,7 +202,7 @@ if __name__ == '__main__':
     print("Connected cases id: ", list_of_cases)
     for case_id in list_of_cases:
         for topic in topics:
-            case_specific_topic = case_id.caseID +"/"+ topic
+            case_specific_topic = case_id +"/"+ topic
             all_topics_to_subscribe_to.append(case_specific_topic)
 
 
