@@ -160,6 +160,22 @@ class co2Sensor:
 		sensor_dict["dev_name"] = 'rpi'
 
 		requests.post(f"http://{catalog_ip}:{catalog_port}/removeSensor", json=sensor_dict)
+		
+		####post to remove from database
+		influx_data = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
+		print(f"Influx data response from catalog api, {influx_data.text}")
+		# post al db per dire che si è connesso il sensore,
+		# mandando topica in cui pubblica così che il servizio mqtt del db possa iscriversi
+		influx_api_ip = json.loads(influx_data.text)["api_ip"]
+		influx_api_port = json.loads(influx_data.text)["api_port"]
+		print(f"Influx db api ip and port {influx_api_ip} {influx_api_port}")
+
+		#Appendo la topica a topics
+		sensor_dict["topics"] = [self.caseID + "/" + self.topic]
+		print("sensor dict before db post request", sensor_dict)
+		#sensor_dic viene mandato a db adaptor a cui si sottoscrive 
+		r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/db/removeSensor", json=sensor_dict)
+		
 		removalTime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 		print( f"Device Removed on Catalog {removalTime}")
 

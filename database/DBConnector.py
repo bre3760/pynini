@@ -80,6 +80,39 @@ class DBConnectorREST:
             except KeyError:
                 raise cherrypy.HTTPError(400, 'Bad request')
 
+        if len(uri) == 1 and uri[0] ==  'removeSensor':
+            print()
+            print("-------REMOVE SENSOR FROM DB --------")
+            # add new sensor to the self.catalog
+            print(f"In POST before device info removed")
+            new_device_info = json.loads(cherrypy.request.body.read())
+            print("In POST of db api", new_device_info)
+             
+            try:
+                # for future use, not curretly used 
+                sensorID = new_device_info['sensorID']
+                caseID = new_device_info['caseID']
+                ip = new_device_info['ip']
+                port = new_device_info['port']
+                last_seen = new_device_info['last_seen']
+                dev_name = new_device_info['dev_name']
+                # only value used at present date project
+                topics = new_device_info["topics"] # a list is sent
+
+                for topic in topics:
+                    print(f"Subscribing to topic {topic}")
+                    db_connector.client_obj.unsubscribe(topic, qos=2)
+                
+                res["status"] = "ok"
+                print(f"Before return")
+
+                # MQTT client should subscribe to topic caseID/measure/sensorID
+
+                return res
+
+            except KeyError:
+                raise cherrypy.HTTPError(400, 'Bad request')
+
 
         if len(uri) == 1 and uri[0] ==  'addStats':
             # add new sensor to the self.catalog
@@ -177,7 +210,7 @@ class DBConnectorMQTT:
             topic_wo_case = level1 + "/" + level2
             measureTopic = True
         #message if stats > stats/price o stats/quantity
-        print("message callback: ",message.topic)
+        #print("message callback: ",message.topic)
         
         if measureTopic:
             print("TOPIC WO CASE: ",topic_wo_case)
