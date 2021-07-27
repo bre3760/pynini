@@ -123,7 +123,7 @@ if __name__ == "__main__":
         time.sleep(1)
 
 
-    df_quantity = pd.read_csv("purchase_history.csv")
+    df_quantity = pd.read_csv("purchase_qnt.csv")
     for i in range(len(df_quantity.index)):
         date_time_obj = datetime.strptime(df_quantity.iloc[i]["date"],'%m-%d-%Y').strftime('%m-%d-%Y')
 
