@@ -58,7 +58,7 @@ class statsPublisher:
         # "topic_price": "stats/price",
         # "topic_quantity": "stats/quantity"
         # publish a message with a certain topic
-        self._paho_mqtt.publish(topic, json.dumps(message), 2)
+        self._paho_mqtt.publish(topic, message, 2)
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print ("Connected to %s with result code: %d" % (self.messageBroker, rc))
