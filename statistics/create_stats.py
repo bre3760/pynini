@@ -1,6 +1,7 @@
 import pandas as pd
 import random
-import datetime as datetime
+from datetime import datetime
+from datetime import timedelta
 year = 2020
 days = []
 white = []
@@ -10,7 +11,7 @@ price_white = []
 price_wheat = []
 price_glutenfree = []
 
-startTime = "06-17"
+startTime = "06-17-2020" 
 
 """
 script that creates the history of purchases for different bread types
@@ -20,13 +21,13 @@ unit of measurement: €/kg
 """
 for i in range(0,365):
     if i == 0:
-        time_dt = datetime.strptime(startTime, "%m-%d")
+        time_dt = datetime.strptime(startTime, "%m-%d-%Y")
     
     else:
-        time_dt = datetime.strptime(days[-1] , "%m-%d") + timedelta(days=1)
+        time_dt = datetime.strptime(days[-1] , "%m-%d-%Y") + timedelta(days=1)
 
 
-    days.append(time_dt.strftime("%m-%d"))
+    days.append(time_dt.strftime("%m-%d-%Y"))
     white.append(random.uniform(100, 250))
     wheat.append(random.uniform(50, 150))
     glutenfree.append(random.uniform(20, 100))
