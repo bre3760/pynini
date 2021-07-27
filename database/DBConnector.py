@@ -47,10 +47,10 @@ class DBConnectorREST:
 class DBConnectorMQTT:
     def __init__(self, influx_data, topics):
         # cloud db configuration
-        self.url = influx_data['url']
-        self.token = influx_data['token']
-        self.bucket = influx_data['bucket']
-        self.org = influx_data['org']
+        self.url = json.loads(influx_data.text)["url"]
+        self.token = json.loads(influx_data.text)["token"]
+        self.bucket = json.loads(influx_data.text)["bucket"]
+        self.org = json.loads(influx_data.text)['org']
         self.client = InfluxDBClient(
             self.url,
             self.token,
@@ -58,7 +58,6 @@ class DBConnectorMQTT:
         )
         
         self.broker_address = json.loads(r.text)["broker_ip"]
-        self.url = json.loads(r.text)["url"]
         self.topics = topics
         self.client_obj = mqtt.Client(self.ID)
 
