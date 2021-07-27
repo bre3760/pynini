@@ -170,34 +170,64 @@ class DBConnectorMQTT:
     # callback for messages
     def message_callback(self, client, userdata, message):
         #TODO split on the caseID if the + does not work
-        caseID, level1, level2 = message.topic.split("/")
-        topic_wo_case = level1 + "/" + level2
-        print("TOPIC WO CASE: ",topic_wo_case)
-        if (topic_wo_case == "measure/co2"):
-            print("Topic:'" + message.topic + "' Message: '" + str(message.payload) + "'")
-            data = json.loads(message.payload)
-            self.sendToDB(data)
+        #split message for sensors
+        if len(message.topic.split("/")) > 2:
+            caseID, level1, level2 = message.topic.split("/")
+            topic_wo_case = level1 + "/" + level2
+            measureTopic = True
+        #split message for stats => stats/price o stats/quantity
 
-        elif (topic_wo_case == "measure/temperature"):
-            print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(message.payload) + "'")
-            data = json.loads(message.payload)
-            self.sendToDB(data)
+        if measureTopic:
+            print("TOPIC WO CASE: ",topic_wo_case)
+            if (topic_wo_case == "measure/co2"):
+                print("Topic:'" + message.topic + "' Message: '" + str(message.payload) + "'")
+                data = json.loads(message.payload)
+                self.sendToDB(data)
 
-        elif (topic_wo_case== "measure/humidity"):
-            print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(message.payload) + "'")
-            data = json.loads(message.payload)
-            self.sendToDB(data)
+            elif (topic_wo_case == "measure/temperature"):
+                print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(message.payload) + "'")
+                data = json.loads(message.payload)
+                self.sendToDB(data)
 
+            elif (topic_wo_case== "measure/humidity"):
+                print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(message.payload) + "'")
+                data = json.loads(message.payload)
+                self.sendToDB(data)
+
+        elif (message == "stats/price"):
+            write_api = self.client.write_api(write_options=SYNCHRONOUS) 
+            data = json.loads(message.payload)
+
+            p = Point("Price")\
+                .tag("category", data["category"])\
+                .field("price", data["price"])\
+                .time(data["timestamp"], WritePrecision.NS) 
+
+            write_api.write(self.bucket, self.org, record=p)
+            print("Data sent to the db") 
+            write_api.close()
+        elif (message == "stats/quantity"):
+            write_api = self.client.write_api(write_options=SYNCHRONOUS) 
+            data = json.loads(message.payload)
             
+            p = Point("Quantity")\
+                .tag("category", data["category"])\
+                .field("quantity", data["quantity"])\
+                .time(data["timestamp"], WritePrecision.NS) 
+
+            write_api.write(self.bucket, self.org, record=p)
+            print("Data sent to the db") 
+            write_api.close()
+
         
     def sendToDB(self, data):
         
         write_api = self.client.write_api(write_options=SYNCHRONOUS) 
         
-        print("type of ",type( data["caseID"]))
-        print("type of ",type( data["category"]))
-        print("type of ",type( data["value"]))
-        print("type of ",type( data["unit_of_measurement"]))
+        # print("type of ",type( data["caseID"]))
+        # print("type of ",type( data["category"]))
+        # print("type of ",type( data["value"]))
+        # print("type of ",type( data["unit_of_measurement"]))
 
         p = Point(data["measurement"])\
             .tag("caseID", data["caseID"])\

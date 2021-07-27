@@ -25,7 +25,7 @@ class statsPublisher:
         self.topic_price = json.loads(r.text)["stats"]["topic_price"]
         self.topic_quantity= json.loads(r.text)["stats"]["topic_quantity"]
         
-        self.broker_port =  ""
+        self.broker_port =  1883
 
         self.clientID = clientID
         #self.category = category
@@ -35,11 +35,12 @@ class statsPublisher:
         # register the callback
         self._paho_mqtt.on_connect = self.myOnConnect
 
-        self.message = {
-            'measurement': self.clientID,
-            'timestamp': '',
-            'value': '',
-        }
+        # self.message = {
+        #     'measurement': self.clientID,
+        #     'timestamp': '',
+        #     'value': '',
+        #     'category':''
+        # }
 		
 
     def start(self):
@@ -124,21 +125,21 @@ if __name__ == "__main__":
 
 
         to_publish_white = {
-            "category": "White", "timestamp":date_time_obj, "price" : df_quantity.iloc[i]["White"]
+            "category": "White", "timestamp":date_time_obj, "quantity" : df_quantity.iloc[i]["White"]
         }
         
         test.myPublish(test.topic_quantity, to_publish_white) #pubblico valore del prezzo in corrispondenza 
         time.sleep(1)
 
         to_publish_wheat = {
-            "category": "Wheat", "timestamp":date_time_obj, "price" : df_quantity.iloc[i]["Wheat"]
+            "category": "Wheat", "timestamp":date_time_obj, "quantity" : df_quantity.iloc[i]["Wheat"]
         }
 
         test.myPublish(test.topic_quantity, to_publish_wheat) #pubblico valore del prezzo in corrispondenza 
         time.sleep(1)
 
         to_publish_glutenfree = {
-            "category": "Glutenfree", "timestamp":date_time_obj, "price" : df_quantity.iloc[i]["Glutenfree"]
+            "category": "Glutenfree", "timestamp":date_time_obj, "quantity" : df_quantity.iloc[i]["Glutenfree"]
         }          
         test.myPublish(test.topic_quantity, to_publish_glutenfree) #pubblico valore del prezzo in corrispondenza 
         time.sleep(1)
