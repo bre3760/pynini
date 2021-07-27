@@ -48,7 +48,7 @@ class DBConnectorMQTT:
     def __init__(self, influx_data, topics, ID):
         # cloud db configuration
         # self.pynini = json.loads(.text)["name"]
-        self.ID = "pynini" + "_DB_MQTT-Adaptor"
+        self.ID = ID
 
         self.url = json.loads(influx_data.text)["url"]
         self.token = json.loads(influx_data.text)["token"]
@@ -67,7 +67,7 @@ class DBConnectorMQTT:
 
         self.broker_port = json.loads(r.text)
         self.topics = topics
-        self.client_obj = PahoMQTT.Client(self.ID, False)
+        self.client_obj = PahoMQTT.Client(self.ID)
 
 
         # register the callback
