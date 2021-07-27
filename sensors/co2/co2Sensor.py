@@ -106,7 +106,7 @@ class co2Sensor:
 		sensor_dict["last_seen"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 		sensor_dict["dev_name"] = 'rpi'
 
-		print("sensor_dict", sensor_dict)
+		print("sensor_dict in registerDevice", sensor_dict)
 
 		# send a post to the catalog to register the sensor
 		r = requests.post(f"http://{catalog_ip}:{catalog_port}/addSensor", json=sensor_dict)
@@ -130,11 +130,13 @@ class co2Sensor:
 		influx_api_ip = json.loads(influx_data.text)["api_ip"]
 		influx_api_port = json.loads(influx_data.text)["api_port"]
 
-		
+		#Appendo la topica a topics
 		sensor_dict["topics"] = [self.topic]
-
+		#sensor_dic viene mandato a db adaptor a cui sottoscri
 		r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/addSensor", json=sensor_dict)
 
+		print(f"Response from post to db api {r.text}")
+		
 		print("[{}] Device Registered on Catalog".format(
 			int(time.time()),
 		))

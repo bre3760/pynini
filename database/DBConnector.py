@@ -50,7 +50,7 @@ class DBConnectorREST:
         if len(uri) == 1 and uri[0] == 'addSensor':
             # add new sensor to the self.catalog
             new_device_info = json.loads(cherrypy.request.body.read())
-            print("cherrypy.request.body.read()", new_device_info)
+            print("In POST of db api", new_device_info)
              
             try:
                 sensorID = new_device_info['sensorID']
@@ -63,8 +63,13 @@ class DBConnectorREST:
 
                 for topic in topics:
                     db_connector.client_obj.subscribe(topic, qos=2)
+                
+                res["status"] = "ok"
 
                 # MQTT client should subscribe to topic caseID/measure/sensorID
+
+                return res
+
             except KeyError:
                 raise cherrypy.HTTPError(400, 'Bad request')
             
@@ -115,7 +120,7 @@ class DBConnectorMQTT:
         self.client_obj.loop_start()
 
 
-        print("Topiche a cui DB conn è sottoscritto: ", self.topics)
+        print("Topiche a cui DB conn è sottoscritto su accensione: ", self.topics)
         for topic in self.topics:
             self.client_obj.subscribe(topic, qos=2)
         print(f"Connected and subscribed")
