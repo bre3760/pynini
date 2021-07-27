@@ -107,8 +107,8 @@ if __name__ == "__main__":
         sensor_config = json.load(sensor_f)
         sensor_ip = sensor_config['sensor_ip']
         sensor_port = sensor_config['sensor_port']
-        # sensor_caseID = sensor_config["caseID"] # for local use ↓ to use env with docker
-        sensor_caseID =  os.getenv("caseID") # when dockerized (could be moved out of file reading)
+        sensor_caseID = sensor_config["caseID"] # for local use ↓ to use env with docker
+        #sensor_caseID =  os.getenv("caseID") # when dockerized (could be moved out of file reading)
         catalog_ip = sensor_config['catalog_ip']
         catalog_port = sensor_config['catalog_port']
 

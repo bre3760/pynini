@@ -116,9 +116,9 @@ class Catalog(object):
                 self.catalog['cases'].append(new_case)
 
             self.catalog['last_updated'] = time.time()
-            self.catalog.seek(0)
-            self.catalog.write(json.dumps(self.catalog, indent=4, sort_keys=True))
-            self.catalog.truncate()
+            # json.dumps(self.catalog).seek(0)
+            # self.catalog.write(json.dumps(self.catalog, indent=4, sort_keys=True))
+            # self.catalog.truncate()
             print(f'${new_dev["name"]} - added to the self.catalog')
 
             try: 
