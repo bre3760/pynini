@@ -18,13 +18,13 @@ unit of measurement: €/kg
 
 class statsPublisher:
     def __init__(self, catalog_ip, catalog_port, clientID):
+        rr = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip_outside")   #forse non usata 
+
         
-        
-        self.messageBroker = ""
+        self.messageBroker = json.loads(rr.text)
         r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")   #forse non usata 
         self.topic_price = json.loads(r.text)["stats"]["topic_price"]
         self.topic_quantity= json.loads(r.text)["stats"]["topic_quantity"]
-        
         self.broker_port =  1883
 
         self.clientID = clientID

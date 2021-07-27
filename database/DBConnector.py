@@ -175,7 +175,7 @@ class DBConnectorMQTT:
             caseID, level1, level2 = message.topic.split("/")
             topic_wo_case = level1 + "/" + level2
             measureTopic = True
-        #split message for stats => stats/price o stats/quantity
+        #message if stats is stats/price o stats/quantity
 
         if measureTopic:
             print("TOPIC WO CASE: ",topic_wo_case)
@@ -206,6 +206,8 @@ class DBConnectorMQTT:
             write_api.write(self.bucket, self.org, record=p)
             print("Data sent to the db") 
             write_api.close()
+
+
         elif (message == "stats/quantity"):
             write_api = self.client.write_api(write_options=SYNCHRONOUS) 
             data = json.loads(message.payload)
