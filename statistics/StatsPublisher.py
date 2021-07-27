@@ -39,7 +39,6 @@ class statsPublisher:
             'measurement': self.clientID,
             'timestamp': '',
             'value': '',
-            'category': self.category
         }
 		
 
