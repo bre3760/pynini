@@ -58,10 +58,11 @@ class DBConnectorMQTT:
         )
         
         r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip")
-        self.broker_address = json.loads(r.text)["broker_ip"]
+        print(r.text)
+        self.broker_address = json.loads(r.text)
         r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_port")
 
-        self.broker_port = json.loads(r.text)["broker_port"]
+        self.broker_port = json.loads(r.text)
         self.topics = topics
         self.client_obj = mqtt.Client(self.ID)
 
