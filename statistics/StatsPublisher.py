@@ -96,7 +96,6 @@ if __name__ == "__main__":
 
     df_prices = pd.read_csv("purchase_prices.csv")
 
-    df_prices = pd.read_csv("pc.csv")
 
     for i in range(len(df_prices.index)):
         date_time_obj = datetime.strptime(df_prices.iloc[i]["date"], '%m-%d-%Y').strftime('%m-%d-%Y')
