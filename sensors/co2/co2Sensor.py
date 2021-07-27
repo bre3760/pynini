@@ -129,10 +129,11 @@ class co2Sensor:
 		# mandando topica in cui pubblica così che il servizio mqtt del db possa iscriversi
 		influx_api_ip = json.loads(influx_data.text)["api_ip"]
 		influx_api_port = json.loads(influx_data.text)["api_port"]
+		print(f"Influx db api ip and port {influx_api_ip} {influx_api_port}")
 
 		#Appendo la topica a topics
 		sensor_dict["topics"] = [self.topic]
-		#sensor_dic viene mandato a db adaptor a cui sottoscri
+		#sensor_dic viene mandato a db adaptor a cui si sottoscrive 
 		r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/addSensor", json=sensor_dict)
 
 		print(f"Response from post to db api {r.text}")
