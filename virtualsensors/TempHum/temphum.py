@@ -20,7 +20,12 @@ class TemperatureHumiditySensor:
         # register the callback
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
-        self.messageBroker = ""
+        #get broker info from catalog
+        bIp = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip_outside")
+        self.messageBroker = json.loads(bIp.text)
+        bPort = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_port")
+        self.broker_port = json.loads(bPort.text)
+        #get topics from catalog
         r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
         self.topic_temp = ""
         self.topic_hum= ""
@@ -37,7 +42,7 @@ class TemperatureHumiditySensor:
     def start(self):
         # manage connection to broker
         self._paho_mqtt.username_pw_set(username="brendan", password="pynini")
-        self._paho_mqtt.connect(self.messageBroker, 1883)
+        self._paho_mqtt.connect(self.messageBroker, self.broker_port)
         self._paho_mqtt.loop_start()
         print(f"Subscribing on start to {self.topicBreadType}")
         self._paho_mqtt.subscribe(self.topicBreadType, 2)
@@ -68,13 +73,40 @@ class TemperatureHumiditySensor:
         sensor_dict["last_seen"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         sensor_dict["dev_name"] = 'rpi'
 
+        print("sensor_dict", sensor_dict)
+
         r = requests.post(f"http://{catalog_ip}:{catalog_port}/addSensor", json=sensor_dict)
+
         dict_of_topics = json.loads(r.text)['topic']
+
         print("dict_of_topics",dict_of_topics)
+        
         self.topic_temp = dict_of_topics["topic_temp"]
         self.topic_hum = dict_of_topics["topic_hum"]
-        self.messageBroker = json.loads(r.text)['broker_ip_outside']
+        self.messageBroker = json.loads(r.text)['broker_ip_outside'] # use ip_outside when trying from other pc to rasp
         self.breadCategories = json.loads(r.text)["breadCategories"]
+        ##########################################################################
+        # sencond post to db api to inform of new sensor added 
+        # post al catalog per avere ip e porta del db 
+        # getting useful information in order to contact db api
+        influx_data = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
+        print(f"Influx data response from catalog api, {influx_data.text}")
+        # post al db per dire che si è connesso il sensore,
+        # mandando topica in cui pubblica così che il servizio mqtt del db possa iscriversi
+        influx_api_ip = json.loads(influx_data.text)["api_ip"]
+        influx_api_port = json.loads(influx_data.text)["api_port"]
+        print(f"Influx db api ip and port {influx_api_ip} {influx_api_port}")
+
+        #Appendo la topica a topics
+        sensor_dict["topics"] = [self.caseID + "/" + self.topic_temp, self.caseID + "/" + self.topic_hum]
+
+        print("sensor dict before db post request", sensor_dict)
+        #sensor_dic viene mandato a db adaptor a cui si sottoscrive 
+        r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/db/addSensor", json=sensor_dict)
+
+        print(f"Response (r) from post to db api {r}")
+        ##########################################################################
+
         print( f"Device Registered on Catalog {sensor_dict['last_seen']}")
 
     def removeDevice(self):
@@ -86,9 +118,24 @@ class TemperatureHumiditySensor:
         sensor_dict["name"] = self.sensorID
         sensor_dict["dev_name"] = 'rpi'
 
-        requests.post(f"http://{catalog_ip}:{catalog_port}/removeSensor", json=sensor_dict)
+        requests.post(f"http://{catalog_ip}:{catalog_port}/removeDevice", json=sensor_dict)
+
+        ####post to remove from database
+        influx_data = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
+        print(f"Influx data response from catalog api, {influx_data.text}")
+        # post al db per dire che si è connesso il sensore,
+        # mandando topica in cui pubblica così che il servizio mqtt del db possa iscriversi
+        influx_api_ip = json.loads(influx_data.text)["api_ip"]
+        influx_api_port = json.loads(influx_data.text)["api_port"]
+        print(f"Influx db api ip and port {influx_api_ip} {influx_api_port}")
+
+        #Appendo la topica a topics
+        sensor_dict["topics"] = [self.caseID + "/" + self.topic_temp, self.caseID + "/" + self.topic_hum]
+        print("sensor dict before db post request for removal", sensor_dict)
+        #sensor_dic viene mandato a db adaptor a cui si sottoscrive 
+        r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/db/removeSensor", json=sensor_dict)
         removalTime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"Device Removed on Catalog {removalTime}")
+        print( f"Device Removed on Catalog {removalTime}")
 
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
@@ -107,8 +154,8 @@ if __name__ == "__main__":
         sensor_config = json.load(sensor_f)
         sensor_ip = sensor_config['sensor_ip']
         sensor_port = sensor_config['sensor_port']
-        sensor_caseID = sensor_config["caseID"] # for local use ↓ to use env with docker
-        #sensor_caseID =  os.getenv("caseID") # when dockerized (could be moved out of file reading)
+        #sensor_caseID = sensor_config["caseID"] # for local use ↓ to use env with docker
+        sensor_caseID =  os.getenv("caseID") # when dockerized (could be moved out of file reading)
         catalog_ip = sensor_config['catalog_ip']
         catalog_port = sensor_config['catalog_port']
 

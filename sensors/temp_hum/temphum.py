@@ -20,7 +20,12 @@ class TemperatureHumiditySensor:
         # register the callback
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
-        self.messageBroker = ""
+        #get broker info from catalog
+        bIp = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip_outside")  #outside se no rasp
+        bPort = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_port")
+        self.messageBroker = json.loads(bIp.text)
+        self.broker_port = json.loads(bPort.text)
+        #get topics from catalog
         r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")  # usata per breadtype
         self.topic_temp = ""
         self.topic_hum= ""
@@ -38,7 +43,7 @@ class TemperatureHumiditySensor:
         # manage connection to broker
         self._paho_mqtt.username_pw_set(username="brendan", password="pynini")
         #TODO: METTI PORTA MQTT DAL CATALOG
-        self._paho_mqtt.connect(self.messageBroker, 1883)
+        self._paho_mqtt.connect(self.messageBroker, self.broker_port)
         self._paho_mqtt.loop_start()
         self._paho_mqtt.subscribe(self.topicBreadType, 2)
 
@@ -131,10 +136,6 @@ class TemperatureHumiditySensor:
         print("sensor dict before db post request for removal", sensor_dict)
         #sensor_dic viene mandato a db adaptor a cui si sottoscrive 
         r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/db/removeSensor", json=sensor_dict)
-
-
-
-
         removalTime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         print( f"Device Removed on Catalog {removalTime}")
 

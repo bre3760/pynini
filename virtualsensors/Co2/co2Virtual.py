@@ -10,10 +10,21 @@ from datetime import datetime
 import os
 
 class co2Sensor:
+
+	"""
+	The flow is the following:
+	On boot the sensor reads its config file with catalog and self information
+	Sensor class is then instantiated with the appropriate variables 
+	init function creates the mqtt client
+	a get request is made to the catalog api in order to retrieve the topics for the sensor.
+
+	The registerdevice function of the sensor class is called, which sends two post requests:
+	- the first to the catalog api in order to register the new sensor 
+	- the second to the db api that allows the db mqtt client to know to which topics to subscribe to.
+	"""
 	def __init__(self, sensor, sensor_ip, sensor_port, catalog_ip, catalog_port):
 		self.caseID, self.sensorID = sensor.split("-")
 		self._paho_mqtt = PahoMQTT.Client(self.sensorID, False)
-		
 		self.sensorIP = sensor_ip
 		self.sensorPort = sensor_port
 		self.category = "White"
@@ -22,8 +33,15 @@ class co2Sensor:
 		# register the callback
 		self._paho_mqtt.on_connect = self.myOnConnect
 		self._paho_mqtt.on_message = self.myOnMessageReceived
-		self.messageBroker = ""
+		#get broker info from catalog
+		bIp = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip_outside")  #outside se no rasp
+		bPort = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_port")
+		self.messageBroker = json.loads(bIp.text)
+		self.broker_port = json.loads(bPort.text)
+		#get topics from catalog
 		r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
+		print("response from topics request", r.text)
+
 		self.topic = self.caseID + "/" + json.loads(r.text)["co2"]
 		self.topicBreadType = self.caseID + "/" + json.loads(r.text)["breadType"]
 		self.message = {
@@ -41,7 +59,7 @@ class co2Sensor:
 			the sensor will receive a message on that topic to update its data
 		'''
 		self._paho_mqtt.username_pw_set(username="brendan", password="pynini")
-		self._paho_mqtt.connect(self.messageBroker, 1883)
+		self._paho_mqtt.connect(self.messageBroker, self.broker_port)
 		self._paho_mqtt.loop_start()
 		# subscribe to a topic
 		self._paho_mqtt.subscribe(self.topicBreadType, 2)
@@ -60,6 +78,7 @@ class co2Sensor:
 			sensor publishes on its topic (caseID/measure/sensor) the measurements and write data into influxDB
 		'''
 		case_specific_topic = self.caseID + "/" +  self.topic # example CCC2/measure/co2
+		print(f"Publishing on topic {case_specific_topic}")
 		self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
 		
 		
@@ -91,24 +110,50 @@ class co2Sensor:
 		sensor_dict["last_seen"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 		sensor_dict["dev_name"] = 'rpi'
 
-		print("sensor_dict", sensor_dict)
+		print("sensor_dict in registerDevice", sensor_dict)
 
+		# send a post to the catalog to register the sensor
 		r = requests.post(f"http://{catalog_ip}:{catalog_port}/addSensor", json=sensor_dict)
+
+		print("R.text: ",  json.loads(r.text))
+
 		dict_of_topics = json.loads(r.text)['topic']
 		print("dict_of_topics",dict_of_topics)
+
 		self.topic = json.loads(r.text)['topic']
-		self.messageBroker = json.loads(r.text)['broker_ip_outside'] # outside since it is dockerized
+
+		self.messageBroker = json.loads(r.text)['broker_ip_outside']
 		self.breadCategories = json.loads(r.text)['breadCategories']
 
+
+		# sencond post to db api to inform of new sensor added 
+		# post al catalog per avere ip e porta del db 
+		# getting useful information in order to contact db api
+		influx_data = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
+		print(f"Influx data response from catalog api, {influx_data.text}")
+		# post al db per dire che si è connesso il sensore,
+		# mandando topica in cui pubblica così che il servizio mqtt del db possa iscriversi
+		influx_api_ip = json.loads(influx_data.text)["api_ip"]
+		influx_api_port = json.loads(influx_data.text)["api_port"]
+		print(f"Influx db api ip and port {influx_api_ip} {influx_api_port}")
+
+		#Appendo la topica a topics
+		sensor_dict["topics"] = [self.caseID + "/" + self.topic]
+		print("sensor dict before db post request", sensor_dict)
+		#sensor_dic viene mandato a db adaptor a cui si sottoscrive 
+		r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/db/addSensor", json=sensor_dict)
+
+		print(f"Response (r) from post to db api {r}")
+		
 		print("[{}] Device Registered on Catalog".format(
 			int(time.time()),
 		))
+
 
 	def removeDevice(self):
 		'''
 			remove the sensor from the list of active sensors in the catalog
 		'''
-
 		sensor_dict = {}
 		sensor_dict['sensorID'] = self.sensorID
 		sensor_dict["caseID"] = self.caseID
@@ -118,9 +163,25 @@ class co2Sensor:
 		sensor_dict["dev_name"] = 'rpi'
 
 		requests.post(f"http://{catalog_ip}:{catalog_port}/removeSensor", json=sensor_dict)
-		print("[{}] Device Removed from Catalog".format(
-			int(time.time()),
-		))
+		
+		####post to remove from database
+		influx_data = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
+		print(f"Influx data response from catalog api, {influx_data.text}")
+		# post al db per dire che si è connesso il sensore,
+		# mandando topica in cui pubblica così che il servizio mqtt del db possa iscriversi
+		influx_api_ip = json.loads(influx_data.text)["api_ip"]
+		influx_api_port = json.loads(influx_data.text)["api_port"]
+		print(f"Influx db api ip and port {influx_api_ip} {influx_api_port}")
+
+		#Appendo la topica a topics
+		sensor_dict["topics"] = [self.caseID + "/" + self.topic]
+		print("sensor dict before db post request", sensor_dict)
+		#sensor_dic viene mandato a db adaptor a cui si sottoscrive 
+		r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/db/removeSensor", json=sensor_dict)
+		
+		removalTime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+		print( f"Device Removed on Catalog {removalTime}")
+
 
 if __name__ == "__main__":
 
@@ -129,8 +190,8 @@ if __name__ == "__main__":
 		sensor_config = json.load(sensor_f)
 		sensor_ip = sensor_config['sensor_ip']
 		sensor_port = sensor_config['sensor_port']
-		sensor_caseID = sensor_config["caseID"] # or os.getenv("caseID")
-		#sensor_caseID = os.getenv("caseID")
+		# sensor_caseID = sensor_config["caseID"] # or os.getenv("caseID")
+		sensor_caseID = os.getenv("caseID")
 		catalog_ip = sensor_config['catalog_ip']
 		catalog_port = sensor_config['catalog_port']
 

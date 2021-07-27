@@ -33,15 +33,16 @@ class co2Sensor:
 		# register the callback
 		self._paho_mqtt.on_connect = self.myOnConnect
 		self._paho_mqtt.on_message = self.myOnMessageReceived
-		self.messageBroker = ""
-
+		#get broker info from catalog
+		bIp = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip_outside")  #outside se no rasp
+		bPort = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_port")
+		self.messageBroker = json.loads(bIp.text)
+		self.broker_port = json.loads(bPort.text)
+		#get topics from catalog
 		r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
 		print("response from topics request", r.text)
-
 		self.topic = self.caseID + "/" + json.loads(r.text)["co2"]
-
 		self.topicBreadType = self.caseID + "/" + json.loads(r.text)["breadType"]
-
 		self.message = {
 			'measurement': self.sensorID,
 			'caseID': self.caseID,
@@ -66,7 +67,6 @@ class co2Sensor:
 	def stop(self):
 		# self._paho_mqtt.unsubscribe(self.topic) #????
 		self._paho_mqtt.unsubscribe(self.topicBreadType)
-
 		self._paho_mqtt.loop_stop()
 		self._paho_mqtt.disconnect()
 
