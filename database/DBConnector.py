@@ -73,6 +73,9 @@ class DBConnectorREST:
 
         #     except KeyError:
         #         raise cherrypy.HTTPError(400, 'Bad request')
+        print(f"Before the if uri conditions")
+        print("Len URI: ",len(uri))
+        print("URI: ", uri)
         if len(uri) == 2 and uri[0] == 'db' and  uri[1] == 'addSensor':
             # add new sensor to the self.catalog
             print(f"In POST before new device info")
