@@ -106,12 +106,12 @@ class DBConnectorMQTT:
             data = json.loads(message.payload)
             self.sentToDB(data)
 
-        elif (message.topic == "measure/temperature"):
+        elif (message.topic == "CCC2/measure/temperature"):
             print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(message.payload) + "'")
             data = json.loads(message.payload)
             self.sentToDB(data)
 
-        elif (message.topic == "measure/humidity"):
+        elif (message.topic == "CCC2/measure/humidity"):
             print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(message.payload) + "'")
             data = json.loads(message.payload)
             self.sentToDB(data)
