@@ -1,4 +1,4 @@
-import paho.mqtt.client as mqtt
+import paho.mqtt.client as PahoMQTT
 import json, time, datetime
 import requests
 from influxdb_client import InfluxDBClient, Point, WritePrecision
@@ -67,7 +67,7 @@ class DBConnectorMQTT:
 
         self.broker_port = json.loads(r.text)
         self.topics = topics
-        self.client_obj = mqtt.Client(self.ID)
+        self.client_obj = PahoMQTT.Client(self.ID, False)
 
 
         # register the callback
