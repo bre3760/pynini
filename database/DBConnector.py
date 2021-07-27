@@ -195,7 +195,7 @@ class DBConnectorMQTT:
                 data = json.loads(message.payload)
                 self.sendToDB(data)
 
-        elif (message == "stats/price"):
+        if (message == "stats/price"):
             write_api = self.client.write_api(write_options=SYNCHRONOUS) 
             data = json.loads(message.payload)
             print("data to be published under topic price: ", data)
@@ -205,21 +205,21 @@ class DBConnectorMQTT:
                 .time(data["timestamp"], WritePrecision.NS) 
 
             write_api.write(self.bucket, self.org, record=p)
-            print("Data sent to the db") 
+            print("Price Data sent to the db") 
             write_api.close()
 
 
-        elif (message == "stats/quantity"):
+        if (message == "stats/quantity"):
             write_api = self.client.write_api(write_options=SYNCHRONOUS) 
             data = json.loads(message.payload)
-            
+            print("data to be published under topic qnt: ", data)
             p = Point("Quantity")\
                 .tag("category", data["category"])\
                 .field("quantity", data["quantity"])\
                 .time(data["timestamp"], WritePrecision.NS) 
 
             write_api.write(self.bucket, self.org, record=p)
-            print("Data sent to the db") 
+            print("Qnt Data sent to the db") 
             write_api.close()
 
         
