@@ -171,6 +171,7 @@ class DBConnectorMQTT:
     def message_callback(self, client, userdata, message):
         #TODO split on the caseID if the + does not work
         #split message for sensors
+        measureTopic = False
         if len(message.topic.split("/")) > 2:
             caseID, level1, level2 = message.topic.split("/")
             topic_wo_case = level1 + "/" + level2
