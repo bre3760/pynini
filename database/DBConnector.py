@@ -57,7 +57,11 @@ class DBConnectorMQTT:
             self.org
         )
         
+        r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip")
         self.broker_address = json.loads(r.text)["broker_ip"]
+        r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_port")
+
+        self.broker_port = json.loads(r.text)["broker_port"]
         self.topics = topics
         self.client_obj = mqtt.Client(self.ID)
 
@@ -75,7 +79,7 @@ class DBConnectorMQTT:
 
     def start(self):
         self.client_obj.username_pw_set(username="brendan", password="pynini")
-        self.client_obj.connect(self.broker_address, int(self.port1))
+        self.client_obj.connect(self.broker_address, self.broker_port)
         self.client_obj.loop_start()
 
         for topic in self.topics:
