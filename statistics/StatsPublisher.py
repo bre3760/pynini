@@ -18,11 +18,11 @@ unit of measurement: €/kg
 
 class statsPublisher:
     def __init__(self, catalog_ip, catalog_port, clientID):
-        rr = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip_outside")   #forse non usata 
+        rr = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip_outside")   
 
         
         self.messageBroker = json.loads(rr.text)
-        r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")   #forse non usata 
+        r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")    
         self.topic_price = json.loads(r.text)["stats"]["topic_price"]
         self.topic_quantity= json.loads(r.text)["stats"]["topic_quantity"]
         self.broker_port =  1883
@@ -58,7 +58,7 @@ class statsPublisher:
         # "topic_price": "stats/price",
         # "topic_quantity": "stats/quantity"
         # publish a message with a certain topic
-        self._paho_mqtt.publish(topic, json.dumps(message, 2))
+        self._paho_mqtt.publish(topic, json.dumps(message), 2)
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print ("Connected to %s with result code: %d" % (self.messageBroker, rc))

@@ -21,7 +21,7 @@ class TemperatureHumiditySensor:
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
         self.messageBroker = ""
-        # r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")   #forse non usata perchè topiche date in register device
+        r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")  # usata per breadtype
         self.topic_temp = ""
         self.topic_hum= ""
         self.topicBreadType = self.caseID + "/" +json.loads(r.text)["breadType"]
