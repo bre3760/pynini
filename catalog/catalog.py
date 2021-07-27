@@ -119,7 +119,7 @@ class Catalog(object):
             # json.dumps(self.catalog).seek(0)
             # self.catalog.write(json.dumps(self.catalog, indent=4, sort_keys=True))
             # self.catalog.truncate()
-            print(f'${new_dev["name"]} - added to the self.catalog')
+            print(f'${new_dev["name"]} - added to the catalog')
 
             try: 
                 print("catalog['topics'][name]", self.catalog['topics'][sensorID])
@@ -156,9 +156,9 @@ class Catalog(object):
 
                 self.catalog['bots'].append(new_bot)
                 self.catalog['last_updated'] = time.time()
-                self.catalog.seek(0)
-                self.catalog.write(json.dumps(self.catalog, indent=4, sort_keys=True))
-                self.catalog.truncate()
+                # self.catalog.seek(0)
+                # self.catalog.write(json.dumps(self.catalog, indent=4, sort_keys=True))
+                # self.catalog.truncate()
                 print(f'${new_bot["chat_ID"]} - added to the self.catalog')
 
                 #except KeyError:
@@ -202,9 +202,9 @@ class Catalog(object):
                     self.catalog['thresholds'].pop(self.catalog['thresholds'].index(d))
 
             self.catalog['thresholds'].append(new_th)
-            self.catalog.seek(0)
-            self.catalog.write(json.dumps(self.catalog, indent=4, sort_keys=True))
-            self.catalog.truncate()
+            #self.catalog.seek(0)
+            #self.catalog.write(json.dumps(self.catalog, indent=4, sort_keys=True))
+            #self.catalog.truncate()
             print(f'${new_th["type"]} - modify in the self.catalog')
             return 'self.catalog file successfully written'
             # except KeyError:
@@ -230,9 +230,9 @@ class Catalog(object):
                 if d['caseID'] == caseID:
                     d["bread_type"] = breadtype
             print([i['bread_type'] for i in self.catalog['cases']])
-            self.catalog.seek(0)
-            self.catalog.write(json.dumps(self.catalog, indent=4, sort_keys=True))
-            self.catalog.truncate()
+            # self.catalog.seek(0)
+            # self.catalog.write(json.dumps(self.catalog, indent=4, sort_keys=True))
+            # self.catalog.truncate()
             print(f'${new_breadtype["breadtype"]} - modify in the self.catalog')
             return 'self.catalog file successfully written'
             # except KeyError:
@@ -264,9 +264,9 @@ class Catalog(object):
                 raise cherrypy.HTTPError(404, "Device not found")
 
             self.catalog['last_updated'] = time.time()
-            self.catalog.seek(0)
-            self.catalog.write(json.dumps(self.catalog, indent=4, sort_keys=True))
-            self.catalog.truncate()
+            # self.catalog.seek(0)
+            # self.catalog.write(json.dumps(self.catalog, indent=4, sort_keys=True))
+            # self.catalog.truncate()
             return 'catalog file successfully written'
 
         if len(uri) == 1 and uri[0] == 'removeBot':
@@ -292,9 +292,9 @@ class Catalog(object):
                 raise cherrypy.HTTPError(404, "Device not found")
 
             self.catalog['last_updated'] = time.time()
-            self.catalog.seek(0)
-            self.catalog.write(json.dumps(self.catalog, indent=4, sort_keys=True))
-            self.catalog.truncate()
+            # self.catalog.seek(0)
+            # self.catalog.write(json.dumps(self.catalog, indent=4, sort_keys=True))
+            # self.catalog.truncate()
             #f.close()
             return 'catalog file successfully written'
  
@@ -333,32 +333,42 @@ class Catalog(object):
                     self.catalog['thresholds'].pop(self.catalog['thresholds'].index(d))
 
             self.catalog['thresholds'].append(new_th)
-            self.catalog.seek(0)
-            self.catalog.write(json.dumps(self.catalog, indent=4, sort_keys=True))
-            self.catalog.truncate()
+            # self.catalog.seek(0)
+            # self.catalog.write(json.dumps(self.catalog, indent=4, sort_keys=True))
+            # self.catalog.truncate()
             
             print(f'${new_th["type"]} - modify in the self.catalog')
             return 'catalog file successfully written'
 
 if __name__ == '__main__':
+    try:
 
-    with open("catalog2.json", 'r') as f:
-        config = json.load(f)
-    catalog_ip = config['catalog_ip']
-    catalog_port = config['catalog_port']
+        with open("catalog2.json", 'r') as f:
+            config = json.load(f)
+        catalog_ip = config['catalog_ip']
+        catalog_port = config['catalog_port']
 
-    catalog = Catalog(config_data=config)
+        catalog = Catalog(config_data=config)
 
+        
+
+        conf = {
+            '/':
+                {
+                    'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+                    'tools.sessions.on': True
+                }
+        }
+        cherrypy.tree.mount(catalog, '/', conf)
+        cherrypy.server.socket_host = catalog_ip
+        cherrypy.server.socket_port = catalog_port
+        cherrypy.engine.start()
     
+    except KeyboardInterrupt:
+        with open("catalog2.json", 'w') as f:
+            f.seek(0)
+            f.write(json.dumps(catalog.catalog, indent=4, sort_keys=True))
+            f.truncate()
 
-    conf = {
-        '/':
-            {
-                'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-                'tools.sessions.on': True
-            }
-    }
-    cherrypy.tree.mount(catalog, '/', conf)
-    cherrypy.server.socket_host = catalog_ip
-    cherrypy.server.socket_port = catalog_port
-    cherrypy.engine.start()
+
+
