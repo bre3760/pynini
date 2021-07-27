@@ -60,7 +60,9 @@ class statsPublisher:
         # publish a message with a certain topic
         print(message)
         print(type(message))
-        self._paho_mqtt.publish(topic, message, 2)
+        print(json.dumps(message))
+        print(type(json.dumps(message)))
+        self._paho_mqtt.publish(topic, json.dumps(message), 2)
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print ("Connected to %s with result code: %d" % (self.messageBroker, rc))
