@@ -75,6 +75,7 @@ class DBConnectorREST:
         #         raise cherrypy.HTTPError(400, 'Bad request')
         if len(uri) == 2 and uri[0] == 'db' and  uri[1] == 'addSensor':
             # add new sensor to the self.catalog
+            print(f"In POST before new device info")
             new_device_info = json.loads(cherrypy.request.body.read())
             print("In POST of db api", new_device_info)
              
