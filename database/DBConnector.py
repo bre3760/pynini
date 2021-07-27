@@ -85,7 +85,7 @@ class DBConnectorMQTT:
         self.client_obj.username_pw_set(username="brendan", password="pynini")
         self.client_obj.connect(self.broker_address, self.broker_port)
         self.client_obj.loop_start()
-
+        print("Topiche a cui DB conn è sottoscritto: ". self.topics)
         for topic in self.topics:
             self.client_obj.subscribe(topic, qos=2)
         print(f"Connected and subscribed")
@@ -106,7 +106,7 @@ class DBConnectorMQTT:
             data = json.loads(message.payload)
             self.sentToDB(data)
 
-        elif (message.topic == "CC2/measure/temperature"):
+        elif (message.topic == "measure/temperature"):
             print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(message.payload) + "'")
             data = json.loads(message.payload)
             self.sentToDB(data)
