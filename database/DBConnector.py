@@ -177,7 +177,8 @@ class DBConnectorMQTT:
             topic_wo_case = level1 + "/" + level2
             measureTopic = True
         #message if stats > stats/price o stats/quantity
-
+        print("message callback: ",message)
+        
         if measureTopic:
             print("TOPIC WO CASE: ",topic_wo_case)
             if (topic_wo_case == "measure/co2"):
