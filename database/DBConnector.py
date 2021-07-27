@@ -46,32 +46,33 @@ class DBConnectorREST:
 
     # add post for when new sensor connects TODO
     def POST(self, *uri, **params):
+        global db_connector
         res = {}
-        if len(uri) == 1 and uri[0] == 'addSensor':
-            # add new sensor to the self.catalog
-            new_device_info = json.loads(cherrypy.request.body.read())
-            print("In POST of db api", new_device_info)
+        # if len(uri) == 1 and uri[0] == 'addSensor':
+        #     # add new sensor to the self.catalog
+        #     new_device_info = json.loads(cherrypy.request.body.read())
+        #     print("In POST of db api", new_device_info)
              
-            try:
-                sensorID = new_device_info['sensorID']
-                caseID = new_device_info['caseID']
-                ip = new_device_info['ip']
-                port = new_device_info['port']
-                last_seen = new_device_info['last_seen']
-                dev_name = new_device_info['dev_name']
-                topics = new_device_info["topics"] # a list is sent
+        #     try:
+        #         sensorID = new_device_info['sensorID']
+        #         caseID = new_device_info['caseID']
+        #         ip = new_device_info['ip']
+        #         port = new_device_info['port']
+        #         last_seen = new_device_info['last_seen']
+        #         dev_name = new_device_info['dev_name']
+        #         topics = new_device_info["topics"] # a list is sent
 
-                for topic in topics:
-                    db_connector.client_obj.subscribe(topic, qos=2)
+        #         for topic in topics:
+        #             db_connector.client_obj.subscribe(topic, qos=2)
                 
-                res["status"] = "ok"
+        #         res["status"] = "ok"
 
-                # MQTT client should subscribe to topic caseID/measure/sensorID
+        #         # MQTT client should subscribe to topic caseID/measure/sensorID
 
-                return res
+        #         return res
 
-            except KeyError:
-                raise cherrypy.HTTPError(400, 'Bad request')
+        #     except KeyError:
+        #         raise cherrypy.HTTPError(400, 'Bad request')
         if len(uri) == 2 and uri[0] == 'db' and  uri[1] == 'addSensor':
             # add new sensor to the self.catalog
             new_device_info = json.loads(cherrypy.request.body.read())
@@ -87,9 +88,11 @@ class DBConnectorREST:
                 topics = new_device_info["topics"] # a list is sent
 
                 for topic in topics:
+                    print(f"Subscribing to topic {topic}")
                     db_connector.client_obj.subscribe(topic, qos=2)
                 
                 res["status"] = "ok"
+                print(f"Before return")
 
                 # MQTT client should subscribe to topic caseID/measure/sensorID
 
