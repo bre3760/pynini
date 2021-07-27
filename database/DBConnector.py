@@ -16,7 +16,7 @@ class DBConnectorREST:
     
     exposed = True
     def __init__(self, config_data):
-        self.api_ip =  json.loads(config_data.text)["api_ip"]      
+        self.api_ip = json.loads(config_data.text)["api_ip"]      
         self.api_port = json.loads(config_data.text)["api_port"]    
         
 
@@ -101,7 +101,7 @@ class DBConnectorMQTT:
 
     # callback for messages
     def message_callback(self, client, userdata, message):
-        if (message.topic == "measure/co2"):
+        if (message.topic == "+/measure/co2"):
             print("Topic:'" + message.topic + "' Message: '" + str(message.payload) + "'")
             data = json.loads(message.payload)
             self.sentToDB(data)
@@ -111,7 +111,6 @@ class DBConnectorMQTT:
             data = json.loads(message.payload)
             self.sentToDB(data)
 
-            
         elif (message.topic == "measure/humidity"):
             print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(message.payload) + "'")
             data = json.loads(message.payload)
