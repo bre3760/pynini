@@ -76,7 +76,9 @@ class DBConnectorREST:
         print(f"Before the if uri conditions")
         print("Len URI: ",len(uri))
         print("URI: ", uri)
-        if len(uri) == 2 and uri[0] == 'db' and  uri[1] == 'addSensor':
+        print("uri[0]: ", uri[0])
+        
+        if len(uri) == 1 and uri[0] ==  'addSensor':
             # add new sensor to the self.catalog
             print(f"In POST before new device info")
             new_device_info = json.loads(cherrypy.request.body.read())
