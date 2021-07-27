@@ -91,12 +91,27 @@ class co2Sensor:
 		print("sensor_dict", sensor_dict)
 
 		r = requests.post(f"http://{catalog_ip}:{catalog_port}/addSensor", json=sensor_dict)
+
+		# sencond post to db to inform of new sensor added 
 		dict_of_topics = json.loads(r.text)['topic']
 		print("dict_of_topics",dict_of_topics)
 		self.topic = json.loads(r.text)['topic']
 
 		self.messageBroker = json.loads(r.text)['broker_ip_outside']
 		self.breadCategories = json.loads(r.text)['breadCategories']
+
+
+
+		# post al catalog per avere ip e porta del db 
+		influx_data = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
+
+		# post al db per dire che si è connesso  il sensore,
+		# mandando topica in cui pubblica così che il servizio mqtt del db 
+		influx_api_ip = json.loads(influx_data.text)["api_ip"]
+		influx_api_port = json.loads(influx_data.text)["api_port"]
+
+		r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/addSensor", json=sensor_dict)
+		# possa iscriversi a quella topica TODO 
 
 		print("[{}] Device Registered on Catalog".format(
 			int(time.time()),

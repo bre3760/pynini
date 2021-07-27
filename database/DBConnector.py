@@ -42,6 +42,27 @@ class DBConnectorREST:
 
             print(f"Results from query {results}, {res}")
             return res
+
+    # add post for when new sensor connects TODO
+    def POST(self, *uri, **params):
+        res = {}
+        if len(uri) == 1 and uri[0] == 'addSensor':
+            # add new sensor to the self.catalog
+            new_device_info = json.loads(cherrypy.request.body.read())
+            print("cherrypy.request.body.read()", new_device_info)
+             
+            try:
+                sensorID = new_device_info['sensorID']
+                caseID = new_device_info['caseID']
+                ip = new_device_info['ip']
+                port = new_device_info['port']
+                last_seen = new_device_info['last_seen']
+                dev_name = new_device_info['dev_name']
+
+
+                # MQTT client should subscribe to topic caseID/measure/sensorID
+            except KeyError:
+                raise cherrypy.HTTPError(400, 'Bad request')
             
 
 class DBConnectorMQTT:
@@ -66,6 +87,9 @@ class DBConnectorMQTT:
         r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_port")
 
         self.broker_port = json.loads(r.text)
+
+
+
         self.topics = topics
         self.client_obj = PahoMQTT.Client(self.ID)
 
@@ -85,6 +109,8 @@ class DBConnectorMQTT:
         self.client_obj.username_pw_set(username="brendan", password="pynini")
         self.client_obj.connect(self.broker_address, self.broker_port)
         self.client_obj.loop_start()
+
+
         print("Topiche a cui DB conn è sottoscritto: ", self.topics)
         for topic in self.topics:
             self.client_obj.subscribe(topic, qos=2)
@@ -149,14 +175,15 @@ if __name__ == '__main__':
     # get all information in order to connect to the db
     influx_data = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
 
-
-    #RITORNA TOKEN URL BUCKET
     
-    # retrieve the topics from the catalog
+    # retrieve all cases in the system
+    r = requests.get(f"http://{catalog_ip}:{catalog_port}/cases")
+    dict_of_cases = json.loads(r.text)
+    list_of_cases = [x["caseID"] for x in dict_of_cases]
+
+    #
     r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
     dict_topics = json.loads(r.text)
-
-
     for key, value in dict_topics.items():
         if key in list_of_wanted_topics:
             if key == "TempHum": # add arduino here for expansion (key=="arduino")
@@ -166,9 +193,18 @@ if __name__ == '__main__':
             else:
                 topics.append(value)
 
-    print("topicheeeeee: ", topics)
+    all_topics_to_subscribe_to = []
+    
+    print("Connected cases id: ", list_of_cases)
+    for case_id in list_of_cases:
+        for topic in topics:
+            case_specific_topic = case_id.clientID +"/"+ topic
+            all_topics_to_subscribe_to.append(case_specific_topic)
 
-    db_connector = DBConnectorMQTT(influx_data, topics, "DB")
+
+    print("topicheeeeee: ", all_topics_to_subscribe_to)
+
+    db_connector = DBConnectorMQTT(influx_data, all_topics_to_subscribe_to, "DB")
 
     db_connector.start()
 
