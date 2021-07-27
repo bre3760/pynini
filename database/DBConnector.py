@@ -58,7 +58,10 @@ class DBConnectorREST:
                 port = new_device_info['port']
                 last_seen = new_device_info['last_seen']
                 dev_name = new_device_info['dev_name']
-
+                topics = new_device_info["topics"] # a list is sent
+                
+                for topic in topics:
+                    db_connector.client_obj.subscribe(topic, qos=2)
 
                 # MQTT client should subscribe to topic caseID/measure/sensorID
             except KeyError:
@@ -127,17 +130,18 @@ class DBConnectorMQTT:
 
     # callback for messages
     def message_callback(self, client, userdata, message):
-        if (message.topic == "CCC2/measure/co2"):
+        #TODO split on the caseID if the + does not work
+        if (message.topic == "+/measure/co2"):
             print("Topic:'" + message.topic + "' Message: '" + str(message.payload) + "'")
             data = json.loads(message.payload)
             self.sentToDB(data)
 
-        elif (message.topic == "CCC2/measure/temperature"):
+        elif (message.topic == "+/measure/temperature"):
             print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(message.payload) + "'")
             data = json.loads(message.payload)
             self.sentToDB(data)
 
-        elif (message.topic == "CCC2/measure/humidity"):
+        elif (message.topic == "+/measure/humidity"):
             print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(message.payload) + "'")
             data = json.loads(message.payload)
             self.sentToDB(data)

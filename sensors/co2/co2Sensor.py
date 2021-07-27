@@ -8,6 +8,20 @@ sys.path.append("../../")
 from datetime import datetime
 
 class co2Sensor:
+	"""
+	The flow is the following:
+	On boot the sensor reads its config file with catalog and self information
+	Sensor class is then instantiated with the appropriate variables 
+	init function creates the mqtt client
+	a get request is made to the catalog api in order to retrieve the topics for the sensor.
+
+	The registerdevice function of the sensor class is called, which sends two post requests:
+	- the first to the catalog api in order to register the new sensor 
+	- the second to the db api that allows the db mqtt client to know to which topics to subscribe to.
+	"""
+
+
+
 	def __init__(self, sensor, sensor_ip, sensor_port, catalog_ip, catalog_port):
 		self.caseID, self.sensorID = sensor.split("-")
 		self._paho_mqtt = PahoMQTT.Client(self.sensorID, False)
@@ -20,10 +34,14 @@ class co2Sensor:
 		self._paho_mqtt.on_connect = self.myOnConnect
 		self._paho_mqtt.on_message = self.myOnMessageReceived
 		self.messageBroker = ""
+
 		r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
-		print("response from request", r.text)
+		print("response from topics request", r.text)
+
 		self.topic = self.caseID + "/" + json.loads(r.text)["co2"]
+
 		self.topicBreadType = self.caseID + "/" + json.loads(r.text)["breadType"]
+
 		self.message = {
 			'measurement': self.sensorID,
 			'caseID': self.caseID,
@@ -90,9 +108,9 @@ class co2Sensor:
 
 		print("sensor_dict", sensor_dict)
 
+		# send a post to the catalog to register the sensor
 		r = requests.post(f"http://{catalog_ip}:{catalog_port}/addSensor", json=sensor_dict)
 
-		# sencond post to db to inform of new sensor added 
 		dict_of_topics = json.loads(r.text)['topic']
 		print("dict_of_topics",dict_of_topics)
 		self.topic = json.loads(r.text)['topic']
@@ -101,17 +119,21 @@ class co2Sensor:
 		self.breadCategories = json.loads(r.text)['breadCategories']
 
 
-
+		# sencond post to db api to inform of new sensor added 
 		# post al catalog per avere ip e porta del db 
+
+		# getting useful information in order to contact db api
 		influx_data = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
 
-		# post al db per dire che si è connesso  il sensore,
-		# mandando topica in cui pubblica così che il servizio mqtt del db 
+		# post al db per dire che si è connesso il sensore,
+		# mandando topica in cui pubblica così che il servizio mqtt del db possa iscriversi
 		influx_api_ip = json.loads(influx_data.text)["api_ip"]
 		influx_api_port = json.loads(influx_data.text)["api_port"]
 
+		
+		sensor_dict["topic"] = [self.topic]
+
 		r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/addSensor", json=sensor_dict)
-		# possa iscriversi a quella topica TODO 
 
 		print("[{}] Device Registered on Catalog".format(
 			int(time.time()),
@@ -144,8 +166,7 @@ if __name__ == "__main__":
 		catalog_ip = sensor_config['catalog_ip']
 		catalog_port = sensor_config['catalog_port']
 
-	sensor = co2Sensor(sensor_caseID +'-'+ 'co2', sensor_ip, sensor_port, catalog_ip, catalog_port )
-	
+	sensor = co2Sensor(sensor_caseID +'-'+ 'co2', sensor_ip, sensor_port, catalog_ip, catalog_port)
 	# sensor registers itself to the catalog and starts publishing
 	sensor.registerDevice()
 	sensor.start()
