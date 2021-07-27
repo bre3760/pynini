@@ -170,7 +170,7 @@ if __name__ == '__main__':
 
     db_connector = DBConnectorMQTT(influx_data, topics, "DB")
 
-
+    db_connector.start()
 
     db_connector_api = DBConnectorREST(influx_data)
 
