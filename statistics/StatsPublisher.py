@@ -80,7 +80,7 @@ class statsPublisher:
 if __name__ == "__main__":
     
     with open("config.json", 'r') as stats_f:
-        stats_config = json.loads(stats_f)
+        stats_config = json.load(stats_f)
         catalog_ip = stats_config['catalog_ip']
         catalog_port = stats_config['catalog_port']
         
