@@ -3,7 +3,7 @@ import time
 import json
 import requests
 from datetime import datetime
-import Adafruit_DHT
+# import Adafruit_DHT
 import random
 import sys
 sys.path.append("../../")
