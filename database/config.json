@@ -1,4 +1,5 @@
 {
     "ip": "0.0.0.0",
-    "port": 9090
+    "port": 9090,
+    "list_of_wanted_topics" : ["co2", "TempHum"]
 }

@@ -6,15 +6,12 @@ from datetime import datetime
 import Adafruit_DHT
 import sys
 sys.path.append("../../")
-from database.influxDB import InfluxDB
-# from database.query import ClientQuery
 
 
 class TemperatureHumiditySensor:
-    def __init__(self, sensor, influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port):
+    def __init__(self, sensor, sensor_ip, sensor_port, catalog_ip, catalog_port):
         self.caseID, self.sensorID = sensor.split("-")
         self._paho_mqtt = PahoMQTT.Client(self.sensorID, False)
-        self.influxDB = influxDB
         self.sensorIP = sensor_ip
         self.sensorPort = sensor_port
         self.category = "White"
@@ -53,8 +50,6 @@ class TemperatureHumiditySensor:
         # publish a message with a certain topic (measure/temperature or measure/humidity)
         case_specific_topic = self.caseID + "/" + topic # example CCC2/measure/co2
         self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
-        self.influxDB.write(message)
-        print("su influx", message)
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print("Connected to %s with result code: %d" % (self.messageBroker, rc))
@@ -114,11 +109,6 @@ if __name__ == "__main__":
         catalog_ip = sensor_config['catalog_ip']
         catalog_port = sensor_config['catalog_port']
 
-
-    dataInfluxDB = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
-    influxDB = InfluxDB(json.loads(dataInfluxDB.text))
- 
-
     sensor = TemperatureHumiditySensor(sensor_caseID +'-'+  'TempHum', influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port)
     sensor.registerDevice()
     sensor.start()
@@ -137,7 +127,7 @@ if __name__ == "__main__":
                                 "value": str(temperature), 
                                 "category": sensor.category,
                                 "unit_of_measurement": "Celsius" }
-                time.sleep(1)
+
                 payload_hum  = {"caseID":sensor.caseID, 
                                 "measurement": "humidity", 
                                 "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), 
@@ -151,7 +141,7 @@ if __name__ == "__main__":
 
             
 
-            time.sleep(15)
+            time.sleep(15) # publish every 15 seconds
 
     except KeyboardInterrupt:
         pass

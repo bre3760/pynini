@@ -8,7 +8,7 @@ import pathlib
 
 
 class ClientREST(object):
-	"""docstring for Reverser"""
+	
 	exposed=True
 	def __init__(self):
 			pass

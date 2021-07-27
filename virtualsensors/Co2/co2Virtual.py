@@ -5,15 +5,15 @@ import requests
 import pandas as pd
 import sys
 sys.path.append("../../")
-from influxDB import InfluxDB
+
 from datetime import datetime
 import os
 
 class co2Sensor:
-	def __init__(self, sensor, influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port):
+	def __init__(self, sensor, sensor_ip, sensor_port, catalog_ip, catalog_port):
 		self.caseID, self.sensorID = sensor.split("-")
 		self._paho_mqtt = PahoMQTT.Client(self.sensorID, False)
-		self.influxDB = influxDB
+		
 		self.sensorIP = sensor_ip
 		self.sensorPort = sensor_port
 		self.category = "White"
@@ -61,14 +61,14 @@ class co2Sensor:
 		'''
 		case_specific_topic = self.caseID + "/" +  self.topic # example CCC2/measure/co2
 		self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
-		self.influxDB.write(message)
+		
 		
 
 
 	def myOnMessageReceived (self, paho_mqtt , userdata, msg):
 		'''
 			when a message is received on the topic "topicBreadType", it means that the bread category of the case is changed:
-			the sensor has to be aware of this change in order to correctly store the measurements into InfluxDB.
+			the sensor has to be aware of this change.
 			(Each bread category has its own thresholds)
 		'''
 		print ("Topic:'" + msg.topic+"', QoS: '"+str(msg.qos)+"' Message: '"+str(msg.payload) + "'")
@@ -130,18 +130,13 @@ if __name__ == "__main__":
 		sensor_ip = sensor_config['sensor_ip']
 		sensor_port = sensor_config['sensor_port']
 		# sensor_caseID = sensor_config["caseID"] # or os.getenv("caseID")
-		sensor_caseID =  os.getenv("caseID")
-
+		sensor_caseID = os.getenv("caseID")
 		catalog_ip = sensor_config['catalog_ip']
 		catalog_port = sensor_config['catalog_port']
 
-	# retrieve data needed to access InfluxDB
 	print(f"catalog ip {catalog_ip}, catalog port {catalog_port}")
-	dataInfluxDB = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
-	print("INFLUXDB INFORMATION FROM CATALOG")
-	influxDB = InfluxDB(json.loads(dataInfluxDB.text))
 
-	sensor = co2Sensor(sensor_caseID +'-'+ 'co2', influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port )
+	sensor = co2Sensor(sensor_caseID +'-'+ 'co2', sensor_ip, sensor_port, catalog_ip, catalog_port )
 	
 	# sensor registers itself to the catalog and starts publishing
 	sensor.registerDevice()

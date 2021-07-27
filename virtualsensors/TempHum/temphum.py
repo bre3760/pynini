@@ -6,15 +6,13 @@ from datetime import datetime
 # import Adafruit_DHT only for real sensor
 import sys
 sys.path.append("../../")
-from influxDB import InfluxDB
 import random
 import os
 
 class TemperatureHumiditySensor:
-    def __init__(self, sensor, influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port):
+    def __init__(self, sensor, sensor_ip, sensor_port, catalog_ip, catalog_port):
         self.caseID, self.sensorID = sensor.split("-")
         self._paho_mqtt = PahoMQTT.Client(self.sensorID, False)
-        self.influxDB = influxDB
         self.sensorIP = sensor_ip
         self.sensorPort = sensor_port
         self.category = "White"
@@ -55,8 +53,7 @@ class TemperatureHumiditySensor:
         case_specific_topic = self.caseID + "/" + topic # example CCC2/measure/co2
         print(f"Publishing to: {self.topicBreadType}")
         self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
-        self.influxDB.write(message)
-        print("Sending data to influx", message)
+        
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print("Connected to %s with result code: %d" % (self.messageBroker, rc))
@@ -110,17 +107,14 @@ if __name__ == "__main__":
         sensor_config = json.load(sensor_f)
         sensor_ip = sensor_config['sensor_ip']
         sensor_port = sensor_config['sensor_port']
-        # sensor_caseID = sensor_config["caseID"] # for local use
+        # sensor_caseID = sensor_config["caseID"] # for local use ↓ to use env with docker
         sensor_caseID =  os.getenv("caseID") # when dockerized (could be moved out of file reading)
         catalog_ip = sensor_config['catalog_ip']
         catalog_port = sensor_config['catalog_port']
 
 
-    dataInfluxDB = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
-    influxDB = InfluxDB(json.loads(dataInfluxDB.text))
- 
 
-    sensor = TemperatureHumiditySensor(sensor_caseID +'-'+  'TempHum', influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port)
+    sensor = TemperatureHumiditySensor(sensor_caseID +'-'+  'TempHum', sensor_ip, sensor_port, catalog_ip, catalog_port)
     sensor.registerDevice()
     sensor.start()
 
@@ -139,7 +133,7 @@ if __name__ == "__main__":
                                 "value": temperature, 
                                 "category": sensor.category,
                                 "unit_of_measurement": "Celsius" }
-                time.sleep(1)
+
                 payload_hum  = {"caseID":sensor.caseID, 
                                 "measurement": "humidity", 
                                 "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), 

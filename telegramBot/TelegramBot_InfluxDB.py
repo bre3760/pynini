@@ -3,8 +3,6 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, Conv
 import sys
 sys.path.append('../')
 import os
-
-from database.query import ClientQuery
 import requests
 import logging
 import json
@@ -15,12 +13,14 @@ import paho.mqtt.client as PahoMQTT
 TYPOLOGY, PARAM, PARAMS, PARAM2, HOME, INFO, THRESHOLD, EXIT = range(8)
 
 class TelegramBot(object):
-    def __init__(self, port, token, ip, catalogPort):
+    def __init__(self, port, token, ip, catalogPort, IP_InfluxDB, port_InfluxDB):
         self.telegramPort = port
         self.token = token
         self.catalogIP = ip
         self.catalogPort = catalogPort
-        
+        self.IP_InfluxDB = IP_InfluxDB
+        self.port_InfluxDB = port_InfluxDB
+    
 
     def stop(self):
         self._paho_mqtt.unsubscribe(self.topic)
@@ -35,19 +35,8 @@ class TelegramBot(object):
         self._paho_mqtt.publish(self.topic, json.dumps(message), 2)
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg, update, context):
-        # A new message is received: an alert is sent to the Telegram Bot
+        # A new message is received
         print("Topic:'" + msg.topic + "', QoS: '" + str(msg.qos) + "' Message: '" + str(msg.payload) + "'")
-
-        self.sendAlert(update, context, msg.topic, msg.payload)
-        print("send Alert, msg.topic: ", msg.topic, msg.payload)
-
-    def sendAlert(self, update, context, topic, msg):
-        if msg['message'] == 'on':
-            txt = 'ALERT! Your {} has been activate to improve the environmental conditions!'.format(topic)
-        else:
-            txt = 'ALERT! Your {} has been deactivate to improve the environmental conditions!'.format(topic)
-        context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text=txt, parse_mode='HTML')
 
     def start(self, update, context):
 
@@ -240,10 +229,17 @@ class TelegramBot(object):
                                  parse_mode='HTML')
 
         print(f"Before ClientQUery INIT")
-        self.clientQuery = ClientQuery(sensor = param, category = self.category, caseID = self.caseID)
-        actualValues = self.clientQuery.getData()
+
+        data = {}
+        data['caseID'] = self.caseID
+        data['sensor'] = param
+        data['category'] = self.category
+       
+        r = requests.get(f"http://{IP_InfluxDB}:{port_InfluxDB}/getData", json=data)
+        actualValues = json.loads(r.text)
         print(f"actualValues in selectedParam {actualValues}")
-        best = self.clientQuery.getBest()
+
+        best = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/getBest", json=data)
 
         if actualValues != []:
             print(f"actualValues in selectedParam is not an empty list {actualValues}")
@@ -283,7 +279,8 @@ class TelegramBot(object):
             return TYPOLOGY
 
         elif query.data == 'info':
-            link = self.clientQuery.getLink()
+            r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/getLink", json={'category': self.category})
+            link = json.loads(r.text)
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='Click on the following link to learn more about the {}: {}.'.format(self.category, link))
 
@@ -579,6 +576,11 @@ if __name__=='__main__':
         config = json.load(f)
     ip = config['ip']
     port = config['port']
-    data = requests.get(f"http://{ip}:{port}/telegramBot")
-    bot = TelegramBot(json.loads(data.text)["telegramPort"], json.loads(data.text)["token"], ip, port)
+
+    dataInfluxDB = requests.get(f"http://{ip}:{port}/InfluxDB")
+    IP_InfluxDB = json.loads(dataInfluxDB.text)["api_ip"]
+    port_InfluxDB = json.loads(dataInfluxDB.text)["api_port"]
+    
+    dataBot = requests.get(f"http://{ip}:{port}/telegramBot")
+    bot = TelegramBot(json.loads(dataBot.text)["telegramPort"], json.loads(dataBot.text)["token"], ip, port, IP_InfluxDB, port_InfluxDB)
     bot.main()

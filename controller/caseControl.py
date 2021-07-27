@@ -19,10 +19,13 @@ class CaseControl(object):
         self.maxHumidity = self.getMaxHumidityThreshold()
         self.minHumidity = self.getMinHumidityThreshold()
         self.maxC02 = self.getMaxCO2Threshold()
-        self.default_value = -69 # default out of range values for initialization
+        self.default_value = -70 # default out of range values for initialization
         self.currentTemperature = 0 
         self.currentHumidity = 0
         self.currentCO2 = 0
+        self.prevStateLamp = "off"
+        self.prevStateFan = "off"
+
         
     def run(self):
         print("running %s" % self.clientID)
@@ -38,16 +41,41 @@ class CaseControl(object):
         if topic == "measure/temperature":
             json_mex = json.loads(msg_payload)
             self.currentTemperature = json_mex["value"]
+            if not self.isTemperatureValid():
+                if self.prevStateFan != "off": # if fan was on turn it off
+                    self.myMqttClient.myPublish(self.clientID + "/" + "trigger/fan", json.dumps({"message":"off"}))
+                    self.prevStateFan ="off"
+                if self.prevStateLamp != "off":
+                    self.myMqttClient.myPublish(self.clientID + "/" +"trigger/lamp", json.dumps({"message":"off"}))
+                    self.prevStateLamp = "off"
 
+            
         if topic == "measure/humidity":
             json_mex = json.loads(msg_payload)
             # the received value of humidity is saved
             self.currentHumidity = json_mex["value"]
+            if not self.isHumidityValid():
+                if self.prevStateFan != "off": # if fan was on turn it off
+                    self.myMqttClient.myPublish(self.clientID + "/" + "trigger/fan", json.dumps({"message":"off"}))
+                    self.prevStateFan ="off"
+                if self.prevStateLamp != "off":
+                    self.myMqttClient.myPublish(self.clientID + "/" +"trigger/lamp", json.dumps({"message":"off"}))
+                    self.prevStateLamp = "off"
+                
+
 
         if topic == "measure/CO2":
             json_mex = json.loads(msg_payload)
             # the received value of co2 is saved
             self.currentCO2 = json_mex["value"]
+            if not self.isCO2Valid():
+                if self.prevStateFan != "off": # if fan was on turn it off
+                    self.myMqttClient.myPublish(self.clientID + "/" + "trigger/fan", json.dumps({"message":"off"}))
+                    self.prevStateFan ="off"
+                if self.prevStateLamp != "off":
+                    self.myMqttClient.myPublish(self.clientID + "/" +"trigger/lamp", json.dumps({"message":"off"}))
+                    self.prevStateLamp = "off"
+
 
         if topic == "breadType/":
             if msg_payload: 

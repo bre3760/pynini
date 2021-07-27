@@ -2,7 +2,10 @@
     "InfluxDB": {
         "bucket": "Pynini",
         "token": "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg==",
-        "url": "https://eu-central-1-1.aws.cloud2.influxdata.com"
+        "url": "https://eu-central-1-1.aws.cloud2.influxdata.com",
+        "org": "s272608@studenti.polito.it",
+        "api_ip":"0.0.0.0",
+        "api_port":9099
     },
     "bots": [],
     "breadCategories": [
@@ -22,6 +25,11 @@
     },
     "ip_address": "172.20.10.11",
     "last_updated": 1626429603.749941,
+    "links":{
+        "White": "https://www.browneyedbaker.com/white-bread-recipe/",
+        "Wheat": "https://bakingamoment.com/soft-whole-wheat-bread/",
+        "Glutenfree": "https://www.glutenfreepalate.com/gluten-free-bread-recipe/"
+    },
     "telegramBot": {
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
@@ -38,29 +46,38 @@
     "thresholds": [
         {
             "max_co2_th": "5",
-            "max_humidity_th": "50",
+            "max_humidity_th": "40",
             "max_temperature_th": "100",
             "min_co2_th": "1",
-            "min_humidity_th": "50",
+            "min_humidity_th": "30",
             "min_temperature_th": "12",
+            "co2": 3,
+            "temp": 27,
+            "hum": 30,
             "type": "Wheat"
         },
         {
             "max_co2_th": "6",
-            "max_humidity_th": "50",
+            "max_humidity_th": "40",
             "max_temperature_th": "100",
             "min_co2_th": "0.5",
-            "min_humidity_th": "50",
+            "min_humidity_th": "30",
             "min_temperature_th": "12",
+            "co2": 2,
+            "temp": 25,
+            "hum": 33,
             "type": "Glutenfree"
         },
         {
             "max_co2_th": "5.5",
-            "max_humidity_th": "50",
+            "max_humidity_th": "40",
             "max_temperature_th": "22",
             "min_co2_th": "0.5",
-            "min_humidity_th": "50",
+            "min_humidity_th": "30",
             "min_temperature_th": "10",
+            "co2": 2.5,
+            "temp": 28,
+            "hum": 37,
             "type": "White"
         }
     ],

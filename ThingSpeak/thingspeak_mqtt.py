@@ -4,7 +4,8 @@ import requests
 
 class ThingSpeakConnector:
 
-    def __init__(self, r, topics):
+    def __init__(self, r, topics, headers):
+        self.headers = headers
         self.pynini = json.loads(r.text)["name"]
         self.channel = json.loads(r.text)["channel"]
         self.write_key = json.loads(r.text)["write_key"]
@@ -59,69 +60,95 @@ class ThingSpeakConnector:
             self.field1_data = data['value']
             self.timestamp = data['timestamp']
 
-        elif (message.topic == "measure/temperature"):
-             print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(
-                 message.payload) + "'")
-             data = json.loads(message.payload)
+            data_upload_json = json.dumps({ "api_key": self.write_key,
+                                "channel_id": self.field3_data ,
+                                "field1": self.field1_data
+                                })
 
-             self.field2_data = data['value']
-             self.timestamp = data['timestamp']
+
+            if (self.field1_data != None):
+                print("Publishing on TS _ co2:", data_upload_json)
+                requests.post(url=self.url, data=data_upload_json, headers=self.headers)
+
+        elif (message.topic == "measure/temperature"):
+            print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(
+                message.payload) + "'")
+            data = json.loads(message.payload)
+
+            self.field2_data = data['value']
+            self.timestamp = data['timestamp']
+            data_upload_json = json.dumps({ "api_key": self.write_key,
+                                            "channel_id": self.field3_data ,
+                                            "field2": self.field2_data
+                                            })
+            if (self.field2_data != None):
+                print("Publishing on TS _ temp:", data_upload_json)
+                requests.post(url=self.url, data=data_upload_json, headers=self.headers)
 
         elif (message.topic == "measure/humidity"):
-             print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(
-                 message.payload) + "'")
-             data = json.loads(message.payload)
- 
-             self.field3_data = data['value']
-             self.timestamp = data['timestamp']
+            print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(
+                message.payload) + "'")
+            data = json.loads(message.payload)
+
+            self.field3_data = data['value']
+            self.timestamp = data['timestamp']
+
+            data_upload_json = json.dumps({ "api_key": self.write_key,
+                                            "channel_id": self.field3_data ,
+                                            "field3": self.field3_data
+                                            })
+
+            if (self.field3_data != None):
+                print("Publishing on TS _ humidity:", data_upload_json)
+                requests.post(url=self.url, data=data_upload_json, headers=self.headers)
 
 # main function
 if __name__ == '__main__':
+    try:
+        headers = {'Content-type': 'application/json', 'Accept': 'raw'}
+        topics = []
 
-    headers = {'Content-type': 'application/json', 'Accept': 'raw'}
-    topics = []
+        with open("config.json", 'r') as thingspeak_f:
+            dict_config = json.load(thingspeak_f)
+            catalog_ip = dict_config['catalog_ip']
+            catalog_port = dict_config['catalog_port']
 
-    with open("config.json", 'r') as thingspeak_f:
-        dict_config = json.load(thingspeak_f)
-        catalog_ip = dict_config['catalog_ip']
-        catalog_port = dict_config['catalog_port']
+        data = requests.get(f"http://{catalog_ip}:{catalog_port}/thingspeak")
+        r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
+        dict_topics = json.loads(r.text)
 
-    data = requests.get(f"http://{catalog_ip}:{catalog_port}/thingspeak")
-    r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
-    dict_topics = json.loads(r.text)
+        for key, value in dict_topics.items():
+            if key == "TempHum" or key == "arduino":
+                for k, v in value.items():
+                    if v not in topics:
+                        topics.append(v)
+            else:
+                if value not in topics:
+                    topics.append(value)
 
-    for key, value in dict_topics.items():
-        if key == "TempHum" or key == "arduino":
-            for k, v in value.items():
-                if v not in topics:
-                    topics.append(v)
-        else:
-            if value not in topics:
-                topics.append(value)
+        tsa = ThingSpeakConnector(data, topics, headers)
+        tsa.start()
 
-    tsa = ThingSpeakConnector(data, topics)
-    tsa.start()
+        # t = 0
+        # #while t < 500:
+        # data_upload_json = json.dumps({"api_key": tsa.write_key,
+        #                                 "channel_id": tsa.channel,
+        #                                 "field1": tsa.field1_data, 
+        #                                 "field2": tsa.field2_data,
+        #                                 "field3": tsa.field3_data
+        #                                 })
 
-    t = 0
-    while t < 500:
-        data_upload_json = json.dumps({"api_key": tsa.write_key,
-                                       "channel_id": tsa.channel,
-                                       "field1": tsa.field1_data, 
-                                       "field2": tsa.field2_data,
-                                       "field3": tsa.field3_data
-                                       })
+        # print(tsa.field1_data, tsa.field2_data, tsa.field3_data)
 
-        print(tsa.field1_data, tsa.field2_data, tsa.field3_data)
+        # if (tsa.field1_data != None or tsa.field2_data != None or tsa.field3_data != None):
+        #     print("Publishing on TS:", data_upload_json)
+        #     requests.post(url=tsa.url, data=data_upload_json, headers=headers)
 
-        if (tsa.field1_data != None or tsa.field2_data != None or tsa.field3_data != None):
-            print("Publishing on TS:", data_upload_json)
-            requests.post(url=tsa.url, data=data_upload_json, headers=headers)
+        # tsa.field1_data = None
+        # tsa.field2_data = None
+        # tsa.field3_data = None
 
-        tsa.field1_data = None
-        tsa.field2_data = None
-        tsa.field3_data = None
-
-        time.sleep(10)  # check for updates every 30sec
-        t += 1
-
-    tsa.stop()
+        # time.sleep(10)  # check for updates every 30sec
+        # t += 1
+    except KeyboardInterrupt:
+        tsa.stop()

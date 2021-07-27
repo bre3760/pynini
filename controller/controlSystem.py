@@ -38,7 +38,6 @@ if __name__ == '__main__':
     This will allow the control system to check if the values measured 
     are within the limits of the current configuration and if not be able 
     to activate the actuators to bring the setting back to normal values. 
-
     """
 
     topics = []
@@ -76,45 +75,45 @@ if __name__ == '__main__':
             obj.myMqttClient.mySubscribe(case_specific_topic)
 
 
-    prevStateLamp = "off"
-    prevStateFan = "off"
-    currentStateLamp = False
-    currentStateFan = False
-    while 1:
-        """
-        control system algorithm that continually checks if the values are within the desired ranges. 
-        """
-        for obj in controllers:
-            if not obj.isTemperatureValid() and not obj.isHumidityValid():
-                if prevStateFan != "off": # if fan was on turn it off
-                    obj.myMqttClient.myPublish(obj.clientID + "/" + "trigger/fan", json.dumps({"message":"off"}))
-                    prevStateFan ="off"
-                if prevStateLamp != "off":
-                    obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/lamp", json.dumps({"message":"off"}))
-                    prevStateLamp = "off"
-            else:
-                if obj.tooHot() and obj.tooHumid():
-                    if prevStateFan != "on":
-                        obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"on"}))
-                        prevStateFan = "on"
-                if obj.tooCold() and obj.tooNotHumid():
-                    if prevStateLamp != "on":
-                        obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/lamp", json.dumps({"message":"on"}))
-                        prevStateLamp = "on"
+    # prevStateLamp = "off"
+    # prevStateFan = "off"
+    # currentStateLamp = False
+    # currentStateFan = False
+    # while 1:
+    #     """
+    #     control system algorithm that continually checks if the values are within the desired ranges. 
+    #     """
+    #     for obj in controllers:
+    #         if not obj.isTemperatureValid() and not obj.isHumidityValid():
+    #             if prevStateFan != "off": # if fan was on turn it off
+    #                 obj.myMqttClient.myPublish(obj.clientID + "/" + "trigger/fan", json.dumps({"message":"off"}))
+    #                 prevStateFan ="off"
+    #             if prevStateLamp != "off":
+    #                 obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/lamp", json.dumps({"message":"off"}))
+    #                 prevStateLamp = "off"
+    #         else:
+    #             if obj.tooHot() and obj.tooHumid():
+    #                 if prevStateFan != "on":
+    #                     obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"on"}))
+    #                     prevStateFan = "on"
+    #             if obj.tooCold() and obj.tooNotHumid():
+    #                 if prevStateLamp != "on":
+    #                     obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/lamp", json.dumps({"message":"on"}))
+    #                     prevStateLamp = "on"
             
-            if obj.isCO2Valid():
-                 if prevStateFan != "off": # if fan was on turn it off
-                     obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"off"}))
-                     prevStateFan ="off"
-                 else:
-                     if prevStateFan != "on":
-                         obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"on"}))
-                         prevStateFan = "on"
+    #         if obj.isCO2Valid():
+    #              if prevStateFan != "off": # if fan was on turn it off
+    #                  obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"off"}))
+    #                  prevStateFan ="off"
+    #              else:
+    #                  if prevStateFan != "on":
+    #                      obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"on"}))
+    #                      prevStateFan = "on"
 
             
          
 
-        time.sleep(7)
+    #     time.sleep(7)
         
             
         
