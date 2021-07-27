@@ -45,8 +45,11 @@ class DBConnectorREST:
             
 
 class DBConnectorMQTT:
-    def __init__(self, influx_data, topics):
+    def __init__(self, influx_data, topics, ID):
         # cloud db configuration
+        # self.pynini = json.loads(.text)["name"]
+        self.ID = "pynini" + "_DB_MQTT-Adaptor"
+
         self.url = json.loads(influx_data.text)["url"]
         self.token = json.loads(influx_data.text)["token"]
         self.bucket = json.loads(influx_data.text)["bucket"]
