@@ -90,6 +90,7 @@ if __name__ == "__main__":
         
 
     test = statsPublisher(catalog_ip, catalog_port, "Stats")
+    test.registerStats()
     test.start()
 
     
