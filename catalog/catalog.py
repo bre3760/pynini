@@ -11,7 +11,7 @@ class Catalog(object):
     exposed = True
 
     def __init__(self, config_data):
-        self.self.catalog = config_data
+        self.catalog = config_data
         pass
 
     def GET(self, *uri, **params):
