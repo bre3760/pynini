@@ -341,34 +341,32 @@ class Catalog(object):
             return 'catalog file successfully written'
 
 if __name__ == '__main__':
-    try:
 
-        with open("catalog2.json", 'r') as f:
-            config = json.load(f)
-        catalog_ip = config['catalog_ip']
-        catalog_port = config['catalog_port']
+    with open("catalog2.json", 'r') as f:
+        config = json.load(f)
+    catalog_ip = config['catalog_ip']
+    catalog_port = config['catalog_port']
 
-        catalog = Catalog(config_data=config)
+    catalog = Catalog(config_data=config)
 
-        
-
-        conf = {
-            '/':
-                {
-                    'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-                    'tools.sessions.on': True
-                }
-        }
-        cherrypy.tree.mount(catalog, '/', conf)
-        cherrypy.server.socket_host = catalog_ip
-        cherrypy.server.socket_port = catalog_port
-        cherrypy.engine.start()
     
-    except KeyboardInterrupt:
-        with open("catalog2.json", 'w') as f:
-            f.seek(0)
-            f.write(json.dumps(catalog.catalog, indent=4, sort_keys=True))
-            f.truncate()
 
-
+    conf = {
+        '/':
+            {
+                'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+                'tools.sessions.on': True
+            }
+    }
+    cherrypy.tree.mount(catalog, '/', conf)
+    cherrypy.server.socket_host = catalog_ip
+    cherrypy.server.socket_port = catalog_port
+    cherrypy.engine.start()
+    cherrypy.engine.block()
+    print("CLOSING THE CATALOG AND SAVING TO FILE uasdyfgasdfgaidflaidfa")
+    with open("catalog2.json", 'w') as f:
+        f.seek(0)
+        f.write(json.dumps(catalog.catalog, indent=4, sort_keys=True))
+        f.truncate()
+    print("AFTER SAVING asdfouahdfladfpaudfh")
 

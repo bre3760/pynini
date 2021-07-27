@@ -129,8 +129,8 @@ if __name__ == "__main__":
 		sensor_config = json.load(sensor_f)
 		sensor_ip = sensor_config['sensor_ip']
 		sensor_port = sensor_config['sensor_port']
-		# sensor_caseID = sensor_config["caseID"] # or os.getenv("caseID")
-		sensor_caseID = os.getenv("caseID")
+		sensor_caseID = sensor_config["caseID"] # or os.getenv("caseID")
+		#sensor_caseID = os.getenv("caseID")
 		catalog_ip = sensor_config['catalog_ip']
 		catalog_port = sensor_config['catalog_port']
 
