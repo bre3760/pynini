@@ -131,7 +131,7 @@ class co2Sensor:
 		influx_api_port = json.loads(influx_data.text)["api_port"]
 
 		
-		sensor_dict["topic"] = [self.topic]
+		sensor_dict["topics"] = [self.topic]
 
 		r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/addSensor", json=sensor_dict)
 
