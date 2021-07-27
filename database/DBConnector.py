@@ -131,17 +131,17 @@ class DBConnectorMQTT:
     # callback for messages
     def message_callback(self, client, userdata, message):
         #TODO split on the caseID if the + does not work
-        if (message.topic == "+/measure/co2"):
+        if (message.topic == "CCC2/measure/co2"):
             print("Topic:'" + message.topic + "' Message: '" + str(message.payload) + "'")
             data = json.loads(message.payload)
             self.sentToDB(data)
 
-        elif (message.topic == "+/measure/temperature"):
+        elif (message.topic == "CCC2/measure/temperature"):
             print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(message.payload) + "'")
             data = json.loads(message.payload)
             self.sentToDB(data)
 
-        elif (message.topic == "+/measure/humidity"):
+        elif (message.topic == "CCC2/measure/humidity"):
             print("Topic:'" + message.topic + "', QoS: '" + str(message.qos) + "' Message: '" + str(message.payload) + "'")
             data = json.loads(message.payload)
             self.sentToDB(data)
