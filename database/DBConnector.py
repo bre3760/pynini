@@ -16,8 +16,8 @@ class DBConnectorREST:
     
     exposed = True
     def __init__(self, config_data):
-        self.api_ip =  config_data["api_ip"]      
-        self.api_port = config_data["api_port"]    
+        self.api_ip =  json.loads(config_data.text)["api_ip"]      
+        self.api_port = json.loads(config_data.text)["api_port"]    
         
 
     def GET(self,*uri,**params):
