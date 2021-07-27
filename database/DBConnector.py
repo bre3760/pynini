@@ -1,5 +1,6 @@
 import paho.mqtt.client as PahoMQTT
-import json, time, datetime
+import json, time
+from datetime import datetime
 import requests
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -160,8 +161,13 @@ class DBConnectorMQTT:
         print("type of ",type( data["value"]))
         print("type of ",type( data["unit_of_measurement"]))
 
-        
-        p = Point(data["measurement"]).tag("caseID", data["caseID"]).tag("category", data["category"]).tag("unit_of_measurement", data["unit_of_measurement"]).field("value", data["value"]).time(datetime.utcnow(), WritePrecision.NS)
+        p = Point(data["measurement"])\
+            .tag("caseID", data["caseID"])\
+            .tag("category", data["category"])\
+            .tag("unit_of_measurement", data["unit_of_measurement"])\
+            .field("value", data["value"])\
+            .time(data["timestamp"], WritePrecision.NS) 
+
         write_api.write(self.bucket, self.org, record=p)
         print("Data sent to the db")
         
