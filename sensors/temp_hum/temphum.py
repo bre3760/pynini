@@ -75,6 +75,7 @@ class TemperatureHumiditySensor:
         dict_of_topics = json.loads(r.text)['topic']
 
         print("dict_of_topics",dict_of_topics)
+        
         self.topic_temp = dict_of_topics["topic_temp"]
         self.topic_hum = dict_of_topics["topic_hum"]
         self.messageBroker = json.loads(r.text)['broker_ip_outside'] # use ip_outside when trying from other pc to rasp
@@ -154,14 +155,14 @@ if __name__ == "__main__":
                 payload_temp = {"caseID":sensor.caseID, 
                                 "measurement": "temperature", 
                                 "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), 
-                                "value": str(temperature), 
+                                "value": temperature, 
                                 "category": sensor.category,
                                 "unit_of_measurement": "Celsius" }
 
                 payload_hum  = {"caseID":sensor.caseID, 
                                 "measurement": "humidity", 
                                 "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), 
-                                "value": str(humidity), 
+                                "value": humidity, 
                                 "category": sensor.category,
                                 "unit_of_measurement":"Relative Humidity"}
 
