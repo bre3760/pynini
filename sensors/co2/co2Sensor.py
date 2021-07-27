@@ -135,6 +135,7 @@ class co2Sensor:
 
 		#Appendo la topica a topics
 		sensor_dict["topics"] = [self.topic]
+		print("sensor dict before db post request", sensor_dict)
 		#sensor_dic viene mandato a db adaptor a cui si sottoscrive 
 		r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/addSensor", json=sensor_dict)
 
