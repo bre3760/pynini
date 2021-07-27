@@ -85,7 +85,7 @@ class DBConnectorMQTT:
         self.client_obj.username_pw_set(username="brendan", password="pynini")
         self.client_obj.connect(self.broker_address, self.broker_port)
         self.client_obj.loop_start()
-        print("Topiche a cui DB conn è sottoscritto: ". self.topics)
+        print("Topiche a cui DB conn è sottoscritto: ", self.topics)
         for topic in self.topics:
             self.client_obj.subscribe(topic, qos=2)
         print(f"Connected and subscribed")
