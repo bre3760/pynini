@@ -71,8 +71,8 @@ class DBConnectorMQTT:
 
 
         # register the callback
-        self._paho_mqtt.on_connect = self.connect_callback
-        self._paho_mqtt.on_message = self.message_callback
+        self.client_obj.on_connect = self.connect_callback
+        self.client_obj.on_message = self.message_callback
 
     # callback for connection
     def connect_callback(self, client, userdata, flags, rc):
