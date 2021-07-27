@@ -177,7 +177,7 @@ class DBConnectorMQTT:
             topic_wo_case = level1 + "/" + level2
             measureTopic = True
         #message if stats > stats/price o stats/quantity
-        print("message callback: ",message)
+        print("message callback: ",message.topic)
         
         if measureTopic:
             print("TOPIC WO CASE: ",topic_wo_case)
@@ -196,7 +196,7 @@ class DBConnectorMQTT:
                 data = json.loads(message.payload)
                 self.sendToDB(data)
 
-        if (message == "stats/price"):
+        if (message.topic == "stats/price"):
             write_api = self.client.write_api(write_options=SYNCHRONOUS) 
             data = json.loads(message.payload)
             print("data to be published under topic price: ", data)
@@ -210,7 +210,7 @@ class DBConnectorMQTT:
             write_api.close()
 
 
-        if (message == "stats/quantity"):
+        if (message.topic == "stats/quantity"):
             write_api = self.client.write_api(write_options=SYNCHRONOUS) 
             data = json.loads(message.payload)
             print("data to be published under topic qnt: ", data)
