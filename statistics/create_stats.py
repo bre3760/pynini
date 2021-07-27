@@ -1,14 +1,6 @@
-import random 
 import pandas as pd
-from datetime import datetime
-from datetime import timedelta
-
-"""
-script that creates the history of purchases for different bread types
-the dataframe has the following structure
-# date, number sold white, number sold wheat, number sold glutenfree
-unit of measurement: €/kg
-"""
+import random
+import datetime as datetime
 year = 2020
 days = []
 white = []
@@ -19,10 +11,17 @@ price_wheat = []
 price_glutenfree = []
 
 startTime = "06-17"
+
+"""
+script that creates the history of purchases for different bread types
+the dataframe has the following structure
+# date, number sold white, number sold wheat, number sold glutenfree
+unit of measurement: €/kg
+"""
 for i in range(0,365):
     if i == 0:
         time_dt = datetime.strptime(startTime, "%m-%d")
-        
+    
     else:
         time_dt = datetime.strptime(days[-1] , "%m-%d") + timedelta(days=1)
 
@@ -35,6 +34,8 @@ for i in range(0,365):
     price_white.append(random.uniform(1, 3))
     price_wheat.append(random.uniform(1, 4))
     price_glutenfree.append(random.uniform(1.5, 5.5))
+
+
 
 
 purchase_qnt_DF = pd.DataFrame()

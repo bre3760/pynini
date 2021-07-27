@@ -53,6 +53,9 @@ class Catalog(object):
             return json.dumps(self.catalog["thresholds"])
         elif uri[0] == "topics":
             return json.dumps(self.catalog["topics"])
+        elif uri[0] == "stats":
+            return json.dumps(self.catalog["stats"])
+
         elif uri[0] == "getBest":
             res = []
             for d in self.catalog['thresholds']:

@@ -16,6 +16,13 @@
     "broker_ip": "127.0.0.1",
     "broker_ip_outside": "192.168.1.2",
     "broker_port": 1883,
+    "stats":{
+        "broker_ip": "127.0.0.1",
+        "broker_ip_outside": "192.168.1.2",
+        "broker_port": 1883,
+        "topic_price":"price",
+        "topic_quantity":"quantity"
+    },
     "cases": [],
     "catalog_ip": "0.0.0.0",
     "catalog_port": 9090,
@@ -92,6 +99,8 @@
             "lamp": "trigger/lamp"
         },
         "breadType": "breadType",
-        "co2": "measure/co2"
+        "co2": "measure/co2",
+        "topic_price":"price",
+        "topic_quantity":"quantity"
     }
 }
