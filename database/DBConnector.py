@@ -60,7 +60,7 @@ class DBConnectorMQTT:
             self.org
         )
         
-        r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip")
+        r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip_outside")
         print(r.text)
         self.broker_address = json.loads(r.text)
         r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_port")

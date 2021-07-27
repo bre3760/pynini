@@ -58,6 +58,7 @@ class co2Sensor:
 			sensor publishes on its topic (caseID/measure/sensor) the measurements
 		'''
 		case_specific_topic = self.caseID + "/" +  self.topic # example CCC2/measure/co2
+		print(f"Publishing on topic {case_specific_topic}")
 		self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
 
 
@@ -94,7 +95,7 @@ class co2Sensor:
 		print("dict_of_topics",dict_of_topics)
 		self.topic = json.loads(r.text)['topic']
 
-		self.messageBroker = json.loads(r.text)['broker_ip']
+		self.messageBroker = json.loads(r.text)['broker_ip_outside']
 		self.breadCategories = json.loads(r.text)['breadCategories']
 
 		print("[{}] Device Registered on Catalog".format(
