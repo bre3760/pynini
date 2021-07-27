@@ -21,7 +21,7 @@ class TemperatureHumiditySensor:
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
         self.messageBroker = ""
-        r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")
+        # r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")   #forse non usata perchè topiche date in register device
         self.topic_temp = ""
         self.topic_hum= ""
         self.topicBreadType = self.caseID + "/" +json.loads(r.text)["breadType"]
@@ -43,8 +43,10 @@ class TemperatureHumiditySensor:
         self._paho_mqtt.subscribe(self.topicBreadType, 2)
 
     def stop(self):
-        self._paho_mqtt.unsubscribe(self.topic_temp)
-        self._paho_mqtt.unsubscribe(self.topic_hum)
+        # self._paho_mqtt.unsubscribe(self.topic_temp) # ???? TODO
+        # self._paho_mqtt.unsubscribe(self.topic_hum)
+        self._paho_mqtt.unsubscribe(self.topicBreadType)
+
         self._paho_mqtt.loop_stop()
         self._paho_mqtt.disconnect()
 
@@ -146,7 +148,8 @@ if __name__ == "__main__":
         while True:
             # read temperature and humidity
             # humidity, temperature = Adafruit_DHT.read_retry(11, 4)  # (sensor,pin)
-            humidity = round(random.uniform(30, 40),2)
+            # when using on pc and not raspberry
+            humidity = round(random.uniform(30, 40),2)   
             temperature = round(random.uniform(23, 30),2)
             if humidity < 100:
 
@@ -155,7 +158,7 @@ if __name__ == "__main__":
                 payload_temp = {"caseID":sensor.caseID, 
                                 "measurement": "temperature", 
                                 "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), 
-                                "value": temperature, 
+                                "value": temperature,   
                                 "category": sensor.category,
                                 "unit_of_measurement": "Celsius" }
 

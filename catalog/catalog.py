@@ -53,9 +53,7 @@ class Catalog(object):
             return json.dumps(self.catalog["thresholds"])
         elif uri[0] == "topics":
             return json.dumps(self.catalog["topics"])
-        elif uri[0] == "stats":
-            return json.dumps(self.catalog["stats"])
-
+        
         elif uri[0] == "getBest":
             res = []
             for d in self.catalog['thresholds']:
@@ -68,6 +66,9 @@ class Catalog(object):
 
     def POST(self, *uri, **params):
         res = {}
+
+
+
         if len(uri) == 1 and uri[0] == 'addSensor':
             # add new sensor to the self.catalog
             new_device_info = json.loads(cherrypy.request.body.read())

@@ -18,12 +18,14 @@ unit of measurement: €/kg
 
 class statsPublisher:
     def __init__(self, catalog_ip, catalog_port, clientID):
-
-        r = requests.post(f"http://{catalog_ip}:{catalog_port}/stats")
-        self.topic_price = json.load(r.text)["topic_price"]
-        self.topic_quantity = json.load(r.text)["topic_quantity"]
-        self.messageBroker = json.load(r.text)["broker_ip"]
-        self.broker_port = json.load(r.text)["broker_port"]
+        
+        
+        self.messageBroker = ""
+        r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")   #forse non usata 
+        self.topic_price = json.loads(r.text)["stats"]["topic_price"]
+        self.topic_quantity= json.loads(r.text)["stats"]["topic_quantity"]
+        
+        self.broker_port =  ""
 
         self.clientID = clientID
         #self.category = category
@@ -32,10 +34,19 @@ class statsPublisher:
         self._paho_mqtt = PahoMQTT.Client(self.clientID,True) 
         # register the callback
         self._paho_mqtt.on_connect = self.myOnConnect
+
+        self.message = {
+            'measurement': self.clientID,
+            'timestamp': '',
+            'value': '',
+            'category': self.category
+        }
 		
 
     def start(self):
     #manage connection to broker
+        self._paho_mqtt.username_pw_set(username="brendan", password="pynini")
+
         self._paho_mqtt.connect(self.messageBroker, self.broker_port)
         self._paho_mqtt.loop_start()
 
@@ -43,12 +54,26 @@ class statsPublisher:
         self._paho_mqtt.loop_stop()
         self._paho_mqtt.disconnect()
 
-    def myPublish(self, message):
+    def myPublish(self, topic, message):
+        # "topic_price": "stats/price",
+        # "topic_quantity": "stats/quantity"
         # publish a message with a certain topic
-        self._paho_mqtt.publish(self.topic, message, 2)
+        self._paho_mqtt.publish(topic, json.dumps(message, 2))
 
-    def myOnConnect (self, paho_mqtt, userdata, flags, rc):
+    def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print ("Connected to %s with result code: %d" % (self.messageBroker, rc))
+
+    def registerStats(self):
+        influx_data = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
+        influx_api_ip = json.loads(influx_data.text)["api_ip"]
+        influx_api_port = json.loads(influx_data.text)["api_port"]
+        topics_dics = {}
+        topics_dics["topics"] = [self.topic_price, self.topic_quantity]
+
+        r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/db/addStats", json=topics_dics)
+
+        print(f"Response (r) from post to db api {r}")
+
 
 
 

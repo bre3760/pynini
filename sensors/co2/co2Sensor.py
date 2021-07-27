@@ -64,7 +64,9 @@ class co2Sensor:
 		print("Subscribed to: ", self.topicBreadType)
 
 	def stop(self):
-		self._paho_mqtt.unsubscribe(self.topic)
+		# self._paho_mqtt.unsubscribe(self.topic) #????
+		self._paho_mqtt.unsubscribe(self.topicBreadType)
+
 		self._paho_mqtt.loop_stop()
 		self._paho_mqtt.disconnect()
 

@@ -48,13 +48,7 @@
         "Wheat": "https://bakingamoment.com/soft-whole-wheat-bread/",
         "White": "https://www.browneyedbaker.com/white-bread-recipe/"
     },
-    "stats": {
-        "broker_ip": "127.0.0.1",
-        "broker_ip_outside": "192.168.1.2",
-        "broker_port": 1883,
-        "topic_price": "price",
-        "topic_quantity": "quantity"
-    },
+    
     "telegramBot": {
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"
@@ -118,7 +112,9 @@
         },
         "breadType": "breadType",
         "co2": "measure/co2",
-        "topic_price": "price",
-        "topic_quantity": "quantity"
+        "stats": {
+            "topic_price": "stats/price",
+            "topic_quantity": "stats/quantity"
+        }
     }
 }
