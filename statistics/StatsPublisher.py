@@ -25,6 +25,7 @@ class statsPublisher:
         r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")    
         self.topic_price = json.loads(r.text)["stats"]["topic_price"]
         self.topic_quantity= json.loads(r.text)["stats"]["topic_quantity"]
+        print(f"In init of stats, topics {self.topic_price} ,{self.topic_quantity}")
         self.broker_port =  1883
 
         self.clientID = clientID
@@ -58,10 +59,7 @@ class statsPublisher:
         # "topic_price": "stats/price",
         # "topic_quantity": "stats/quantity"
         # publish a message with a certain topic
-        print(message)
-        print(type(message))
-        print(json.dumps(message))
-        print(type(json.dumps(message)))
+        print(f"Publishing to {topic}")
         self._paho_mqtt.publish(topic, json.dumps(message), 2)
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
