@@ -77,7 +77,7 @@ class TemperatureHumiditySensor:
         print("dict_of_topics",dict_of_topics)
         self.topic_temp = dict_of_topics["topic_temp"]
         self.topic_hum = dict_of_topics["topic_hum"]
-        self.messageBroker = json.loads(r.text)['broker_ip']
+        self.messageBroker = json.loads(r.text)['broker_ip_outside'] # use ip_outside when trying from other pc to rasp
         self.breadCategories = json.loads(r.text)["breadCategories"]
         ##########################################################################
         # sencond post to db api to inform of new sensor added 
