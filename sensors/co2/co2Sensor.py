@@ -139,7 +139,7 @@ class co2Sensor:
 		#sensor_dic viene mandato a db adaptor a cui si sottoscrive 
 		r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/db/addSensor", json=sensor_dict)
 
-		print(f"Response from post to db api {r.text}")
+		print(f"Response (r) from post to db api {r}")
 		
 		print("[{}] Device Registered on Catalog".format(
 			int(time.time()),

@@ -48,35 +48,6 @@ class DBConnectorREST:
     def POST(self, *uri, **params):
         global db_connector
         res = {}
-        # if len(uri) == 1 and uri[0] == 'addSensor':
-        #     # add new sensor to the self.catalog
-        #     new_device_info = json.loads(cherrypy.request.body.read())
-        #     print("In POST of db api", new_device_info)
-             
-        #     try:
-        #         sensorID = new_device_info['sensorID']
-        #         caseID = new_device_info['caseID']
-        #         ip = new_device_info['ip']
-        #         port = new_device_info['port']
-        #         last_seen = new_device_info['last_seen']
-        #         dev_name = new_device_info['dev_name']
-        #         topics = new_device_info["topics"] # a list is sent
-
-        #         for topic in topics:
-        #             db_connector.client_obj.subscribe(topic, qos=2)
-                
-        #         res["status"] = "ok"
-
-        #         # MQTT client should subscribe to topic caseID/measure/sensorID
-
-        #         return res
-
-        #     except KeyError:
-        #         raise cherrypy.HTTPError(400, 'Bad request')
-        print(f"Before the if uri conditions")
-        print("Len URI: ",len(uri))
-        print("URI: ", uri)
-        print("uri[0]: ", uri[0])
         
         if len(uri) == 1 and uri[0] ==  'addSensor':
             # add new sensor to the self.catalog
@@ -85,12 +56,14 @@ class DBConnectorREST:
             print("In POST of db api", new_device_info)
              
             try:
+                # for future use, not curretly used 
                 sensorID = new_device_info['sensorID']
                 caseID = new_device_info['caseID']
                 ip = new_device_info['ip']
                 port = new_device_info['port']
                 last_seen = new_device_info['last_seen']
                 dev_name = new_device_info['dev_name']
+                # only value used at present date project
                 topics = new_device_info["topics"] # a list is sent
 
                 for topic in topics:

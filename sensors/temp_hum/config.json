@@ -1,7 +1,7 @@
 {
     "sensor_ip": "172.10.20.1",
     "sensor_port": 9090,
-    "caseID":"CCC2",
+    "caseID": "CCC2",
     "catalog_ip":"0.0.0.0",
     "catalog_port":9090
   }

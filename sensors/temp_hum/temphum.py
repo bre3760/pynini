@@ -4,6 +4,7 @@ import json
 import requests
 from datetime import datetime
 import Adafruit_DHT
+import random
 import sys
 sys.path.append("../../")
 
@@ -36,6 +37,7 @@ class TemperatureHumiditySensor:
     def start(self):
         # manage connection to broker
         self._paho_mqtt.username_pw_set(username="brendan", password="pynini")
+        #TODO: METTI PORTA MQTT DAL CATALOG
         self._paho_mqtt.connect(self.messageBroker, 1883)
         self._paho_mqtt.loop_start()
         self._paho_mqtt.subscribe(self.topicBreadType, 2)
@@ -48,7 +50,9 @@ class TemperatureHumiditySensor:
 
     def myPublish(self, topic, message):
         # publish a message with a certain topic (measure/temperature or measure/humidity)
-        case_specific_topic = self.caseID + "/" + topic # example CCC2/measure/co2
+        case_specific_topic = self.caseID + "/" + topic 
+        print(f"Publishing on topic {case_specific_topic}")
+
         self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
@@ -67,12 +71,36 @@ class TemperatureHumiditySensor:
         print("sensor_dict", sensor_dict)
 
         r = requests.post(f"http://{catalog_ip}:{catalog_port}/addSensor", json=sensor_dict)
+
         dict_of_topics = json.loads(r.text)['topic']
+
         print("dict_of_topics",dict_of_topics)
         self.topic_temp = dict_of_topics["topic_temp"]
         self.topic_hum = dict_of_topics["topic_hum"]
         self.messageBroker = json.loads(r.text)['broker_ip']
         self.breadCategories = json.loads(r.text)["breadCategories"]
+        ##########################################################################
+        # sencond post to db api to inform of new sensor added 
+        # post al catalog per avere ip e porta del db 
+        # getting useful information in order to contact db api
+        influx_data = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
+        print(f"Influx data response from catalog api, {influx_data.text}")
+        # post al db per dire che si è connesso il sensore,
+        # mandando topica in cui pubblica così che il servizio mqtt del db possa iscriversi
+        influx_api_ip = json.loads(influx_data.text)["api_ip"]
+        influx_api_port = json.loads(influx_data.text)["api_port"]
+        print(f"Influx db api ip and port {influx_api_ip} {influx_api_port}")
+
+        #Appendo la topica a topics
+        sensor_dict["topics"] = [self.caseID + "/" + self.topic_temp, self.caseID + "/" + self.topic_hum]
+
+        print("sensor dict before db post request", sensor_dict)
+        #sensor_dic viene mandato a db adaptor a cui si sottoscrive 
+        r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/db/addSensor", json=sensor_dict)
+
+        print(f"Response (r) from post to db api {r}")
+        ##########################################################################
+
         print( f"Device Registered on Catalog {sensor_dict['last_seen']}")
 
     def removeDevice(self):
@@ -109,14 +137,16 @@ if __name__ == "__main__":
         catalog_ip = sensor_config['catalog_ip']
         catalog_port = sensor_config['catalog_port']
 
-    sensor = TemperatureHumiditySensor(sensor_caseID +'-'+  'TempHum', influxDB, sensor_ip, sensor_port, catalog_ip, catalog_port)
+    sensor = TemperatureHumiditySensor(sensor_caseID +'-'+ 'TempHum', sensor_ip, sensor_port, catalog_ip, catalog_port)
     sensor.registerDevice()
     sensor.start()
 
     try:
         while True:
             # read temperature and humidity
-            humidity, temperature = Adafruit_DHT.read_retry(11, 4)  # (sensor,pin)
+            # humidity, temperature = Adafruit_DHT.read_retry(11, 4)  # (sensor,pin)
+            humidity = round(random.uniform(30, 40),2)
+            temperature = round(random.uniform(23, 30),2)
             if humidity < 100:
 
                 print('Temp: {0:0.1f} °C  Humidity: {1:0.1f} %'.format(temperature, humidity))
