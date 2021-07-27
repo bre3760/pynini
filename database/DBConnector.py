@@ -166,7 +166,7 @@ if __name__ == '__main__':
 
     print("topicheeeeee: ", topics)
 
-    db_connector = DBConnectorMQTT(influx_data, topics)
+    db_connector = DBConnectorMQTT(influx_data, topics, "DB")
 
 
 
