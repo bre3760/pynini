@@ -521,12 +521,12 @@ class TelegramBot(object):
         
         return ConversationHandler.END
 
-    def image(self, update, context):
-        clientQuery = ClientQuery("bot", "Freeboard")
-        link = clientQuery.getFreeboard()
-        context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text='Click on the following link to see the Freeboard: {}'.format(link))
-        self.home(update, context)
+    # def image(self, update, context):
+    #     clientQuery = ClientQuery("bot", "Freeboard")
+    #     link = clientQuery.getFreeboard()
+    #     context.bot.send_message(chat_id=update.effective_chat.id,
+    #                              text='Click on the following link to see the Freeboard: {}'.format(link))
+    #     self.home(update, context)
 
     def main(self):
 

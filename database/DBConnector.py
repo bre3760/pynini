@@ -142,8 +142,8 @@ class DBConnectorREST:
 
 class DBConnectorMQTT:
     def __init__(self, influx_data, topics, ID):
+
         # cloud db configuration
-        # self.pynini = json.loads(.text)["name"]
         self.ID = ID
 
         self.url = json.loads(influx_data.text)["url"]
@@ -293,7 +293,6 @@ if __name__ == '__main__':
     # get all information in order to connect to the db
     influx_data = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
 
-    
     # retrieve all cases in the system
     r = requests.get(f"http://{catalog_ip}:{catalog_port}/cases")
     dict_of_cases = json.loads(r.text)
@@ -318,6 +317,7 @@ if __name__ == '__main__':
         for topic in topics:
             case_specific_topic = case_id +"/"+ topic
             all_topics_to_subscribe_to.append(case_specific_topic)
+    
 
 
     print("topicheeeeee: ", all_topics_to_subscribe_to)
