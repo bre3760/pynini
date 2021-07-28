@@ -16,25 +16,7 @@
     "broker_ip": "127.0.0.1",
     "broker_ip_outside": "192.168.1.2",
     "broker_port": 1883,
-    "cases": [
-        {
-            "arduino": {
-                "sensors": []
-            },
-            "bread_type": "White",
-            "caseID": "CCC2",
-            "rpi": {
-                "sensors": [
-                    {
-                        "ip": "172.10.20.2",
-                        "last_seen": "2021-07-27 10:57:22",
-                        "name": "co2",
-                        "port": 9090
-                    }
-                ]
-            }
-        }
-    ],
+    "cases": [],
     "catalog_ip": "0.0.0.0",
     "catalog_port": 9090,
     "freeboard": {
@@ -48,7 +30,6 @@
         "Wheat": "https://bakingamoment.com/soft-whole-wheat-bread/",
         "White": "https://www.browneyedbaker.com/white-bread-recipe/"
     },
-    
     "telegramBot": {
         "telegramPort": "8086",
         "token": "1275410864:AAH4_Kpy59KY7iq5jQaC8r8XvCGacp2LBNc"

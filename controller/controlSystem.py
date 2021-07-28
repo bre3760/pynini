@@ -53,6 +53,8 @@ if __name__ == '__main__':
             for k, v in value.items():
                 if v not in topics:
                     topics.append(v)
+        elif  key =="stats":
+            pass
         else:
             if value not in topics:
                 topics.append(value)
@@ -69,10 +71,13 @@ if __name__ == '__main__':
     controllers = [CaseControl(client_id, broker_ip, broker_port, catalog_ip, catalog_port, topics) for client_id in list_of_cases]
 
     for obj in controllers:
-        obj.run()
+        print(f"Obj, in controller {obj}")
         for topic in topics:
             case_specific_topic = obj.clientID +"/"+ topic
             obj.myMqttClient.mySubscribe(case_specific_topic)
+        obj.run()
+
+
 
 
     # prevStateLamp = "off"

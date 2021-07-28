@@ -2,7 +2,7 @@ import pandas as pd
 import random
 from datetime import datetime
 from datetime import timedelta
-year = 2020
+year = 2021
 days = []
 white = []
 wheat = []
@@ -11,7 +11,7 @@ price_white = []
 price_wheat = []
 price_glutenfree = []
 
-startTime = "06-17-2020" 
+startTime = "06-17" + "-" + str(year) 
 
 """
 script that creates the history of purchases for different bread types
@@ -19,7 +19,7 @@ the dataframe has the following structure
 # date, number sold white, number sold wheat, number sold glutenfree
 unit of measurement: €/kg
 """
-for i in range(0,365):
+for i in range(0,5):
     if i == 0:
         time_dt = datetime.strptime(startTime, "%m-%d-%Y")
     
