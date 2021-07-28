@@ -7,7 +7,6 @@ import requests
 import logging
 import json
 import time
-import numpy as np
 import paho.mqtt.client as PahoMQTT
 
 TYPOLOGY, PARAM, PARAMS, PARAM2, HOME, INFO, THRESHOLD, EXIT = range(8)
@@ -64,9 +63,8 @@ class TelegramBot(object):
         update.message.reply_text(
             text = ' <b> Hi {}! &#128522; Welcome to @Pynini! &#128523 </b> \
                     \nHere you can find information about different typologies of bread &#127838'.format(update.message.from_user.first_name), parse_mode = 'HTML')
-        pass
+
         time.sleep(2)
-        pass
 
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='Choose the *ID* of the case you are interested in and type it in the chat: \
@@ -156,9 +154,9 @@ class TelegramBot(object):
 
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='You have selected the case <b> {} </b>, now you have to select the parameter you want to investigate!'.format(self.caseID), parse_mode = 'HTML')
-        pass
+
         time.sleep(2)
-        pass
+
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='You can retrieve optimal and actual values for: <b> \n temperature,\n humidity, \n CO2 emitted, \n go back, \n or Exit </b>',
                                  reply_markup=reply_markup, parse_mode='HTML')
@@ -205,14 +203,12 @@ class TelegramBot(object):
                                          reply_markup=reply_markup, parse_mode='HTML')
                 return PARAM2
             except:
-                pass
                 print(e)
                 return PARAM2
 
-        pass
         time.sleep(2)
-        pass
         self.optionEnd(update, context)
+
         return PARAM2
 
 
@@ -227,8 +223,6 @@ class TelegramBot(object):
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text='You have chosen the <b> {} </b> parameter.'.format(param),
                                  parse_mode='HTML')
-
-        print(f"Before ClientQUery INIT")
 
         data = {}
         data['caseID'] = self.caseID
@@ -301,7 +295,6 @@ class TelegramBot(object):
             res = self.exit(update, context)
             return res
 
-        pass
         time.sleep(2)
 
         return THRESHOLD
@@ -480,7 +473,6 @@ class TelegramBot(object):
         return PARAM2
 
     def endMenu(self, update, context):
-        print("sono in endMenu")
         keyboard_info = [[InlineKeyboardButton("Back", callback_data='home')],
                          [InlineKeyboardButton("Exit", callback_data='exit')]]
         reply_markup_info = InlineKeyboardMarkup(keyboard_info)
@@ -499,9 +491,11 @@ class TelegramBot(object):
             return TYPOLOGY
 
         elif query.data == 'info':
-            link = self.clientQuery.getLink()
+            r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/getLink", json={'category': self.category})
+            link = json.loads(r.text)
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text='Click on the following link to learn more about the {}: {}.'.format(self.category, link))
+                                     text='Click on the following link to learn more about the {}: {}.'.format(
+                                         self.category, link))
 
             self.endMenu(update, context)
 
@@ -517,16 +511,9 @@ class TelegramBot(object):
                                  reply_markup=ReplyKeyboardRemove(), parse_mode='HTML')
         requests.post(f"http://{self.catalogIP}:{self.catalogPort}/removeBot",
                       json={'ip': self.catalogIP, 'chat_ID': self.chatID, 'last_seen': time.time()})
-        print("Mi sono eliminato dal catalog")
         
         return ConversationHandler.END
 
-    # def image(self, update, context):
-    #     clientQuery = ClientQuery("bot", "Freeboard")
-    #     link = clientQuery.getFreeboard()
-    #     context.bot.send_message(chat_id=update.effective_chat.id,
-    #                              text='Click on the following link to see the Freeboard: {}'.format(link))
-    #     self.home(update, context)
 
     def main(self):
 
@@ -558,8 +545,7 @@ class TelegramBot(object):
                       CommandHandler('minHumidity', self.minHum),
                       CommandHandler('maxHumidity', self.maxHum),
                       CommandHandler('minCO2', self.minCO2),
-                      CommandHandler('minCO2', self.maxCO2),
-                      CommandHandler('image', self.image)
+                      CommandHandler('minCO2', self.maxCO2)
                       ]
        )
 
