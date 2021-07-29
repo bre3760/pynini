@@ -55,11 +55,14 @@ class Catalog(object):
             return json.dumps(self.catalog["topics"])
         elif uri[0] == "getBest":
             res = []
+            print("params in getBest: ", params)
             for d in self.catalog['thresholds']:
                 if d['type'] == params['category']:
                     res = d[params['sensor']]
+            print("res getBest: ", res)
             return json.dumps(res)
         elif uri[0] == "getLink":
+            print(f"Params in getLink {params}")
             return json.dumps(self.catalog["links"][params['category']])
 
 

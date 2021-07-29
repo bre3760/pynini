@@ -7,7 +7,18 @@
         "token": "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg==",
         "url": "https://eu-central-1-1.aws.cloud2.influxdata.com"
     },
-    "bots": [],
+    "bots": [
+        {
+            "chat_ID": 171693969,
+            "ip": "0.0.0.0",
+            "last_seen": 1627576226.0556493
+        },
+        {
+            "chat_ID": 490068659,
+            "ip": "0.0.0.0",
+            "last_seen": 1627576999.1071932
+        }
+    ],
     "breadCategories": [
         "White",
         "Wheat",
@@ -24,7 +35,14 @@
             "bread_type": "White",
             "caseID": "CCC2",
             "rpi": {
-                "sensors": []
+                "sensors": [
+                    {
+                        "ip": "172.10.20.1",
+                        "last_seen": "2021-07-29 14:14:03",
+                        "name": "TempHum",
+                        "port": 9090
+                    }
+                ]
             }
         }
     ],
@@ -35,11 +53,11 @@
         "freeboard_port": "8080"
     },
     "ip_address": "172.20.10.11",
-    "last_updated": 1627563625.9027636,
+    "last_updated": 1627576999.113115,
     "links": {
         "Glutenfree": "https://www.glutenfreepalate.com/gluten-free-bread-recipe/",
         "Wheat": "https://bakingamoment.com/soft-whole-wheat-bread/",
-        "White": "https://www.browneyedbaker.com/white-bread-recipe/"
+        "White": "hnttps://www.browneyedbaker.com/white-bread-recipe/"
     },
     "telegramBot": {
         "telegramPort": "8086",
@@ -80,15 +98,15 @@
             "type": "Glutenfree"
         },
         {
-            "co2": 2.5,
-            "hum": 37,
+            "co2": 2,
+            "hum": 33,
             "max_co2_th": "5.5",
             "max_humidity_th": "40",
             "max_temperature_th": "22",
             "min_co2_th": "0.5",
             "min_humidity_th": "30",
             "min_temperature_th": "10",
-            "temp": 28,
+            "temp": 27,
             "type": "White"
         }
     ],
