@@ -109,6 +109,7 @@ class CaseControlMQTT:
             # the received value of co2 is saved
             self.currentCO2 = json_mex["value"]
             if not self.isCO2Valid():
+                print("Co2 is not valid! Taking action")
                 if self.prevStateFan != "off": # if fan was on turn it off
                     self.myPublish(self.client_caseID + "/" + "trigger/fan", json.dumps({"message":"off"}))
                     self.prevStateFan ="off"
