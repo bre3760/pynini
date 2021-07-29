@@ -48,8 +48,10 @@ class TemperatureHumiditySensor:
         self._paho_mqtt.subscribe(self.topicBreadType, 2)
 
     def stop(self):
-        self._paho_mqtt.unsubscribe(self.topic_temp)
-        self._paho_mqtt.unsubscribe(self.topic_hum)
+        # self._paho_mqtt.unsubscribe(self.topic_temp)
+        # self._paho_mqtt.unsubscribe(self.topic_hum)
+        self._paho_mqtt.unsubscribe(self.topicBreadType)
+
         self._paho_mqtt.loop_stop()
         self._paho_mqtt.disconnect()
 
@@ -57,6 +59,7 @@ class TemperatureHumiditySensor:
         # publish a message with a certain topic (measure/temperature or measure/humidity)
         case_specific_topic = self.caseID + "/" + topic # example CCC2/measure/co2
         print(f"Publishing to: {self.topicBreadType}")
+
         self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
         
 
@@ -102,9 +105,13 @@ class TemperatureHumiditySensor:
 
         print("sensor dict before db post request", sensor_dict)
         #sensor_dic viene mandato a db adaptor a cui si sottoscrive 
-        r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/db/addSensor", json=sensor_dict)
+        try:
+            r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/db/addSensor", json=sensor_dict)
 
-        print(f"Response (r) from post to db api {r}")
+            print(f"Response (r) from post to db api {r}")
+        except:
+            print(f"DB is probably off, sorry, the topics of this sensor will be retireved \
+                    automatically when the DB is turned on")
         ##########################################################################
 
         print( f"Device Registered on Catalog {sensor_dict['last_seen']}")
@@ -145,7 +152,7 @@ class TemperatureHumiditySensor:
 
             if json.loads(msg.payload)['bread_index'] != '':
                 self.category = self.breadCategories[int(json.loads(msg.payload)['bread_index'])]
-                
+                print("bread_index", self.category)
 
 
 if __name__ == "__main__":
@@ -158,8 +165,6 @@ if __name__ == "__main__":
         sensor_caseID =  os.getenv("caseID") # when dockerized (could be moved out of file reading)
         catalog_ip = sensor_config['catalog_ip']
         catalog_port = sensor_config['catalog_port']
-
-
 
     sensor = TemperatureHumiditySensor(sensor_caseID +'-'+  'TempHum', sensor_ip, sensor_port, catalog_ip, catalog_port)
     sensor.registerDevice()

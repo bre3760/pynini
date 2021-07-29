@@ -82,8 +82,6 @@ class co2Sensor:
 		self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
 		
 		
-
-
 	def myOnMessageReceived (self, paho_mqtt , userdata, msg):
 		'''
 			when a message is received on the topic "topicBreadType", it means that the bread category of the case is changed:
@@ -95,7 +93,7 @@ class co2Sensor:
 		if msg.topic == self.topicBreadType:
 			if json.loads(msg.payload)['bread_index'] != '':
 				self.category = self.breadCategories[int(json.loads(msg.payload)['bread_index'])]
-				
+				print("bread_index",self.category)
 
 
 	def registerDevice(self):
@@ -141,10 +139,14 @@ class co2Sensor:
 		sensor_dict["topics"] = [self.caseID + "/" + self.topic]
 		print("sensor dict before db post request", sensor_dict)
 		#sensor_dic viene mandato a db adaptor a cui si sottoscrive 
-		r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/db/addSensor", json=sensor_dict)
+		try:
+			r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/db/addSensor", json=sensor_dict)
 
-		print(f"Response (r) from post to db api {r}")
-		
+			print(f"Response (r) from post to db api {r}")
+		except:
+			print(f"DB is probably off, sorry, the topics of this sensor will be retireved \
+					automatically when the DB is turned on")
+					
 		print("[{}] Device Registered on Catalog".format(
 			int(time.time()),
 		))

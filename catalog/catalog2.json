@@ -16,7 +16,18 @@
     "broker_ip": "127.0.0.1",
     "broker_ip_outside": "192.168.1.2",
     "broker_port": 1883,
-    "cases": [],
+    "cases": [
+        {
+            "arduino": {
+                "sensors": []
+            },
+            "bread_type": "White",
+            "caseID": "CCC2",
+            "rpi": {
+                "sensors": []
+            }
+        }
+    ],
     "catalog_ip": "0.0.0.0",
     "catalog_port": 9090,
     "freeboard": {
@@ -24,7 +35,7 @@
         "freeboard_port": "8080"
     },
     "ip_address": "172.20.10.11",
-    "last_updated": 1627383442.4874058,
+    "last_updated": 1627563625.9027636,
     "links": {
         "Glutenfree": "https://www.glutenfreepalate.com/gluten-free-bread-recipe/",
         "Wheat": "https://bakingamoment.com/soft-whole-wheat-bread/",

@@ -194,7 +194,10 @@ if __name__ == "__main__":
 		catalog_ip = sensor_config['catalog_ip']
 		catalog_port = sensor_config['catalog_port']
 
+	print(f"catalog ip {catalog_ip}, catalog port {catalog_port}")
+
 	sensor = co2Sensor(sensor_caseID +'-'+ 'co2', sensor_ip, sensor_port, catalog_ip, catalog_port)
+	
 	# sensor registers itself to the catalog and starts publishing
 	sensor.registerDevice()
 	sensor.start()
