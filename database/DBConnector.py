@@ -337,10 +337,10 @@ if __name__ == '__main__':
         dict_config = json.load(dbconfig)
         catalog_ip = dict_config['ip']
         catalog_port = dict_config['port']
-        list_of_wanted_topics = dict_config["list_of_wanted_topics"]
 
     # get all information in order to connect to the db
     influx_data = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
+    list_of_wanted_topics = influx_data["list_of_wanted_topics"]
 
     # retrieve all cases in the system
     r = requests.get(f"http://{catalog_ip}:{catalog_port}/cases")

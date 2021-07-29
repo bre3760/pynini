@@ -5,7 +5,8 @@
         "bucket": "Pynini",
         "org": "s272608@studenti.polito.it",
         "token": "jgQI1omy9-K1AbNCqtWLJi_f3sx4QwLjULypPMPNpAdRRlTDf8musUMpwQitkPwXEr1Ht62O-1-a_DVJyYE5Hg==",
-        "url": "https://eu-central-1-1.aws.cloud2.influxdata.com"
+        "url": "https://eu-central-1-1.aws.cloud2.influxdata.com",
+        "list_of_wanted_topics" : ["co2", "TempHum"]
     },
     "bots": [
         {
