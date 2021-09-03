@@ -320,7 +320,6 @@ if __name__ == '__main__':
     
 
 
-    print("topicheeeeee: ", all_topics_to_subscribe_to)
 
     db_connector = DBConnectorMQTT(influx_data, all_topics_to_subscribe_to, "DB")
 
