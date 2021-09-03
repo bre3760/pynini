@@ -18,6 +18,8 @@ unit of measurement: €/kg
 
 class statsPublisher:
     def __init__(self, catalog_ip, catalog_port, clientID):
+        self.dateformat =  "%d-%m-%Y"
+
         rr = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_ip_outside")   
         self.messageBroker = json.loads(rr.text)
         r = requests.get(f"http://{catalog_ip}:{catalog_port}/topics")    
@@ -93,11 +95,12 @@ if __name__ == "__main__":
 
     
 
+
     df_prices = pd.read_csv("purchase_prices.csv")
 
 
     for i in range(len(df_prices.index)):
-        date_time_obj = datetime.strptime(df_prices.iloc[i]["date"], '%m-%d-%Y').strftime('%m-%d-%Y')
+        date_time_obj = datetime.strptime(df_prices.iloc[i]["date"], test.dateformat).strftime( test.dateformat)
 
 
         to_publish_white = {
@@ -123,7 +126,7 @@ if __name__ == "__main__":
 
     df_quantity = pd.read_csv("purchase_qnt.csv")
     for i in range(len(df_quantity.index)):
-        date_time_obj = datetime.strptime(df_quantity.iloc[i]["date"],'%m-%d-%Y').strftime('%m-%d-%Y')
+        date_time_obj = datetime.strptime(df_quantity.iloc[i]["date"], test.dateformat).strftime( test.dateformat)
 
 
         to_publish_white = {

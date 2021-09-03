@@ -5,7 +5,7 @@ import requests
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 import cherrypy
-
+import jsonify
 """
 This module is a MQTT subscriber that will subscribe to all topics for the sensors of the cases connected, 
 when a message is published by a sensor it will immediately check which one and then use 
@@ -16,15 +16,67 @@ For the telegram bot it will use rest apis.
 class DBConnectorREST:
     
     exposed = True
-    def __init__(self, config_data):
-        self.api_ip = json.loads(config_data.text)["api_ip"]      
-        self.api_port = json.loads(config_data.text)["api_port"]    
+    def __init__(self, influx_data):
+        self.api_ip = json.loads(influx_data.text)["api_ip"]      
+        self.api_port = json.loads(influx_data.text)["api_port"]
+        self.url = json.loads(influx_data.text)["url"]
+        self.token = json.loads(influx_data.text)["token"]
+        self.bucket = json.loads(influx_data.text)["bucket"]
+        self.org = json.loads(influx_data.text)['org']
+        self.client = InfluxDBClient(
+            self.url,
+            self.token,
+            self.org
+        )
         
 
-    def GET(self,*uri,**params):
-        if uri[0]=="getData":             
+    # def GET(self,*uri,**params):
+    #     print(f"In getData of dbadaptor, len uri is {len(uri)} and uri is {uri}")
+    #     try:
+    #         print(f"cherrypy request params {cherrypy.request.params}")
+    #     except:
+    #         print(f"Parmans in cherry py paramns not found")
+    #     print(f"Params received are {params}")
+    #     if uri[0]=="getData":      
 
-            print("In getData")
+
+    #         print(f"In getData with params {params}")
+    #         query = f'from(bucket: "Pynini")|> range(start: -3d)|> filter(fn: (r) => r.caseID == "{params["caseID"]}") |> filter(fn: (r) => r["_measurement"] == "{params["sensor"]}") |> filter(fn: (r) => r.category == "{params["category"]}")'
+    #         print(f"query is {query}")
+    #         result = self.client.query_api().query(org=self.org, query=query)
+    #         results = []
+    #         values = []
+    #         res = []
+    #         for table in result:
+    #             for record in table.records:
+    #                 results.append((record.get_field(), record.get_value()))
+    #                 if record.get_field() == 'value':
+    #                     values.append(record.get_value())
+
+    #         for v in values:
+    #             w = float(v)
+    #             res.append(round(w, 2))
+
+    #         print(f"Results from query {results}, {res}")
+    #         resdict = {}
+    #         resdict["response"] = res
+    #         return jsonify(resdict)
+
+    @cherrypy.tools.json_out()
+    def POST(self, *uri, **params):
+        global db_connector
+        res = {}
+
+        print(f"In getData of dbadaptor POST, len uri is {len(uri)} and uri is {uri}")
+        try:
+            print(f"cherrypy request params {cherrypy.request.params}")
+        except:
+            print(f"Parmans in cherry py paramns not found")
+        print(f"Params received are {params}")
+        if uri[0]=="getData":      
+
+
+            print(f"In getData with params {params}")
             query = f'from(bucket: "Pynini")|> range(start: -3d)|> filter(fn: (r) => r.caseID == "{params["caseID"]}") |> filter(fn: (r) => r["_measurement"] == "{params["sensor"]}") |> filter(fn: (r) => r.category == "{params["category"]}")'
             print(f"query is {query}")
             result = self.client.query_api().query(org=self.org, query=query)
@@ -42,12 +94,9 @@ class DBConnectorREST:
                 res.append(round(w, 2))
 
             print(f"Results from query {results}, {res}")
-            return res
-
-    # add post for when new sensor connects TODO
-    def POST(self, *uri, **params):
-        global db_connector
-        res = {}
+            resdict = {}
+            resdict["response"] = res
+            return (resdict)            
         
         if len(uri) == 1 and uri[0] ==  'addSensor':
             # add new sensor to the self.catalog
@@ -288,10 +337,10 @@ if __name__ == '__main__':
         dict_config = json.load(dbconfig)
         catalog_ip = dict_config['ip']
         catalog_port = dict_config['port']
-        list_of_wanted_topics = dict_config["list_of_wanted_topics"]
 
     # get all information in order to connect to the db
     influx_data = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
+    list_of_wanted_topics = influx_data["list_of_wanted_topics"]
 
     # retrieve all cases in the system
     r = requests.get(f"http://{catalog_ip}:{catalog_port}/cases")

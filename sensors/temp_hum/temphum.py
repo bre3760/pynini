@@ -30,6 +30,7 @@ class TemperatureHumiditySensor:
         self.topic_temp = ""
         self.topic_hum= ""
         self.topicBreadType = self.caseID + "/" +json.loads(r.text)["breadType"]
+
         self.message = {
             'measurement': self.sensorID,
             'caseID': self.caseID,
@@ -48,7 +49,7 @@ class TemperatureHumiditySensor:
         self._paho_mqtt.subscribe(self.topicBreadType, 2)
 
     def stop(self):
-        # self._paho_mqtt.unsubscribe(self.topic_temp) # ???? TODO
+        # self._paho_mqtt.unsubscribe(self.topic_temp) 
         # self._paho_mqtt.unsubscribe(self.topic_hum)
         self._paho_mqtt.unsubscribe(self.topicBreadType)
 
@@ -104,9 +105,13 @@ class TemperatureHumiditySensor:
 
         print("sensor dict before db post request", sensor_dict)
         #sensor_dic viene mandato a db adaptor a cui si sottoscrive 
-        r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/db/addSensor", json=sensor_dict)
+        try:
+            r = requests.post(f"http://{influx_api_ip}:{influx_api_port}/db/addSensor", json=sensor_dict)
 
-        print(f"Response (r) from post to db api {r}")
+            print(f"Response (r) from post to db api {r}")
+        except:
+            print(f"DB is probably off, sorry, the topics of this sensor will be retireved \
+                    automatically when the DB is turned on")
         ##########################################################################
 
         print( f"Device Registered on Catalog {sensor_dict['last_seen']}")
@@ -172,7 +177,6 @@ if __name__ == "__main__":
             humidity = round(random.uniform(30, 40),2)   
             temperature = round(random.uniform(23, 30),2)
             if humidity < 100:
-
                 print('Temp: {0:0.1f} °C  Humidity: {1:0.1f} %'.format(temperature, humidity))
 
                 payload_temp = {"caseID":sensor.caseID, 

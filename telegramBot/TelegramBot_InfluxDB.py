@@ -191,6 +191,7 @@ class TelegramBot(object):
                 return res
 
             elif query.data == 'co2' or query.data == 'temperature' or query.data == 'humidity':
+                print(f"In elif for co2 and temphum")
                 self.selectedParam(update, context, query, keyboard_params)
 
         except Exception as e:
@@ -228,13 +229,25 @@ class TelegramBot(object):
         data['caseID'] = self.caseID
         data['sensor'] = param
         data['category'] = self.category
+
+        try:
+            print(f"Sending data to db connector {data}")
+            r = requests.post(f"http://{IP_InfluxDB}:{port_InfluxDB}/db/getData", params=data)
+            actualValues = json.loads(r.text)["response"]
+            print(f"actualValues in selectedParam {actualValues}")
+        except:
+            print(f"Something went wrong with the connection to DB")
+            print(f"r.text response {r.text}")
+        
+        try:
+            print("json ready for best get: ", data)
+            r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/getBest", params=data)
+            best = json.loads(r.text)
+            print("best: ", best)
+
+        except:
+            print(f"Something went wrong with the catalog")
        
-        r = requests.get(f"http://{IP_InfluxDB}:{port_InfluxDB}/getData", json=data)
-        actualValues = json.loads(r.text)
-        print(f"actualValues in selectedParam {actualValues}")
-
-        best = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/getBest", json=data)
-
         if actualValues != []:
             print(f"actualValues in selectedParam is not an empty list {actualValues}")
 
@@ -273,8 +286,13 @@ class TelegramBot(object):
             return TYPOLOGY
 
         elif query.data == 'info':
-            r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/getLink", json={'category': self.category})
+            data = {}
+            data['category'] = self.category
+            print("json for link", data)
+
+            r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/getLink", params=data)
             link = json.loads(r.text)
+            print("link: ", link)
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='Click on the following link to learn more about the {}: {}.'.format(self.category, link))
 
@@ -491,8 +509,13 @@ class TelegramBot(object):
             return TYPOLOGY
 
         elif query.data == 'info':
-            r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/getLink", json={'category': self.category})
+            data = {}
+            data['category'] = self.category
+            print("json for link: ", data)
+
+            r = requests.get(f"http://{self.catalogIP}:{self.catalogPort}/getLink", params=data)
             link = json.loads(r.text)
+            print("link: ", link)
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='Click on the following link to learn more about the {}: {}.'.format(
                                          self.category, link))
