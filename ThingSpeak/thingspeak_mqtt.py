@@ -129,26 +129,5 @@ if __name__ == '__main__':
         tsa = ThingSpeakConnector(data, topics, headers)
         tsa.start()
 
-        # t = 0
-        # #while t < 500:
-        # data_upload_json = json.dumps({"api_key": tsa.write_key,
-        #                                 "channel_id": tsa.channel,
-        #                                 "field1": tsa.field1_data, 
-        #                                 "field2": tsa.field2_data,
-        #                                 "field3": tsa.field3_data
-        #                                 })
-
-        # print(tsa.field1_data, tsa.field2_data, tsa.field3_data)
-
-        # if (tsa.field1_data != None or tsa.field2_data != None or tsa.field3_data != None):
-        #     print("Publishing on TS:", data_upload_json)
-        #     requests.post(url=tsa.url, data=data_upload_json, headers=headers)
-
-        # tsa.field1_data = None
-        # tsa.field2_data = None
-        # tsa.field3_data = None
-
-        # time.sleep(10)  # check for updates every 30sec
-        # t += 1
     except KeyboardInterrupt:
         tsa.stop()
