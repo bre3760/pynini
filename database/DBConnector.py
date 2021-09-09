@@ -30,37 +30,6 @@ class DBConnectorREST:
         )
         
 
-    # def GET(self,*uri,**params):
-    #     print(f"In getData of dbadaptor, len uri is {len(uri)} and uri is {uri}")
-    #     try:
-    #         print(f"cherrypy request params {cherrypy.request.params}")
-    #     except:
-    #         print(f"Parmans in cherry py paramns not found")
-    #     print(f"Params received are {params}")
-    #     if uri[0]=="getData":      
-
-
-    #         print(f"In getData with params {params}")
-    #         query = f'from(bucket: "Pynini")|> range(start: -3d)|> filter(fn: (r) => r.caseID == "{params["caseID"]}") |> filter(fn: (r) => r["_measurement"] == "{params["sensor"]}") |> filter(fn: (r) => r.category == "{params["category"]}")'
-    #         print(f"query is {query}")
-    #         result = self.client.query_api().query(org=self.org, query=query)
-    #         results = []
-    #         values = []
-    #         res = []
-    #         for table in result:
-    #             for record in table.records:
-    #                 results.append((record.get_field(), record.get_value()))
-    #                 if record.get_field() == 'value':
-    #                     values.append(record.get_value())
-
-    #         for v in values:
-    #             w = float(v)
-    #             res.append(round(w, 2))
-
-    #         print(f"Results from query {results}, {res}")
-    #         resdict = {}
-    #         resdict["response"] = res
-    #         return jsonify(resdict)
 
     @cherrypy.tools.json_out()
     def POST(self, *uri, **params):

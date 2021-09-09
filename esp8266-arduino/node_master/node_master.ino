@@ -141,7 +141,7 @@ void setup() {
                 sizeof(mqtt_config.caseID));
         //HTTP CONFIG
         strlcpy(http_config.rpi_ip,                  
-                doc["rpi_ip"] | "192.168.1.2",     
+                doc["rpi_ip"] | "192.168.1.4",     
                 sizeof(http_config.rpi_ip));
         strlcpy(http_config.rpi_port,                  
                 doc["rpi_port"] | "9090",     
