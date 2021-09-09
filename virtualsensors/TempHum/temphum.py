@@ -58,7 +58,7 @@ class TemperatureHumiditySensor:
     def myPublish(self, topic, message):
         # publish a message with a certain topic (measure/temperature or measure/humidity)
         case_specific_topic = self.caseID + "/" + topic # example CCC2/measure/co2
-        print(f"Publishing to: {self.topicBreadType}")
+        print(f"Publishing to: {case_specific_topic}")
 
         self._paho_mqtt.publish(case_specific_topic, json.dumps(message), 2)
         

@@ -1,6 +1,6 @@
 {
     "InfluxDB": {
-        "api_ip": "0.0.0.0",
+        "api_ip": "database",
         "api_port": 9099,
         "bucket": "Pynini",
         "org": "s272608@studenti.polito.it",

@@ -309,7 +309,11 @@ if __name__ == '__main__':
 
     # get all information in order to connect to the db
     influx_data = requests.get(f"http://{catalog_ip}:{catalog_port}/InfluxDB")
-    list_of_wanted_topics = influx_data["list_of_wanted_topics"]
+    print(f"Type of influx_data returned from catalog {type(influx_data)}")
+    influx_data_dict = json.loads(influx_data.text)
+    print(f"Type of influx_data_dict {type(influx_data_dict)}, and it content {influx_data_dict}")
+
+    list_of_wanted_topics = influx_data_dict["list_of_wanted_topics"]
 
     # retrieve all cases in the system
     r = requests.get(f"http://{catalog_ip}:{catalog_port}/cases")

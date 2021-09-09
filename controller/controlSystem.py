@@ -24,6 +24,7 @@ if __name__ == '__main__':
         broker_ip = json.loads(r.text)
         r = requests.get(f"http://{catalog_ip}:{catalog_port}/broker_port")
         broker_port = json.loads(r.text)
+        print(f"Inside try condition, broker ip and broker port {broker_ip} {broker_port}")
     except:
         print("REST service of catalog was not reachable")
 
@@ -80,46 +81,6 @@ if __name__ == '__main__':
 
 
 
-    # prevStateLamp = "off"
-    # prevStateFan = "off"
-    # currentStateLamp = False
-    # currentStateFan = False
-    # while 1:
-    #     """
-    #     control system algorithm that continually checks if the values are within the desired ranges. 
-    #     """
-    #     for obj in controllers:
-    #         if not obj.isTemperatureValid() and not obj.isHumidityValid():
-    #             if prevStateFan != "off": # if fan was on turn it off
-    #                 obj.myMqttClient.myPublish(obj.clientID + "/" + "trigger/fan", json.dumps({"message":"off"}))
-    #                 prevStateFan ="off"
-    #             if prevStateLamp != "off":
-    #                 obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/lamp", json.dumps({"message":"off"}))
-    #                 prevStateLamp = "off"
-    #         else:
-    #             if obj.tooHot() and obj.tooHumid():
-    #                 if prevStateFan != "on":
-    #                     obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"on"}))
-    #                     prevStateFan = "on"
-    #             if obj.tooCold() and obj.tooNotHumid():
-    #                 if prevStateLamp != "on":
-    #                     obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/lamp", json.dumps({"message":"on"}))
-    #                     prevStateLamp = "on"
-            
-    #         if obj.isCO2Valid():
-    #              if prevStateFan != "off": # if fan was on turn it off
-    #                  obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"off"}))
-    #                  prevStateFan ="off"
-    #              else:
-    #                  if prevStateFan != "on":
-    #                      obj.myMqttClient.myPublish(obj.clientID + "/" +"trigger/fan", json.dumps({"message":"on"}))
-    #                      prevStateFan = "on"
-
-            
-         
-
-    #     time.sleep(7)
-        
             
         
         
