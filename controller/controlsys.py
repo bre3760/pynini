@@ -6,6 +6,7 @@ import os
 import time
 import paho.mqtt.client as PahoMQTT
 
+"""Single file for controller"""
 
 
 class CaseControlMQTT:
