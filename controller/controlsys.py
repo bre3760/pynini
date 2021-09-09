@@ -86,9 +86,12 @@ class CaseControlMQTT:
                 if self.prevStateFan != "off": # if fan was on turn it off
                     self.myPublish(self.client_caseID + "/" + "trigger/fan", json.dumps({"message":"off"}))
                     self.prevStateFan ="off"
+                    print(f"Changing fan status to: {self.prevStateFan}")
                 if self.prevStateLamp != "off":
                     self.myPublish(self.client_caseID + "/" +"trigger/lamp", json.dumps({"message":"off"}))
                     self.prevStateLamp = "off"
+                    print(f"Changing lamp status to: {self.prevStateLamp}")
+
 
             
         if topic == "measure/humidity":
@@ -99,9 +102,11 @@ class CaseControlMQTT:
                 if self.prevStateFan != "off": # if fan was on turn it off
                     self.myPublish(self.client_caseID + "/" + "trigger/fan", json.dumps({"message":"off"}))
                     self.prevStateFan ="off"
+                    print(f"Changing fan status to: {self.prevStateFan}")
                 if self.prevStateLamp != "off":
                     self.myPublish(self.client_caseID + "/" +"trigger/lamp", json.dumps({"message":"off"}))
                     self.prevStateLamp = "off"
+                    print(f"Changing fan status to: {self.prevStateLamp}")
                 
 
 
@@ -114,9 +119,11 @@ class CaseControlMQTT:
                 if self.prevStateFan != "off": # if fan was on turn it off
                     self.myPublish(self.client_caseID + "/" + "trigger/fan", json.dumps({"message":"off"}))
                     self.prevStateFan ="off"
+                    print(f"Changing fan status to: {self.prevStateFan}")
                 if self.prevStateLamp != "off":
                     self.myPublish(self.client_caseID + "/" +"trigger/lamp", json.dumps({"message":"off"}))
                     self.prevStateLamp = "off"
+                    print(f"Changing fan status to: {self.prevStateLamp}")
 
 
         if topic == "breadType/":
