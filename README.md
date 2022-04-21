@@ -70,7 +70,7 @@ Request URI | Body | Response
 #### PUT
 Request URI | Body | Response
 --------|----------|----------
-```xxx.xxx.xxx.xxx/setThresholds```|```{"type": type,"min_temperature_th": min_T_th,"min_humidity_th": min_hum_th,"min_co2_th": min_co2_th,"max_temperature_th": max_T_th,"max_humidity_th": max_hum_th,"max_co2_th": max_co2_th}```| et thresolds of breadtype defined by *type*. used by telegramBOT
+```xxx.xxx.xxx.xxx/setThresholds```|```{"type": type,"min_temperature_th": min_T_th,"min_humidity_th": min_hum_th,"min_co2_th": min_co2_th,"max_temperature_th": max_T_th,"max_humidity_th": max_hum_th,"max_co2_th": max_co2_th}```| set thresolds of breadtype defined by *type*. used by telegramBOT
 
 
 ## Software Usage
